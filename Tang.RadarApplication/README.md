@@ -2,6 +2,8 @@
 
 .NET Framework 4.8 WPF radar demonstration added to `ayu-6666/WPF-Demo`.
 
+![image-20260921142119473](imgs/image-20260921142119473.png)
+
 ## Features
 
 - WPF + MVVM with `CommunityToolkit.Mvvm`.

@@ -9,16 +9,28 @@
         <DockPanel Grid.Row="0" Margin="0,0,0,14">
             <TextBlock Text="TANG RADAR" Foreground="{StaticResource AccentBrush}" FontSize="26" FontWeight="Bold" />
             <TextBlock Text="  100 km real-time target detection" Foreground="White" FontSize="16" VerticalAlignment="Center" />
-            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                <Button Content="开始扫描" Command="{Binding StartCommand}" Margin="6" Padding="18,8" />
-                <Button Content="停止" Command="{Binding StopCommand}" Margin="6" Padding="18,8" />
-                <Button Content="清空目标" Command="{Binding ClearCommand}" Margin="6" Padding="18,8" />
-            </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <StackPanel.Resources>
+                        <Style x:Key="HeaderButtonStyle" TargetType="Button">
+                            <Setter Property="Background" Value="#F0F0F0" />
+                            <Setter Property="Foreground" Value="#222" />
+                            <Setter Property="Padding" Value="14,6" />
+                            <Setter Property="Margin" Value="6" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Width" Value="90" />
+                        </Style>
+                    </StackPanel.Resources>
+                    <Button Content="开始扫描" Command="{Binding StartCommand}" Style="{StaticResource HeaderButtonStyle}" />
+                    <Button Content="停止" Command="{Binding StopCommand}" Style="{StaticResource HeaderButtonStyle}" />
+                    <Button Content="清空目标" Command="{Binding ClearCommand}" Style="{StaticResource HeaderButtonStyle}" />
+                    <Button Content="重置缩放" Margin="6" Padding="14,6" Click="ResetZoom_Click" />
+                    <Button Content="图表" Margin="6" Padding="14,6" Click="OpenChart_Click" />
+                </StackPanel>
         </DockPanel>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="330"/></Grid.ColumnDefinitions>
-            <Border Grid.Column="0" Background="#08131B" CornerRadius="8" Padding="10" Margin="0,0,14,0">
-                <local:RadarScope Targets="{Binding Targets}" ScanAngle="{Binding ScanAngle}" RangeKm="{Binding RangeKm}" />
+                <Border Grid.Column="0" Background="#08131B" CornerRadius="8" Padding="10" Margin="0,0,14,0">
+                <local:RadarScope x:Name="radar" Targets="{Binding Targets}" ScanAngle="{Binding ScanAngle}" RangeKm="{Binding RangeKm}" IsScanning="{Binding IsScanning}" />
             </Border>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
@@ -27,14 +39,39 @@
                         <TextBlock Text="系统状态" Foreground="White" FontSize="18" FontWeight="Bold" />
                         <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource AccentBrush}" Margin="0,10,0,0" />
                         <TextBlock Text="{Binding DataSourceText}" Foreground="#AFC4CC" Margin="0,5,0,0" />
-                        <TextBlock Text="量程：{Binding RangeKm, StringFormat={}{0:F0} km}" Foreground="#AFC4CC" Margin="0,5,0,0" />
-                        <TextBlock Text="目标数：{Binding Targets.Count}" Foreground="#AFC4CC" Margin="0,5,0,0" />
+                        <TextBlock Foreground="#AFC4CC" Margin="0,5,0,0">
+                            <Run Text="量程：" />
+                            <Run Text="{Binding RangeKm, Mode=OneWay, StringFormat={}{0:F0} km}" />
+                        </TextBlock>
+                        <TextBlock Foreground="#AFC4CC" Margin="0,5,0,0">
+                            <Run Text="目标数：" />
+                            <Run Text="{Binding Targets.Count, Mode=OneWay}" />
+                        </TextBlock>
                     </StackPanel>
                 </Border>
                 <Border Grid.Row="1" Background="{StaticResource PanelBackground}" CornerRadius="8" Padding="10" Margin="0,14,0,14">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="探测目标" Foreground="White" FontSize="18" FontWeight="Bold" Margin="6" />
-                        <DataGrid ItemsSource="{Binding Targets}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" Background="Transparent" Foreground="White" BorderThickness="0">
+                        <DataGrid ItemsSource="{Binding Targets}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" 
+                                  Background="Transparent" 
+                                  Foreground="White" 
+                                  BorderThickness="0"
+                                  GridLinesVisibility="None" RowBackground="ForestGreen" 
+                                  AlternatingRowBackground="#9A67EA" RowHeaderWidth="0">
+                            <DataGrid.Resources>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="Foreground" Value="#AFC4CC" />
+                                    <Setter Property="Background" Value="#383838" />
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                    <Setter Property="Height" Value="35" />
+                                </Style>
+                                <Style TargetType="DataGridRow">
+                                    <Setter Property="Height" Value="35" />
+                                    <Setter Property="Foreground" Value="White" />
+                                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                </Style>
+                            </DataGrid.Resources>
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="*" />
                                 <DataGridTextColumn Header="距离(km)" Binding="{Binding DistanceKm, StringFormat={}{0:F2}}" Width="*" />

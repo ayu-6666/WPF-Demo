@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="RadarApp/RadarApp.csproj" Id="effb0622-92d9-475f-844b-a75c7cf7bec6" />
+  <Project Path="Tang.RadarApplication/Tang.RadarApplication.csproj" />
+</Solution>
