@@ -1,0 +1,9 @@
+<Application x:Class="Tang.RadarApplication.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <SolidColorBrush x:Key="WindowBackground" Color="#101820" />
+        <SolidColorBrush x:Key="PanelBackground" Color="#172632" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#35E6A5" />
+    </Application.Resources>
+</Application>
