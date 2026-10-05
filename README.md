@@ -17,6 +17,7 @@
 
 > open VisualStudio
 
+<img width="1086" height="793" alt="image" src="https://github.com/user-attachments/assets/a01c06f3-5586-42ee-beff-84fb949d2ad1" />
 
 
 ## 3 About project
