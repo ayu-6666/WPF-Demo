@@ -1,0 +1,196 @@
+<Window x:Class="Tang.VideoThrimalgoAI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Tang.VideoThrimalgoAI" Height="920" Width="1500"
+        WindowStartupLocation="CenterScreen"
+        Background="#0F172A"
+        TextElement.Foreground="#E2E8F0"
+        TextElement.FontFamily="Microsoft YaHei"
+        TextElement.FontSize="14">
+    <Window.Resources>
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="#111827" />
+            <Setter Property="BorderBrush" Value="#334155" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="12" />
+        </Style>
+        <Style x:Key="GlassButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+            <Setter Property="Margin" Value="0,0,0,8" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="#2563EB" />
+            <Setter Property="BorderBrush" Value="#2563EB" />
+            <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="10" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource CardStyle}" Padding="18" Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Tang.VideoThrimalgoAI" FontSize="30" FontWeight="Bold" Foreground="#F8FAFC" />
+                    <TextBlock Text="图像 / 视频修复智能工作台" FontSize="14" Foreground="#94A3B8" Margin="0,6,0,0" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Border Background="#1D4ED8" CornerRadius="999" Padding="10,6">
+                        <TextBlock Text="AI修复" Foreground="White" FontWeight="SemiBold" />
+                    </Border>
+                    <Border Background="#0F766E" CornerRadius="999" Padding="10,6" Margin="10,0,0,0">
+                        <TextBlock Text="OpenCV + ONNX" Foreground="White" FontWeight="SemiBold" />
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="340" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}" Padding="18" Margin="0,0,12,0">
+                <StackPanel>
+                    <TextBlock Text="处理控制" FontSize="20" FontWeight="Bold" Foreground="#F8FAFC" Margin="0,0,0,14" />
+
+                    <TextBlock Text="修复模式" Foreground="#CBD5E1" Margin="0,0,0,8" />
+                    <ComboBox ItemsSource="{Binding ProcessingModes}"
+                              SelectedItem="{Binding SelectedMode, Mode=TwoWay}"
+                              Margin="0,0,0,16"
+                              Background="#0B1220"
+                              Foreground="#E2E8F0" />
+
+                    <TextBlock Text="亮度" Foreground="#CBD5E1" Margin="0,0,0,8" />
+                    <Slider Minimum="-50" Maximum="50" Value="{Binding BrightnessValue, Mode=TwoWay}" Margin="0,0,0,12" />
+
+                    <TextBlock Text="对比度" Foreground="#CBD5E1" Margin="0,0,0,8" />
+                    <Slider Minimum="0.5" Maximum="2.0" Value="{Binding ContrastValue, Mode=TwoWay}" Margin="0,0,0,12" />
+
+                    <TextBlock Text="锐度" Foreground="#CBD5E1" Margin="0,0,0,8" />
+                    <Slider Minimum="0.5" Maximum="2.5" Value="{Binding SharpnessValue, Mode=TwoWay}" Margin="0,0,0,12" />
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="打开图片"
+                                Style="{StaticResource GlassButton}"
+                                Command="{Binding OpenImageCommand}" />
+                        <Button Content="输出目录"
+                                Style="{StaticResource GlassButton}"
+                                Command="{Binding OpenFolderCommand}"
+                                Background="#14B8A6" BorderBrush="#14B8A6" />
+                    </StackPanel>
+
+                    <Button Content="开始修复"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Command="{Binding ProcessImageCommand}"
+                            Height="42"
+                            Background="#22C55E"
+                            BorderBrush="#22C55E"
+                            Margin="0,8,0,8" />
+
+                    <Button Content="批量修复"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Command="{Binding ProcessBatchCommand}"
+                            Height="42"
+                            Background="#F59E0B"
+                            BorderBrush="#F59E0B"
+                            Margin="0,0,0,8" />
+
+                    <TextBlock Text="目标目录" Foreground="#CBD5E1" Margin="0,8,0,4" />
+                    <TextBox Text="{Binding OutputFolder, Mode=TwoWay}" IsReadOnly="True" Background="#0B1220" Foreground="#E2E8F0" />
+
+                    <TextBlock Text="状态" Foreground="#CBD5E1" Margin="0,14,0,4" />
+                    <TextBlock Text="{Binding StatusText}" Foreground="#93C5FD" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource CardStyle}" Padding="18">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                        <TextBlock Text="预览界面" FontSize="20" FontWeight="Bold" Foreground="#F8FAFC" />
+                        <TextBlock Text="{Binding SelectedFileName}" Foreground="#94A3B8" Margin="12,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <Border Grid.Row="1" Background="#020817" CornerRadius="12" BorderBrush="#334155" BorderThickness="1">
+                        <Grid>
+                            <Image Source="{Binding CurrentImageSource}"
+                                   Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                        </Grid>
+                    </Border>
+
+                    <Grid Grid.Row="2" Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Background="#0F172A" BorderBrush="#334155" BorderThickness="1" CornerRadius="10" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="图像尺寸" Foreground="#94A3B8" />
+                                <TextBlock Text="{Binding ImageSizeText}" Foreground="#F8FAFC" FontWeight="SemiBold" Margin="0,4,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="1" Background="#0F172A" BorderBrush="#334155" BorderThickness="1" CornerRadius="10" Padding="10" Margin="12,0">
+                            <StackPanel>
+                                <TextBlock Text="处理方式" Foreground="#94A3B8" />
+                                <TextBlock Text="{Binding SelectedMode}" Foreground="#F8FAFC" FontWeight="SemiBold" Margin="0,4,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="2" Background="#0F172A" BorderBrush="#334155" BorderThickness="1" CornerRadius="10" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="处理状态" Foreground="#94A3B8" />
+                                <TextBlock Text="{Binding StatusText}" Foreground="#F8FAFC" FontWeight="SemiBold" Margin="0,4,0,0" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="12" Margin="0,12,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="最近打开：" Foreground="#CBD5E1" VerticalAlignment="Center" />
+                <ItemsControl Grid.Column="1" ItemsSource="{Binding RecentFiles}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#1E293B" CornerRadius="8" Padding="8,4" Margin="4,0,0,0">
+                                <TextBlock Text="{Binding}" Foreground="#E2E8F0" />
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

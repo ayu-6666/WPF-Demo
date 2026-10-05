@@ -1,4 +1,49 @@
-<Solution>
-  <Project Path="RadarApp/RadarApp.csproj" Id="effb0622-92d9-475f-844b-a75c7cf7bec6" />
-  <Project Path="Tang.RadarApplication/Tang.RadarApplication.csproj" />
-</Solution>
+# Tang.VideoThrimalgoAI
+
+基于 WPF + MVVM + OpenCvSharp4 + .NET 6.0 + ONNX Runtime + MaterialDesignInXamlToolkit 的图像/视频修复智能平台。
+
+## 1. 项目简介
+本模块用于实现图像修复、视频增强、批量修复等桌面端功能，支持：
+- 画质增强
+- 高清修复清晰度提升
+- 批量图片修复
+- 图像查看与放大
+- 去除马赛克
+- 去除水印
+- 视频帧修复
+
+## 2. 技术栈
+- .NET 6.0
+- WPF
+- MVVM
+- C# 8.0
+- OpenCvSharp4
+- ONNX Runtime
+- MaterialDesignInXamlToolkit
+
+## 3. 目录结构
+```text
+Tang.VideoThrimalgoAI/
+├── App.xaml
+├── App.xaml.cs
+├── MainWindow.xaml
+├── MainWindow.xaml.cs
+├── Tang.VideoThrimalgoAI.csproj
+├── Models/
+├── Services/
+├── README.md
+└── ...
+```
+
+## 4. 使用方式
+1. 打开 Visual Studio 2022
+2. 还原 NuGet 包
+3. 运行 `Tang.VideoThrimalgoAI.csproj`
+4. 在界面中选择图片并执行修复
+
+## 5. 说明
+- 该模块强调桌面端演示与扩展能力；实际高清修复效果依赖模型文件（如 Real-ESRGAN / ONNX 格式）
+- 处理算法可以进一步扩展为更精准的去水印、去马赛克和超分辨率模型推理
+
+## 6. 结论
+本项目提供了一个完整的 WPF 视觉修复应用骨架，便于继续扩展为真实产品化的软件。
