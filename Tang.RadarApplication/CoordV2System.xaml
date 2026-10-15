@@ -1,0 +1,108 @@
+﻿<Window x:Class="Tang.RadarApplication.CoordV2System"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+         xmlns:local="clr-namespace:Tang.RadarApplication.ViewModels"
+        mc:Ignorable="d"
+        Title="平面直角坐标系 - WPF / MVVM / DrawingVisual"
+        Height="760" Width="1200" Foreground="DarkBlue"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 工具栏 -->
+        <Border Background="#F4F4F4" BorderBrush="#DDD" BorderThickness="0,0,0,1" Padding="8">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="目标数 (3~255)：" VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtCount" Text="200" Width="60" Margin="4,0" VerticalAlignment="Center"/>
+                <Button Content="批量生成" Padding="10,3"
+                        Command="{Binding GenerateCommand}"
+                        CommandParameter="{Binding Text, ElementName=TxtCount}"/>
+                <Button Content="清除目标" Padding="10,3" Margin="6,0,0,0"
+                        Command="{Binding ClearCommand}"/>
+
+                <Separator Width="1" Margin="12,0" Background="#CCC"/>
+
+                <TextBlock Text="手动绘制：" VerticalAlignment="Center"/>
+                <Button Content="直线" Padding="8,3" Margin="4,0,0,0"
+                        Command="{Binding SetDrawingTypeCommand}" CommandParameter="Line"/>
+                <Button Content="箭头" Padding="8,3" Margin="4,0,0,0"
+                        Command="{Binding SetDrawingTypeCommand}" CommandParameter="Arrow"/>
+                <Button Content="三角形" Padding="8,3" Margin="4,0,0,0"
+                        Command="{Binding SetDrawingTypeCommand}" CommandParameter="Triangle"/>
+                <Button Content="矩形" Padding="8,3" Margin="4,0,0,0"
+                        Command="{Binding SetDrawingTypeCommand}" CommandParameter="Rectangle"/>
+                <Button Content="椭圆" Padding="8,3" Margin="4,0,0,0"
+                        Command="{Binding SetDrawingTypeCommand}" CommandParameter="Ellipse"/>
+                <Button Content="圆环" Padding="8,3" Margin="4,0,0,0"
+                        Command="{Binding SetDrawingTypeCommand}" CommandParameter="Ring"/>
+                <Button Content="退出绘制" Padding="8,3" Margin="4,0,0,0"
+                        Command="{Binding SetDrawingTypeCommand}" CommandParameter="None"/>
+
+                <Separator Width="1" Margin="12,0" Background="#CCC"/>
+                <Button Content="重置视图" Padding="10,3" Command="{Binding ResetViewCommand}"/>
+
+                <TextBlock Margin="16,0,0,0" Foreground="#666" VerticalAlignment="Center"
+                           Text="滚轮缩放 / 左键拖动平移 / 左键点选目标"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 坐标系 + 左下角信息面板 -->
+        <Grid Grid.Row="1" Background="#0b1220">
+            <local:CoordinateV2Canvas x:Name="Canvas" 
+                                       Targets="{Binding Targets}"
+                                       SelectedItem="{Binding SelectedTarget, Mode=TwoWay}"
+                                       DrawingType="{Binding DrawingType, Mode=TwoWay}"
+                                       XUnit="m" YUnit="m"/>
+
+            <!-- 左下角实时信息 -->
+            <Border HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                    Margin="12" Padding="12,10" CornerRadius="6"
+                    MinWidth="260" Background="#CC1E1E1E">
+                <StackPanel>
+                    <TextBlock Text="● 光标位置" Foreground="#9CDCFE" FontWeight="Bold"/>
+                    <TextBlock Foreground="White" FontFamily="Consolas">
+                        <Run Text="X = "/>
+                        <Run Text="{Binding MouseWorld.X, StringFormat=F3, Mode=OneWay}"/>
+                        <Run Text="  m"/>
+                    </TextBlock>
+                    <TextBlock Foreground="White" FontFamily="Consolas">
+                        <Run Text="Y = "/>
+                        <Run Text="{Binding MouseWorld.Y, StringFormat=F3, Mode=OneWay}"/>
+                        <Run Text="  m"/>
+                    </TextBlock>
+
+                    <Separator Margin="0,8" Background="#444"/>
+
+                    <TextBlock Text="● 目标详情" Foreground="#9CDCFE" FontWeight="Bold"/>
+
+                    <StackPanel Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Foreground="White" FontFamily="Consolas"
+                                   Text="{Binding SelectedTarget.Id, StringFormat='ID      : {0}'}"/>
+                        <TextBlock Foreground="White" FontFamily="Consolas"
+                                   Text="{Binding SelectedTarget.Type, StringFormat='类型    : {0}'}"/>
+                        <TextBlock Foreground="White" FontFamily="Consolas"
+                                   Text="{Binding SelectedTarget.Label, StringFormat='标签    : {0}'}"/>
+                        <TextBlock Foreground="White" FontFamily="Consolas"
+                                   Text="{Binding SelectedTarget.X, StringFormat='X       : {0:F3}'}"/>
+                        <TextBlock Foreground="White" FontFamily="Consolas"
+                                   Text="{Binding SelectedTarget.Y, StringFormat='Y       : {0:F3}'}"/>
+                        <TextBlock Foreground="White" FontFamily="Consolas"
+                                   Text="{Binding SelectedTarget.Width, StringFormat='宽度    : {0:F3}'}"/>
+                        <TextBlock Foreground="White" FontFamily="Consolas"
+                                   Text="{Binding SelectedTarget.Height, StringFormat='高度    : {0:F3}'}"/>
+                    </StackPanel>
+
+                    <TextBlock Text="（未选中目标）" Foreground="#888" FontFamily="Consolas"
+                               Visibility="{Binding HasSelection,
+                                            Converter={StaticResource InverseBoolToVis}}"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

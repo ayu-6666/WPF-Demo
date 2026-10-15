@@ -26,6 +26,11 @@ namespace Tang.RadarApplication.Controls
         // internal simulation removed: rely on data source / ViewModel to update Targets
         private Vector _offset = new Vector(0, 0); // pixel offset to allow zoom-centering
         private RadarTarget? _selectedTarget;
+        private readonly HashSet<string> _selectedIds = new();
+        private Vector? _crosshairWorld = null; // in km coordinates
+        // modes
+        private bool _isSelectionEnabled = false;
+        private bool _showCrosshair = false;
         private bool _isZooming;
         private Point _zoomStartMouse;
         private double _zoomStartRangeKm;
@@ -42,6 +47,23 @@ namespace Tang.RadarApplication.Controls
             MouseLeftButtonUp += RadarScope_MouseLeftButtonUp;
             MouseMove += RadarScope_MouseMove;
             MouseWheel += RadarScope_MouseWheel;
+        }
+
+        // public control API
+        public bool IsSelectionEnabled { get => _isSelectionEnabled; set => _isSelectionEnabled = value; }
+        public bool ShowCrosshair { get => _showCrosshair; set => _showCrosshair = value; }
+
+        public void ClearSelection()
+        {
+            _selectedIds.Clear();
+            _selectedTarget = null;
+            InvalidateVisual();
+        }
+
+        public void ClearCrosshair()
+        {
+            _crosshairWorld = null;
+            InvalidateVisual();
         }
 
         private static void OnTargetsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -135,7 +157,17 @@ namespace Tang.RadarApplication.Controls
                     var p = new Point(center.X + _offset.X + t.X / RangeKm * radius, center.Y + _offset.Y + t.Y / RangeKm * radius);
                     if ((p - pos).Length <= 7)
                     {
-                        _selectedTarget = t;
+                        if (_isSelectionEnabled)
+                        {
+                            // toggle selection
+                            if (_selectedIds.Contains(t.Id)) _selectedIds.Remove(t.Id);
+                            else _selectedIds.Add(t.Id);
+                            _selectedTarget = _selectedIds.LastOrDefault(id => id == t.Id) != null ? t : null;
+                        }
+                        else
+                        {
+                            _selectedTarget = t;
+                        }
                         // start potential zoom; actual zoom begins on mouse move beyond threshold
                         _isPotentialZoom = true;
                         CaptureMouse();
@@ -151,7 +183,7 @@ namespace Tang.RadarApplication.Controls
             // clicked empty radar area: start zoom anchored at click
             if ((pos - center).Length <= radius)
             {
-                _selectedTarget = null;
+                if (!_isSelectionEnabled) _selectedTarget = null;
                 _isPotentialZoom = true;
                 CaptureMouse();
                 _zoomStartMouse = pos;
@@ -197,6 +229,21 @@ namespace Tang.RadarApplication.Controls
             if (_isPotentialZoom && !_isZooming)
             {
                 _isPotentialZoom = false;
+                // if in crosshair mode and selection not enabled, set crosshair at click position
+                if (_showCrosshair)
+                {
+                    var pos = e.GetPosition(this);
+                    var center = new Point(ActualWidth / 2, ActualHeight / 2);
+                    var radius = Math.Max(0, Math.Min(ActualWidth, ActualHeight) / 2 - 18);
+                    if (radius > 0)
+                    {
+                        // convert pixel to world km
+                        var wx = (pos.X - center.X - _offset.X) / radius * RangeKm;
+                        var wy = (pos.Y - center.Y - _offset.Y) / radius * RangeKm;
+                        _crosshairWorld = new Vector(wx, wy);
+                        InvalidateVisual();
+                    }
+                }
                 return;
             }
             _isZooming = false;
@@ -242,10 +289,10 @@ namespace Tang.RadarApplication.Controls
             {
                 foreach (var t in collection)
                 {
-                    var p = new Point(center.X + t.X / RangeKm * radius, center.Y + t.Y / RangeKm * radius);
+                    var p = new Point(center.X + _offset.X + t.X / RangeKm * radius, center.Y + _offset.Y + t.Y / RangeKm * radius);
                     if ((p - center).Length <= radius)
                     {
-                        var isSelected = _selectedTarget != null && _selectedTarget == t;
+                        var isSelected = (_selectedTarget != null && _selectedTarget == t) || _selectedIds.Contains(t.Id);
 
                         // compute angle of target (0 = north)
                         var dx = t.X; var dy = t.Y; // km
@@ -293,6 +340,18 @@ namespace Tang.RadarApplication.Controls
                 var info = $"ID: {_selectedTarget.Id}  X:{_selectedTarget.X:F2} km  Y:{_selectedTarget.Y:F2} km";
                 var ft = new FormattedText(info, System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Segoe UI"), 12, Brushes.LightGreen, 1.0);
                 dc.DrawText(ft, new Point(12, ActualHeight - ft.Height - 12));
+            }
+
+            // draw crosshair in world coordinates if set and visible
+            if (_showCrosshair && _crosshairWorld != null)
+            {
+                var wx = _crosshairWorld.Value.X; // km
+                var wy = _crosshairWorld.Value.Y; // km
+                var px = center.X + _offset.X + wx / RangeKm * radius;
+                var py = center.Y + _offset.Y + wy / RangeKm * radius;
+                var crossPen = new Pen(Brushes.Yellow, 1);
+                dc.DrawLine(crossPen, new Point(px - 20, py), new Point(px + 20, py));
+                dc.DrawLine(crossPen, new Point(px, py - 20), new Point(px, py + 20));
             }
         }
 

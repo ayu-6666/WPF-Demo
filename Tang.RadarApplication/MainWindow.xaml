@@ -23,9 +23,16 @@
                     <Button Content="开始扫描" Command="{Binding StartCommand}" Style="{StaticResource HeaderButtonStyle}" />
                     <Button Content="停止" Command="{Binding StopCommand}" Style="{StaticResource HeaderButtonStyle}" />
                     <Button Content="清空目标" Command="{Binding ClearCommand}" Style="{StaticResource HeaderButtonStyle}" />
+                    <Button Content="绘制坐标系" Margin="6" Padding="8" Click="DrawCoordinateSystem_Click" />
                     <Button Content="重置缩放" Margin="6" Padding="14,6" Click="ResetZoom_Click" />
                     <Button Content="图表" Margin="6" Padding="14,6" Click="OpenChart_Click" />
-                </StackPanel>
+                    <!-- wafer toolbar: select, cross, clear, reset -->
+                    <ToggleButton x:Name="SelectToggle" Content="选择" Margin="6" Padding="8" Checked="SelectToggle_Checked" Unchecked="SelectToggle_Unchecked" />
+                    <ToggleButton x:Name="CrossToggle" Content="十字" Margin="6" Padding="8" Checked="CrossToggle_Checked" Unchecked="CrossToggle_Unchecked" />
+                    <Button Content="清除" Margin="6" Padding="8" Click="WaferClear_Click" />
+                    <Button Content="重置" Margin="6" Padding="8" Click="WaferReset_Click" />
+                    
+            </StackPanel>
         </DockPanel>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="330"/></Grid.ColumnDefinitions>

@@ -1,0 +1,62 @@
+﻿<Window x:Class="Tang.RadarApplication.CoordinateSystem"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tang.RadarApplication.ViewModels"
+        mc:Ignorable="d"
+Title="高性能多图元直角坐标系" Height="700" Width="1000">
+    <Window.DataContext>
+        <local:CoordinateViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 顶部工具栏：支持批量生成、自定义刻度、清除目标 -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10" VerticalAlignment="Center">
+            <Button Content="生成 10 个" Command="{Binding GenerateCommand}" CommandParameter="10" Width="80" Margin="3"/>
+            <Button Content="生成 100 个" Command="{Binding GenerateCommand}" CommandParameter="100" Width="90" Margin="3"/>
+            <Button Content="生成 255 个" Command="{Binding GenerateCommand}" CommandParameter="255" Width="90" Margin="3"/>
+
+            <Separator Width="1" Margin="10,0"/>
+
+            <TextBlock Text="X刻度步长:" VerticalAlignment="Center" Margin="5,0,2,0"/>
+            <TextBox Text="{Binding CustomTickStepX, UpdateSourceTrigger=PropertyChanged}" Width="45" VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+            <TextBlock Text="Y刻度步长:" VerticalAlignment="Center" Margin="5,0,2,0"/>
+            <TextBox Text="{Binding CustomTickStepY, UpdateSourceTrigger=PropertyChanged}" Width="45" VerticalAlignment="Center" Margin="0,0,15,0"/>
+
+            <Button Content="清除全部" Command="{Binding ClearCommand}" Width="80" Margin="5" Background="#FFF0F0"/>
+            <Button Content="修改选中目标标签" Command="{Binding UpdateSelectedTextCommand}" Width="120" Margin="5"/>
+        </StackPanel>
+
+        <!-- 坐标系与左下角详情面板区域 -->
+        <Grid Grid.Row="1">
+            <local:CoordinateCanvas x:Name="CoordCanvas"
+                                    XMin="{Binding XMin, Mode=TwoWay}"
+                                    XMax="{Binding XMax, Mode=TwoWay}"
+                                    YMin="{Binding YMin, Mode=TwoWay}"
+                                    YMax="{Binding YMax, Mode=TwoWay}"
+                                    XUnit="X (km)" YUnit="Y (km)"
+                                    CustomTickStepX="{Binding CustomTickStepX}"
+                                    CustomTickStepY="{Binding CustomTickStepY}"
+                                    Shapes="{Binding Shapes}"
+                                    SelectedShape="{Binding SelectedShape, Mode=TwoWay}"/>
+
+            <!-- 左下角浮动面板：实时显示鼠标点击目标的详细信息，支持实时响应与更新 -->
+            <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="15" 
+                    Background="#EEFFFFFF" BorderBrush="DarkGray" BorderThickness="1" CornerRadius="4" Padding="12" Width="300">
+                <StackPanel>
+                    <TextBlock Text="【目标详细信息 (实时监控)】" FontWeight="Bold" Foreground="MidnightBlue" Margin="0,0,0,5"/>
+                    <TextBlock Text="{Binding SelectedShape.Description, FallbackValue='提示：请点击坐标系中的任意目标点/图形查看详细信息'}" 
+                               Foreground="DarkSlateGray" TextWrapping="Wrap" Margin="0,0,0,5"/>
+                    <TextBlock Text="{Binding SelectedShape.Text, StringFormat='当前标签: {0}', FallbackValue=''}" 
+                               Foreground="Gray" FontSize="11"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
