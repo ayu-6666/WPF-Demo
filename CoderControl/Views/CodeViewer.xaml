@@ -1,0 +1,83 @@
+﻿<UserControl x:Class="CoderControl.Views.CodeViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CoderControl.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+              xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+             Background="#1E1E1E">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TabControl x:Name="MainTab" Background="#2D2D30" BorderThickness="0" 
+                    SelectionChanged="MainTab_SelectionChanged">
+            <TabControl.Resources>
+                <!-- 定制 TabItem 样式 (1:1 还原图片) -->
+                <Style TargetType="TabItem">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="#969696"/>
+                    <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                    <Setter Property="BorderBrush" Value="#3E3E42"/>
+                    <Setter Property="Padding" Value="20,10"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Border x:Name="Border" Background="{TemplateBinding Background}" 
+                                        BorderBrush="{TemplateBinding BorderBrush}" 
+                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                    <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#1E1E1E"/>
+                                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                                        <!-- 顶部高亮线 -->
+                                        <Setter TargetName="Border" Property="BorderThickness" Value="0,2,1,0"/>
+                                        <Setter TargetName="Border" Property="BorderBrush" Value="#007ACC"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.Resources>
+
+            <!-- 内容模板：支持动态加载 AvalonEdit 或 Sample 页面 -->
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <!-- 代码编辑器 (默认隐藏) -->
+                        <avalonEdit:TextEditor x:Name="Editor" 
+                                               FontFamily="Consolas" FontSize="14" 
+                                               Background="#1E1E1E" Foreground="#D4D4D4"
+                                               ShowLineNumbers="True"
+                                               HorizontalScrollBarVisibility="Auto"
+                                               VerticalScrollBarVisibility="Auto"
+                                               Visibility="Collapsed"/>
+
+                        <!-- 自定义 Sample 页面容器 (默认隐藏) -->
+                        <ContentControl x:Name="SampleContainer" Visibility="Collapsed"/>
+                    </Grid>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
+
+        <!-- 右下角悬浮按钮 (匹配图片中的 "+" 号) -->
+        <Canvas HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="20">
+            <Button x:Name="AddTabButton" Width="40" Height="40"  Background="White" BorderBrush="#D0D0D0" BorderThickness="1" 
+                    HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="AddTabButton_Click">
+                <Button.Effect>
+                    <DropShadowEffect Color="Black" Opacity="0.15" BlurRadius="8" ShadowDepth="2"/>
+                </Button.Effect>
+                <TextBlock Text="+" FontSize="20" FontWeight="Bold" Foreground="#555"/>
+            </Button>
+        </Canvas>
+    </Grid>
+</UserControl>
