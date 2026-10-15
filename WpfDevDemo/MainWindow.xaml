@@ -1,0 +1,218 @@
+﻿﻿<wd:Window
+    x:Class="WpfDevDemo.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:WpfDevDemo.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:WpfDevDemo.ViewModels"
+    xmlns:wd="https://github.com/WPFDevelopersOrg/WPFDevelopers"
+    Title="WPFDevelopers"
+    Width="1200"
+    Height="800"
+    TitleBarMode="High"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+    <wd:Window.TitleBarLayout>
+        <StackPanel
+            HorizontalAlignment="Right"
+            wd:PanelHelper.Spacing="2"
+            Orientation="Horizontal">
+            <wd:SwitchButton
+                x:Name="ThemeSwitchBtn"
+                Width="30"
+                Height="30"
+                Click="ThemeSwitchBtn_Click">
+                <wd:SwitchButton.UncheckedContent>
+                    <Border
+                        Width="18"
+                        Height="18"
+                        Background="White"
+                        CornerRadius="10">
+                        <wd:PathIcon
+                            Width="16"
+                            Height="16"
+                            Data="M12 2a10 10 0 1 0 10 10A7 7 0 0 1 12 2Z"
+                            Foreground="{DynamicResource WD.WindowBorderBrush}" />
+                    </Border>
+                </wd:SwitchButton.UncheckedContent>
+                <wd:SwitchButton.CheckedContent>
+                    <wd:PathIcon
+                        Width="18"
+                        Height="18"
+                        Data="M12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14Zm0-1.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 1 0 0 11Zm-5.657.157a.75.75 0 0 1 0 1.06l-1.768 1.768a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l1.767-1.768a.75.75 0 0 1 1.061 0ZM3.515 3.515a.75.75 0 0 1 1.06 0l1.768 1.768a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L3.515 4.575a.75.75 0 0 1 0-1.06ZM12 0a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 12 0ZM4 12a.75.75 0 0 1-.75.75H.75a.75.75 0 0 1 0-1.5h2.5A.75.75 0 0 1 4 12Zm8 8a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0v-2.5A.75.75 0 0 1 12 20Zm12-8a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h2.5A.75.75 0 0 1 24 12Zm-6.343 5.657a.75.75 0 0 1 1.06 0l1.768 1.768a.751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018l-1.768-1.767a.75.75 0 0 1 0-1.061Zm2.828-14.142a.75.75 0 0 1 0 1.06l-1.768 1.768a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l1.767-1.768a.75.75 0 0 1 1.061 0Z"
+                        Foreground="White" />
+                </wd:SwitchButton.CheckedContent>
+            </wd:SwitchButton>
+            <wd:SwitchButton
+                x:Name="ColorSwitchBtn"
+                Width="30"
+                Height="30">
+                <wd:SwitchButton.UncheckedContent>
+                    <wd:PathIcon
+                        Width="18"
+                        Height="18"
+                        Data="M198,56.74A99.31,99.31,0,0,0,128,28h-1A100,100,0,0,0,28,128c0,41.22,25.55,75.85,66.69,90.38a28.34,28.34,0,0,0,9.42,1.63A28,28,0,0,0,132,192a20,20,0,0,1,20-20h46.21a27.84,27.84,0,0,0,27.3-21.76,100.37,100.37,0,0,0,2.49-23.1A99.26,99.26,0,0,0,198,56.74Zm19.74,91.72A19.89,19.89,0,0,1,198.21,164H152a28,28,0,0,0-28,28,20,20,0,0,1-26.64,18.83C59.51,197.46,36,165.72,36,128a92,92,0,0,1,91.05-92H128a92,92,0,0,1,89.72,112.46ZM136,76a8,8,0,1,1-8-8A8,8,0,0,1,136,76ZM92,100a8,8,0,1,1-8-8A8,8,0,0,1,92,100Zm0,56a8,8,0,1,1-8-8A8,8,0,0,1,92,156Zm88-56a8,8,0,1,1-8-8A8,8,0,0,1,180,100Z"
+                        Foreground="White" />
+                </wd:SwitchButton.UncheckedContent>
+                <wd:SwitchButton.CheckedContent>
+                    <wd:PathIcon
+                        Width="18"
+                        Height="18"
+                        Data="M200.77,53.89A103.27,103.27,0,0,0,128,24h-1.07A104,104,0,0,0,24,128c0,43,26.58,79.06,69.36,94.17A32,32,0,0,0,136,192a16,16,0,0,1,16-16h46.21a31.81,31.81,0,0,0,31.2-24.88,104.43,104.43,0,0,0,2.59-24A103.28,103.28,0,0,0,200.77,53.89ZM84,168a12,12,0,1,1,12-12A12,12,0,0,1,84,168Zm0-56a12,12,0,1,1,12-12A12,12,0,0,1,84,112Zm44-24a12,12,0,1,1,12-12A12,12,0,0,1,128,88Zm44,24a12,12,0,1,1,12-12A12,12,0,0,1,172,112Z"
+                        Foreground="White" />
+                </wd:SwitchButton.CheckedContent>
+            </wd:SwitchButton>
+            <Popup
+                AllowsTransparency="True"
+                HorizontalOffset="-200"
+                IsOpen="{Binding IsChecked, ElementName=ColorSwitchBtn, Mode=TwoWay}"
+                Placement="Bottom"
+                PlacementTarget="{Binding ElementName=ColorSwitchBtn}"
+                StaysOpen="False">
+                <Border
+                    Margin="10"
+                    Background="{DynamicResource WD.BackgroundBrush}"
+                    BorderBrush="{DynamicResource WD.BaseBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Effect="{StaticResource WD.PopupShadowDepth}">
+                    <StackPanel Margin="4">
+                        <wd:ColorPicker x:Name="ThemeColorPicker" />
+                        <StackPanel
+                            HorizontalAlignment="Right"
+                            wd:PanelHelper.Spacing="4"
+                            Orientation="Horizontal">
+                            <Button
+                                Click="ColorPicker_Apply"
+                                Content="Apply"
+                                Style="{StaticResource WD.PrimaryButton}" />
+                            <Button
+                                Click="ColorPicker_Cancel"
+                                Content="Cancel"
+                                Style="{StaticResource WD.DefaultButton}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Popup>
+        </StackPanel>
+    </wd:Window.TitleBarLayout>
+    <Window.DataContext>
+        <vm:MainVM />
+    </Window.DataContext>
+    <Grid>
+        <Grid Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="150" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid Margin="0,0,3,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBox
+                    Name="PART_MenuTextBox"
+                    TextChanged="MenuTextBox_TextChanged"
+                    wd:ElementHelper.IsClear="True"
+                    wd:ElementHelper.Watermark="Search Control" />
+                <wd:Segmented
+                    Grid.Row="1"
+                    Margin="0,3"
+                    wd:ElementHelper.CornerRadius="15"
+                    SelectedIndex="{Binding SegmentedSelectedIndex, Mode=TwoWay}">
+                    <wd:SegmentedItem Content="Custom" />
+                    <wd:SegmentedItem Content="Basic" />
+                </wd:Segmented>
+                <controls:NavigateMenu
+                    x:Name="NavigateMenu"
+                    Grid.Row="2"
+                    DisplayMemberPath="Name"
+                    ItemsSource="{Binding NavigateMenuModelList}"
+                    SelectionChanged="NavigateMenu_SelectionChanged" />
+            </Grid>
+            <GridSplitter
+                Grid.Column="1"
+                Width="5"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                ShowsPreview="True" />
+
+            <wd:Drawer
+                x:Name="CodeDrawer"
+                Grid.Column="2"
+                Margin="3,0,0,0"
+                BorderThickness="0"
+                Position="Right">
+                <wd:Drawer.Header>
+                    <controls:CodeViewer Header="MainWindow">
+                        <controls:CodeViewer.SourceCodes>
+                            <controls:SourceCodeModel CodeSource="pack://siteoforigin:,,,/MainWindow.xaml" CodeType="Xaml" />
+                            <controls:SourceCodeModel CodeSource="pack://siteoforigin:,,,/MainWindow.xaml.cs" CodeType="CSharp" />
+                            <controls:SourceCodeModel
+                                CodeSource="pack://siteoforigin:,,,/MainVM.cs"
+                                CodeType="CSharp"
+                                Haader="ViewModel" />
+                        </controls:CodeViewer.SourceCodes>
+                    </controls:CodeViewer>
+                </wd:Drawer.Header>
+                <ContentControl Content="{Binding ControlPanel}" />
+            </wd:Drawer>
+            <wd:CircleMenu
+                Grid.Column="2"
+                Width="100"
+                Height="100"
+                Margin="20"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                ItemClick="CircleMenu_ItemClick">
+                <wd:CircleMenuItem x:Name="ScreenShot" ToolTip="ScreenShot">
+                    <Path
+                        Width="14"
+                        Height="14"
+                        Data="M8.5 2h7a1 1 0 0 1 1 1v1.5H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2h2.5V3a1 1 0 0 1 1-1Zm.5 2v1.5a1 1 0 0 1-1 1H5V18h14V6.5h-3a1 1 0 0 1-1-1V4H9Zm3 4.5a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"
+                        Fill="White"
+                        Stretch="Uniform" />
+                </wd:CircleMenuItem>
+                <wd:CircleMenuItem x:Name="Github" ToolTip="Github">
+                    <Path
+                        Width="14"
+                        Height="14"
+                        Data="M12 1.5a10.5 10.5 0 0 0-3.32 20.46c.53.1.72-.23.72-.5v-1.96c-2.92.63-3.54-1.24-3.54-1.24-.48-1.22-1.17-1.55-1.17-1.55-.95-.65.07-.64.07-.64 1.06.07 1.61 1.08 1.61 1.08.94 1.6 2.46 1.14 3.06.87.1-.68.37-1.14.66-1.4-2.33-.27-4.78-1.17-4.78-5.19 0-1.15.4-2.08 1.08-2.82-.11-.26-.47-1.33.1-2.77 0 0 .88-.28 2.87 1.08a9.98 9.98 0 0 1 5.24 0c2-1.36 2.87-1.08 2.87-1.08.57 1.44.21 2.51.1 2.77.67.74 1.08 1.67 1.08 2.82 0 4.03-2.46 4.92-4.8 5.18.38.33.71.97.71 1.96v2.9c0 .28.19.6.73.5A10.5 10.5 0 0 0 12 1.5Z"
+                        Fill="White"
+                        Stretch="Uniform" />
+                </wd:CircleMenuItem>
+                <wd:CircleMenuItem x:Name="Grayscale" ToolTip="Grayscale">
+                    <wd:PathIcon
+                        Width="14"
+                        Height="14"
+                        Data="M12 2a10 10 0 1 0 10 10A7 7 0 0 1 12 2Z"
+                        Foreground="White" />
+                </wd:CircleMenuItem>
+                <wd:CircleMenuItem x:Name="Theme" ToolTip="Theme">
+                    <wd:PathIcon
+                        Width="14"
+                        Height="14"
+                        Data="M12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14Zm0-1.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 1 0 0 11Zm-5.657.157a.75.75 0 0 1 0 1.06l-1.768 1.768a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l1.767-1.768a.75.75 0 0 1 1.061 0ZM3.515 3.515a.75.75 0 0 1 1.06 0l1.768 1.768a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L3.515 4.575a.75.75 0 0 1 0-1.06ZM12 0a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 12 0ZM4 12a.75.75 0 0 1-.75.75H.75a.75.75 0 0 1 0-1.5h2.5A.75.75 0 0 1 4 12Zm8 8a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0v-2.5A.75.75 0 0 1 12 20Zm12-8a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h2.5A.75.75 0 0 1 24 12Zm-6.343 5.657a.75.75 0 0 1 1.06 0l1.768 1.768a.751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018l-1.768-1.767a.75.75 0 0 1 0-1.061Zm2.828-14.142a.75.75 0 0 1 0 1.06l-1.768 1.768a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l1.767-1.768a.75.75 0 0 1 1.061 0Z"
+                        Foreground="White" />
+                </wd:CircleMenuItem>
+                <wd:CircleMenuItem x:Name="Code" ToolTip="MainWindow Code">
+                    <Path
+                        Width="14"
+                        Height="14"
+                        Data="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4Zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4Z"
+                        Fill="White"
+                        Stretch="Uniform" />
+                </wd:CircleMenuItem>
+                <wd:CircleMenuItem x:Name="ClearToast" ToolTip="Clear Toast">
+                    <wd:PathIcon
+                        Width="10"
+                        Height="10"
+                        Kind="WindowClose" />
+                </wd:CircleMenuItem>
+            </wd:CircleMenu>
+        </Grid>
+    </Grid>
+</wd:Window>

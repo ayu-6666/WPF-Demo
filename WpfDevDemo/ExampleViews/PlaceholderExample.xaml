@@ -1,0 +1,29 @@
+<UserControl
+    x:Class="WpfDevDemo.ExampleViews.PlaceholderExample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:WpfDevDemo.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:WpfDevDemo.ExampleViews"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:wd="https://github.com/WPFDevelopersOrg/WPFDevelopers"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <controls:CodeViewer Header="{Binding NavigateMenuItem.Name}">
+        <Grid Background="{DynamicResource WD.BackgroundBrush}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    FontSize="20"
+                    Foreground="{DynamicResource WD.PrimaryTextBrush}"
+                    Text="{Binding NavigateMenuItem.Name}" />
+                <TextBlock
+                    Margin="0,10,0,0"
+                    HorizontalAlignment="Center"
+                    Foreground="{DynamicResource WD.RegularTextSolidBrush}"
+                    Text="示例持续更新中…" />
+            </StackPanel>
+        </Grid>
+    </controls:CodeViewer>
+</UserControl>

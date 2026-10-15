@@ -1,0 +1,161 @@
+<UserControl
+    x:Class="WpfDevDemo.ExampleViews.NavMenu3DExample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:WpfDevDemo.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:WpfDevDemo.ExampleViews"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:wd="https://github.com/WPFDevelopersOrg/WPFDevelopers"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <controls:CodeViewer Header="{Binding NavigateMenuItem.Name}">
+        <Grid>
+            <Grid.Background>
+                <ImageBrush ImageSource="pack://application:,,,/WpfDevDemo;component/Resources/Images/NavMenu3D/background.png" />
+            </Grid.Background>
+            <Border
+                Width="400"
+                Height="235"
+                Margin="10,0"
+                VerticalAlignment="Top"
+                Background="{DynamicResource WD.BackgroundBrush}"
+                SnapsToDevicePixels="True">
+                <wd:NavMenu3D
+                    x:Name="PART_NavMenu3D"
+                    VerticalAlignment="Bottom"
+                    SelectionChanged="NavMenu3D_SelectionChanged">
+                    <wd:NavMenu3DItem
+                        Background="#E21854"
+                        Fill="#FD3574"
+                        Tag="Item1">
+                        <StackPanel VerticalAlignment="Center">
+                            <Path
+                                Width="40"
+                                Height="40"
+                                Data="{StaticResource WD.SmileyOutlineGeometry}"
+                                Fill="{DynamicResource WD.WindowTextBrush}"
+                                Stretch="Uniform" />
+                            <TextBlock HorizontalAlignment="Center" Text="Emoji" />
+                        </StackPanel>
+                    </wd:NavMenu3DItem>
+                    <wd:NavMenu3DItem
+                        Background="#41A545"
+                        Fill="#5EECA6"
+                        Tag="Item2">
+                        <StackPanel VerticalAlignment="Center">
+                            <Path
+                                Width="40"
+                                Height="40"
+                                Data="{StaticResource WD.BusGeometry}"
+                                Fill="{DynamicResource WD.WindowTextBrush}"
+                                Stretch="Uniform" />
+                            <TextBlock HorizontalAlignment="Center" Text="Bus" />
+                        </StackPanel>
+                    </wd:NavMenu3DItem>
+                    <wd:NavMenu3DItem
+                        Background="#0A58F0"
+                        Fill="#3A7DFE"
+                        Tag="Item3">
+                        <StackPanel VerticalAlignment="Center">
+                            <Path
+                                Width="40"
+                                Height="40"
+                                Data="{StaticResource WD.FriendGeometry}"
+                                Fill="{DynamicResource WD.WindowTextBrush}"
+                                Stretch="Uniform" />
+                            <TextBlock HorizontalAlignment="Center" Text="Friend" />
+                        </StackPanel>
+                    </wd:NavMenu3DItem>
+                    <wd:NavMenu3DItem
+                        Background="#5F0574"
+                        Fill="#8E1FA4"
+                        Tag="Item4">
+                        <StackPanel VerticalAlignment="Center">
+                            <Path
+                                Width="40"
+                                Height="40"
+                                Data="{StaticResource WD.AlarmClockGeometry}"
+                                Fill="{DynamicResource WD.WindowTextBrush}"
+                                Stretch="Uniform" />
+                            <TextBlock HorizontalAlignment="Center" Text="Clock" />
+                        </StackPanel>
+                    </wd:NavMenu3DItem>
+                    <wd:NavMenu3DItem
+                        Background="#1F0355"
+                        Fill="#5B31AD"
+                        Tag="Item5">
+                        <wd:NavMenu3DItem.Content>
+                            <StackPanel VerticalAlignment="Center">
+                                <Path
+                                    Width="40"
+                                    Height="40"
+                                    Data="{StaticResource WD.BuildingRegularGeometry}"
+                                    Fill="{DynamicResource WD.WindowTextBrush}"
+                                    Stretch="Uniform" />
+                                <TextBlock HorizontalAlignment="Center" Text="Regular" />
+                            </StackPanel>
+                        </wd:NavMenu3DItem.Content>
+                        <wd:NavMenu3DItem.ContentBack>
+                            <StackPanel VerticalAlignment="Center">
+                                <Path
+                                    Width="40"
+                                    Height="40"
+                                    Data="{StaticResource WD.BuildingRegularGeometry}"
+                                    Fill="{DynamicResource WD.WindowTextBrush}"
+                                    Stretch="Uniform" />
+                                <TextBlock HorizontalAlignment="Center" Text="建筑" />
+                            </StackPanel>
+                        </wd:NavMenu3DItem.ContentBack>
+                    </wd:NavMenu3DItem>
+                    <wd:NavMenu3DItem Background="Red" Tag="Item6">Item 6</wd:NavMenu3DItem>
+                </wd:NavMenu3D>
+            </Border>
+            <Border
+                Width="450"
+                Height="260"
+                Margin="10,0"
+                VerticalAlignment="Top"
+                Background="{x:Null}"
+                BorderBrush="#181618"
+                BorderThickness="25,0,25,25"
+                CornerRadius="0,0,50,50"
+                SnapsToDevicePixels="True">
+                <Border.Effect>
+                    <DropShadowEffect
+                        BlurRadius="10"
+                        Direction="300"
+                        ShadowDepth="0"
+                        Color="White" />
+                </Border.Effect>
+            </Border>
+            <StackPanel>
+                <TextBlock
+                    Margin="0,20"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    FontSize="20"
+                    FontWeight="Black"
+                    Text="微信号公众号:WPFDevelopers" />
+                <TextBlock
+                    Margin="0,20"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    FontSize="{StaticResource WD.PrimaryFontSize}"
+                    FontWeight="Black">
+                    <LineBreak />
+                    <Hyperlink NavigateUri="https://github.com/WPFDevelopersOrg/WPFDevelopers.git" RequestNavigate="GithubHyperlink_RequestNavigate">Github 源代码</Hyperlink>
+                    <Run />
+                    <Run />
+                    <Run />
+                    <Hyperlink NavigateUri="https://gitee.com/yanjinhua/WPFDevelopers.git" RequestNavigate="GiteeHyperlink_RequestNavigate">码云源代码</Hyperlink>
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+        <controls:CodeViewer.SourceCodes>
+            <controls:SourceCodeModel CodeSource="pack://siteoforigin:,,,/ExampleViews/NavMenu3DExample.xaml" CodeType="Xaml" />
+            <controls:SourceCodeModel CodeSource="pack://siteoforigin:,,,/ExampleViews/NavMenu3DExample.xaml.cs" CodeType="CSharp" />
+        </controls:CodeViewer.SourceCodes>
+    </controls:CodeViewer>
+</UserControl>
