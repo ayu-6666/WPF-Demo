@@ -1,0 +1,102 @@
+<Window x:Class="GenealogyDemo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:GenealogyDemo.Models"
+        xmlns:local="clr-namespace:GenealogyDemo"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="族谱软件 Demo" Height="600" Width="900">
+    <Window.DataContext>
+        <vm:FamilyTreeViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <!-- 性别选项来源 -->
+        <x:Array x:Key="GenderOptions" Type="{x:Type sys:String}">
+            <sys:String>男</sys:String>
+            <sys:String>女</sys:String>
+        </x:Array>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- 左侧族谱树 -->
+        <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1" CornerRadius="4" Padding="5">
+            <TreeView ItemsSource="{Binding RootPeople}">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold" Margin="0,0,4,0"/>
+                            <TextBlock Text="["/>
+                            <TextBlock Text="{Binding Gender}" Foreground="DarkSlateGray"/>
+                            <TextBlock Text="]"/>
+                            <TextBlock Text=" ("/>
+                            <TextBlock Text="{Binding BirthDate, StringFormat=y}" Foreground="DimGray"/>
+                            <TextBlock Text=")"/>
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+
+                <TreeView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="添加子女"
+                                  Command="{Binding AddPersonCommand}"
+                                  Icon="{StaticResource SymbolAdd}"/>
+                        <Separator/>
+                        <MenuItem Header="编辑"
+                                  Command="{Binding EditPersonCommand}"
+                                  Icon="{StaticResource SymbolEdit}"/>
+                        <MenuItem Header="删除"
+                                  Command="{Binding DeletePersonCommand}"
+                                  Icon="{StaticResource SymbolDelete}"
+                                  Foreground="Red"/>
+                    </ContextMenu>
+                </TreeView.ContextMenu>
+            </TreeView>
+        </Border>
+
+        <!-- 右侧操作面板 -->
+        <StackPanel Grid.Column="1" Margin="15,0,0,0">
+            <GroupBox Header="当前选中的人" Padding="10">
+                <StackPanel>
+                    <TextBlock Text="姓名：" FontWeight="Bold"/>
+                    <TextBox Text="{Binding SelectedPerson.Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,6"/>
+                    <TextBlock Text="性别：" FontWeight="Bold"/>
+                    <ComboBox SelectedItem="{Binding SelectedPerson.Gender}"
+                              ItemsSource="{StaticResource GenderOptions}"
+                              Margin="0,0,0,6"/>
+                    <TextBlock Text="出生日期：" FontWeight="Bold"/>
+                    <DatePicker SelectedDate="{Binding SelectedPerson.BirthDate}" Margin="0,0,0,6"/>
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="配偶关系" Padding="10" Margin="0,10,0,0">
+                <StackPanel>
+                    <TextBlock Text="配偶 ID：" FontWeight="Bold"/>
+                    <TextBox Text="{Binding SelectedPerson.SpouseId, StringFormat={}{0}}" IsReadOnly="True" Background="#F0F0F0"/>
+                    <Button Content="选择配偶"
+                            Command="{Binding AddPersonCommand}"
+                            Margin="0,6,0,0"/>
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="族谱查询" Padding="10" Margin="0,10,0,0">
+                <StackPanel>
+                    <Button Content="查询上五代祖先"
+                            Command="{Binding QueryUpFiveCommand}"
+                            Margin="0,0,0,6"/>
+                    <Button Content="查询下五代后代"
+                            Command="{Binding QueryDownFiveCommand}"/>
+                </StackPanel>
+            </GroupBox>
+
+            <StackPanel VerticalAlignment="Bottom"/>
+        </StackPanel>
+    </Grid>
+</Window>
