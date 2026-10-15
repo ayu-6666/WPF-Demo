@@ -1,0 +1,47 @@
+﻿<Application x:Class="Cmp.UTools.GUI.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Cmp.UTools.GUI"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- 简化主题：定义少量 Material 风格的资源，避免引用外部包导致的 XAML 解析错误 -->
+            <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="#673AB7" />
+            <SolidColorBrush x:Key="PrimaryHueDarkForegroundBrush" Color="White" />
+            <SolidColorBrush x:Key="PrimaryHueMidForegroundBrush" Color="#616161" />
+            <SolidColorBrush x:Key="MaterialDesignPaper" Color="#FAFAFA" />
+
+            <!-- 简单按钮样式（Material-like） -->
+            <Style x:Key="MaterialDesignRaisedButton" TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource PrimaryHueMidBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="Padding" Value="8,4" />
+                <Setter Property="Margin" Value="4" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Cursor" Value="Hand" />
+            </Style>
+
+            <Style x:Key="MaterialDesignOutlinedButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{StaticResource PrimaryHueMidBrush}" />
+            </Style>
+
+            <Style x:Key="MaterialDesignOutlinedTextBox" TargetType="TextBox">
+                <Setter Property="Padding" Value="6" />
+                <Setter Property="BorderBrush" Value="#DDD" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Background" Value="White" />
+            </Style>
+
+            <Style x:Key="MaterialDesignFloatingHintComboBox" TargetType="ComboBox">
+                <Setter Property="Padding" Value="4" />
+                <Setter Property="BorderBrush" Value="#DDD" />
+                <Setter Property="BorderThickness" Value="1" />
+            </Style>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
