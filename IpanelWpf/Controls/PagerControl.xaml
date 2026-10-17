@@ -1,0 +1,33 @@
+<UserControl x:Class="IpanelWpf.Controls.PagerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             x:Name="Root">
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <TextBlock Text="{Binding TotalText, ElementName=Root}" Style="{StaticResource TdText}"/>
+        <ComboBox Style="{StaticResource DarkComboBox}" Width="96" Margin="12,0,0,0"
+                  SelectedIndex="{Binding PageSizeIndex, ElementName=Root}">
+            <ComboBoxItem Content="10条/页"/>
+            <ComboBoxItem Content="20条/页"/>
+            <ComboBoxItem Content="50条/页"/>
+            <ComboBoxItem Content="100条/页"/>
+        </ComboBox>
+        <Button Style="{StaticResource IconBtn}" Margin="8,0,0,0" Width="26" Height="26">
+            <materialDesign:PackIcon Kind="ChevronLeft" Width="15" Height="15"/>
+        </Button>
+        <TextBlock Text="{Binding PageValue, ElementName=Root}"
+                   Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"
+                   VerticalAlignment="Center" Margin="2,0"/>
+        <Button Style="{StaticResource IconBtn}" Width="26" Height="26">
+            <materialDesign:PackIcon Kind="ChevronRight" Width="15" Height="15"/>
+        </Button>
+        <TextBlock Text="前往" Style="{StaticResource TdText}" Margin="8,0,0,0"/>
+        <Border Background="{StaticResource InputBgBrush}" BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1" CornerRadius="4" Width="36" Height="24" Margin="6,0">
+            <TextBlock Text="{Binding PageValue, ElementName=Root}" FontSize="12"
+                       Foreground="{StaticResource TextPrimaryBrush}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+        <TextBlock Text="页" Style="{StaticResource TdText}"/>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,222 @@
+<UserControl x:Class="IpanelWpf.Views.ContainerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:c="clr-namespace:IpanelWpf.Controls">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 页签栏 -->
+        <Border Grid.Row="0" Style="{StaticResource CardBorder}" Padding="12,10">
+            <ListBox Style="{StaticResource HListBox}" ItemsSource="{Binding Tabs}" SelectedIndex="{Binding TabIndex}"
+                     ItemContainerStyle="{StaticResource PageTabItem}"/>
+        </Border>
+
+        <!-- 主卡 -->
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Margin="0,12,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- 统计行 -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                    <TextBlock FontSize="12" VerticalAlignment="Center">
+                        <Run Text="新建 * " Foreground="{StaticResource TextMutedBrush}"/><Run Text="6" Foreground="{StaticResource PrimaryBrush}"/>
+                    </TextBlock>
+                    <TextBlock FontSize="12" Margin="24,0,0,0" VerticalAlignment="Center">
+                        <Run Text="已启动 * " Foreground="{StaticResource TextMutedBrush}"/><Run Text="6" Foreground="{StaticResource PrimaryBrush}"/>
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- 工具栏 -->
+                <Grid Grid.Row="1" Margin="0,0,0,12">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource BtnBlueSmall}" Content="创建"/>
+                        <Button Style="{StaticResource BtnGhostSmall}" Content="导入" Margin="8,0,0,0"/>
+                        <Button Style="{StaticResource BtnGhostSmall}" Content="清理容器" Margin="8,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Border Background="{StaticResource ChipBgBrush}" CornerRadius="4" Height="26" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Margin="4">
+                                <Button Style="{StaticResource IconBtn}" Width="22" Height="22">
+                                    <materialDesign:PackIcon Kind="FormatListBulleted" Width="13" Height="13"
+                                                             Foreground="{StaticResource PrimaryBrush}"/>
+                                </Button>
+                                <Button Style="{StaticResource IconBtn}" Width="22" Height="22">
+                                    <materialDesign:PackIcon Kind="ViewGrid" Width="13" Height="13"/>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                        <Button Style="{StaticResource IconBtn}" Width="28" Height="28" Margin="8,0,0,0">
+                            <materialDesign:PackIcon Kind="Refresh" Width="14" Height="14"/>
+                        </Button>
+                        <ComboBox Style="{StaticResource DarkComboBox}" Width="92" Margin="6,0,0,0" SelectedIndex="0">
+                            <ComboBoxItem Content="不刷新"/>
+                            <ComboBoxItem Content="5秒"/>
+                            <ComboBoxItem Content="10秒"/>
+                        </ComboBox>
+                        <c:SearchBoxControl Placeholder="搜索" BoxWidth="180" Margin="8,0,0,0"
+                                            Text="{Binding SearchText, Mode=TwoWay}"/>
+                        <Button Style="{StaticResource IconBtn}" Width="28" Height="28" Margin="6,0,0,0">
+                            <materialDesign:PackIcon Kind="Cog" Width="14" Height="14"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- 表头 -->
+                <Border Grid.Row="2" BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,0,0,1" Padding="0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="26"/>
+                            <ColumnDefinition Width="1.35*"/>
+                            <ColumnDefinition Width="1.35*"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="132"/>
+                            <ColumnDefinition Width="86"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="1.5*"/>
+                            <ColumnDefinition Width="36"/>
+                            <ColumnDefinition Width="104"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <TextBlock Text="名称" Style="{StaticResource ThText}"/>
+                            <materialDesign:PackIcon Kind="ArrowUpDown" Width="10" Height="10" Foreground="{StaticResource TextMutedBrush}" Margin="4,1,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                            <TextBlock Text="镜像" Style="{StaticResource ThText}"/>
+                            <materialDesign:PackIcon Kind="ArrowUpDown" Width="10" Height="10" Foreground="{StaticResource TextMutedBrush}" Margin="4,1,0,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="3" Text="状态" Style="{StaticResource ThText}"/>
+                        <TextBlock Grid.Column="4" Text="资源使用率" Style="{StaticResource ThText}"/>
+                        <TextBlock Grid.Column="5" Text="IP 地址" Style="{StaticResource ThText}"/>
+                        <TextBlock Grid.Column="6" Text="关联资源" Style="{StaticResource ThText}"/>
+                        <TextBlock Grid.Column="7" Text="端口" Style="{StaticResource ThText}"/>
+                        <TextBlock Grid.Column="8" Text="描述" Style="{StaticResource ThText}"/>
+                        <TextBlock Grid.Column="9" Text="操作" Style="{StaticResource ThText}"/>
+                    </Grid>
+                </Border>
+
+                <!-- 数据行 -->
+                <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Rows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,0,0,1" Padding="0,10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="26"/>
+                                            <ColumnDefinition Width="1.35*"/>
+                                            <ColumnDefinition Width="1.35*"/>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="132"/>
+                                            <ColumnDefinition Width="86"/>
+                                            <ColumnDefinition Width="1.1*"/>
+                                            <ColumnDefinition Width="1.5*"/>
+                                            <ColumnDefinition Width="36"/>
+                                            <ColumnDefinition Width="104"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Name}" Style="{StaticResource TdLink}"
+                                                   TextTrimming="CharacterEllipsis" Margin="0,0,8,0"/>
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="Pencil" Width="11" Height="11" Foreground="{StaticResource TextMutedBrush}"
+                                                                     VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                            <TextBlock Text="{Binding Image}" Style="{StaticResource TdText}" FontSize="11"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                        <Border Grid.Column="3" Style="{StaticResource BadgeGreen}" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock Style="{StaticResource BadgeGreenText}" Text="已启动"/>
+                                        </Border>
+                                        <StackPanel Grid.Column="4" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="CPU: " FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding CpuPct, StringFormat={}{0} %}" FontSize="11" Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                            <ProgressBar Style="{StaticResource MiniBar}" Value="{Binding CpuPct}" Maximum="20" Margin="0,3,0,0"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                                <TextBlock Text="内存: " FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding MemPct, StringFormat={}{0} %}" FontSize="11" Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                            <ProgressBar Style="{StaticResource MiniBar}" Value="{Binding MemPct}" Maximum="20" Margin="0,3,0,0"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="5" Text="{Binding Ip}" Style="{StaticResource TdPrimary}"/>
+                                        <TextBlock Grid.Column="6" Text="{Binding Related}" Style="{StaticResource TdText}" FontSize="11"
+                                                   TextTrimming="CharacterEllipsis" Margin="0,0,8,0"/>
+                                        <ItemsControl Grid.Column="7" ItemsSource="{Binding Ports}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Style="{StaticResource PortChip}">
+                                                        <TextBlock Text="{Binding Text}"
+                                                                   Style="{StaticResource PortChipText}"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <TextBlock Grid.Column="8" Text="{Binding Desc}" Style="{StaticResource TdText}"/>
+                                        <StackPanel Grid.Column="9" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <ItemsControl ItemsSource="{Binding Ops}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal"/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border CornerRadius="4" BorderThickness="1" BorderBrush="Transparent" Padding="3,1">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Selected}" Value="True">
+                                                                            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <TextBlock Text="{Binding Text}" FontSize="12"
+                                                                       Foreground="{StaticResource PrimaryBrush}"
+                                                                       Cursor="Hand" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- 底部批量操作 -->
+                <Grid Grid.Row="4" Margin="0,12,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <ComboBox Style="{StaticResource DarkComboBox}" Width="120" SelectedIndex="0">
+                            <ComboBoxItem Content="请选择"/>
+                        </ComboBox>
+                        <Button Style="{StaticResource BtnGhostSmall}" Content="批量操作" Margin="8,0,0,0" IsEnabled="False"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- 分页 -->
+        <Grid Grid.Row="2" Margin="0,12,0,2">
+            <c:PagerControl TotalText="共 6 条" PageSizeIndex="1" HorizontalAlignment="Right"/>
+        </Grid>
+    </Grid>
+</UserControl>

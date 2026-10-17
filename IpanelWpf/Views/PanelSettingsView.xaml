@@ -1,0 +1,386 @@
+<UserControl x:Class="IpanelWpf.Views.PanelSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 页签栏 -->
+        <Border Grid.Row="0" Style="{StaticResource CardBorder}" Padding="12,10">
+            <ListBox Style="{StaticResource HListBox}" SelectedIndex="{Binding TabIndex}"
+                     ItemContainerStyle="{StaticResource PageTabItem}">
+                <ListBoxItem Content="面板"/>
+                <ListBoxItem Content="安全"/>
+                <ListBoxItem Content="告警通知"/>
+                <ListBoxItem Content="备份账号"/>
+                <ListBoxItem Content="快照"/>
+                <ListBoxItem Content="许可证"/>
+                <ListBoxItem Content="API Key"/>
+                <ListBoxItem Content="关于"/>
+            </ListBox>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" Margin="0,12,0,0" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <!-- ============ 面板 Tab ============ -->
+                <Border Style="{StaticResource CardBorder}" Padding="24,10"
+                        Visibility="{Binding TabIndex, Converter={StaticResource IdxToVis}, ConverterParameter=0}">
+                    <StackPanel>
+
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="主题颜色" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <RadioButton Style="{StaticResource SegRadio}" Content="亮色" GroupName="theme"
+                                             IsChecked="{Binding ThemeIndex, Converter={StaticResource IdxToBool}, ConverterParameter=0}"/>
+                                <RadioButton Style="{StaticResource SegRadio}" Content="暗色" GroupName="theme" Margin="8,0,0,0"
+                                             IsChecked="{Binding ThemeIndex, Converter={StaticResource IdxToBool}, ConverterParameter=1}"/>
+                                <RadioButton Style="{StaticResource SegRadio}" Content="跟随系统" GroupName="theme" Margin="8,0,0,0"
+                                             IsChecked="{Binding ThemeIndex, Converter={StaticResource IdxToBool}, ConverterParameter=2}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="菜单栏固定" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton Style="{StaticResource SegRadio}" Content="启用" GroupName="menuFixed"
+                                                 IsChecked="{Binding MenuFixed}"/>
+                                    <RadioButton Style="{StaticResource SegRadio}" Content="停用" GroupName="menuFixed" Margin="8,0,0,0"
+                                                 IsChecked="{Binding MenuFixed, Converter={StaticResource InverseBool}}"/>
+                                </StackPanel>
+                                <TextBlock Text="开启后，可点击菜单栏上方的按钮固定菜单页面。" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="面板别名" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <TextBox Style="{StaticResource DarkTextBox}" Width="520" Text="{Binding PanelAlias}"/>
+                                <Button Style="{StaticResource BtnGhostSmall}" Height="32" Margin="10,0,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Cog" Width="12" Height="12" VerticalAlignment="Center"/>
+                                        <TextBlock Text="设置" Margin="4,0,0,0"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="系统语言" Style="{StaticResource TdText}"/>
+                            <ComboBox Grid.Column="1" Style="{StaticResource DarkComboBox}" Width="240" HorizontalAlignment="Left" SelectedIndex="0">
+                                <ComboBoxItem Content="中文(简体)"/>
+                                <ComboBoxItem Content="English"/>
+                            </ComboBox>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="重启倒计时间" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox Style="{StaticResource DarkTextBox}" Width="520" Text="{Binding RestartCountdown}"/>
+                                    <Button Style="{StaticResource BtnGhostSmall}" Height="32" Margin="10,0,0,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="Cog" Width="12" Height="12" VerticalAlignment="Center"/>
+                                            <TextBlock Text="设置" Margin="4,0,0,0"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                                <TextBlock Text="如果用户超过 86400 秒未操作面板，面板将自动退出登录" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="默认访问地址" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox Style="{StaticResource DarkTextBox}" Width="520" Text="{Binding DefaultAddress}"/>
+                                    <Button Style="{StaticResource BtnGhostSmall}" Height="32" Margin="10,0,0,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="Cog" Width="12" Height="12" VerticalAlignment="Center"/>
+                                            <TextBlock Text="设置" Margin="4,0,0,0"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                                <TextBlock Text="应用网络，若请勿妨碍功能使用需修改此地址行调整。每个节点可设置不同地址。" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="代理服务器" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <TextBox Style="{StaticResource DarkTextBox}" Width="520" Text="未设置" IsEnabled="False"/>
+                                <Button Style="{StaticResource BtnGhostSmall}" Height="32" Margin="10,0,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Cog" Width="12" Height="12" VerticalAlignment="Center"/>
+                                        <TextBlock Text="设置" Margin="4,0,0,0"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="隐藏体验计划" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton Style="{StaticResource SegRadio}" Content="启用" GroupName="hideExp"
+                                                 IsChecked="{Binding HideExperience}"/>
+                                    <RadioButton Style="{StaticResource SegRadio}" Content="停用" GroupName="hideExp" Margin="8,0,0,0"
+                                                 IsChecked="{Binding HideExperience, Converter={StaticResource InverseBool}}"/>
+                                </StackPanel>
+                                <TextBlock Text="获取 1Panel 的内部版本，以分享有关功能和更新的反馈" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="菜单设置" Style="{StaticResource TdText}"/>
+                            <Button Grid.Column="1" Style="{StaticResource BtnGhostSmall}" Height="32" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Cog" Width="12" Height="12" VerticalAlignment="Center"/>
+                                    <TextBlock Text="设置" Margin="4,0,0,0"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="运行环境" Style="{StaticResource TdText}"/>
+                            <Button Grid.Column="1" Style="{StaticResource BtnGhostSmall}" Height="30" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Earth" Width="12" Height="12" VerticalAlignment="Center"/>
+                                    <TextBlock Text="中国大陆 / 规避运行区域（默认）" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- ============ 安全 Tab ============ -->
+                <Border Style="{StaticResource CardBorder}" Padding="24,10"
+                        Visibility="{Binding TabIndex, Converter={StaticResource IdxToVis}, ConverterParameter=1}">
+                    <StackPanel>
+
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="面板端口" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <TextBox Style="{StaticResource DarkTextBox}" Width="520" Text="{Binding PanelPort}"/>
+                                <Button Style="{StaticResource BtnGhostSmall}" Height="32" Margin="10,0,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Cog" Width="12" Height="12" VerticalAlignment="Center"/>
+                                        <TextBlock Text="设置" Margin="4,0,0,0"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="监听地址" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <TextBox Style="{StaticResource DarkTextBox}" Width="520" Text="{Binding ListenAddress}"/>
+                                <Button Style="{StaticResource BtnGhostSmall}" Height="32" Margin="10,0,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Cog" Width="12" Height="12" VerticalAlignment="Center"/>
+                                        <TextBlock Text="设置" Margin="4,0,0,0"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="安全入口" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <PasswordBox Style="{StaticResource DarkPasswordBox}" Width="520" Password="********"/>
+                                    <Button Style="{StaticResource BtnGhostSmall}" Height="32" Margin="10,0,0,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="Cog" Width="12" Height="12" VerticalAlignment="Center"/>
+                                            <TextBlock Text="设置" Margin="4,0,0,0"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                                <TextBlock Text="开启安全入口后可通过该安全入口登录面板" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="未认证页面" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <TextBox Style="{StaticResource DarkTextBox}" Width="520" Text="{Binding UnauthPage}"/>
+                                <Button Style="{StaticResource BtnGhostSmall}" Height="32" Margin="10,0,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Cog" Width="12" Height="12" VerticalAlignment="Center"/>
+                                        <TextBlock Text="设置" Margin="4,0,0,0"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="授权 IP" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox Style="{StaticResource DarkTextBox}" Width="520" Text="未设置" IsEnabled="False"/>
+                                    <Button Style="{StaticResource BtnGhostSmall}" Height="32" Margin="10,0,0,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="Cog" Width="12" Height="12" VerticalAlignment="Center"/>
+                                            <TextBlock Text="设置" Margin="4,0,0,0"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                                <TextBlock Text="设置授权 IP 后，仅可设置中的 IP 可以访问 1Panel 服务" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="域名绑定" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox Style="{StaticResource DarkTextBox}" Width="520" Text="未设置" IsEnabled="False"/>
+                                    <Button Style="{StaticResource BtnGhostSmall}" Height="32" Margin="10,0,0,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="Cog" Width="12" Height="12" VerticalAlignment="Center"/>
+                                            <TextBlock Text="设置" Margin="4,0,0,0"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                                <TextBlock Text="设置域名绑定，仅可通过设置域名访问 1Panel 服务" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="面板 SSL" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1">
+                                <ToggleButton Style="{StaticResource SwitchToggle}" IsChecked="{Binding SslEnabled}"
+                                              HorizontalAlignment="Left"/>
+                                <TextBlock Text="为面板设置 HTTPS 提升访问安全性" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="密码过期时间" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox Style="{StaticResource DarkTextBox}" Width="520" Text="{Binding PasswordExpire}"/>
+                                    <Button Style="{StaticResource BtnGhostSmall}" Height="32" Margin="10,0,0,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="Cog" Width="12" Height="12" VerticalAlignment="Center"/>
+                                            <TextBlock Text="设置" Margin="4,0,0,0"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                                <TextBlock Text="为密码设置过期时间，过期后需要重新设置密码" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,16,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="密码复杂度验证" Style="{StaticResource TdText}"/>
+                            <StackPanel Grid.Column="1">
+                                <ToggleButton Style="{StaticResource SwitchToggle}" IsChecked="{Binding PwdComplexity}"
+                                              HorizontalAlignment="Left"/>
+                                <TextBlock Text="开启密码必须满足长度为 8-30 位，且包含字母、数字、特殊字符中至少两项" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- ============ 其余 Tab 占位 ============ -->
+                <Border Style="{StaticResource CardBorder}" Height="420"
+                        Visibility="{Binding TabIndex, Converter={StaticResource IdxToVis}, ConverterParameter=ge:2}">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="ShieldOutline" Width="42" Height="42"
+                                                 Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="该模块暂未开放，敬请期待" FontSize="13" Margin="0,12,0,0"
+                                   Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

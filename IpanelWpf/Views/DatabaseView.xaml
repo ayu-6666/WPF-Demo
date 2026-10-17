@@ -1,0 +1,126 @@
+<UserControl x:Class="IpanelWpf.Views.DatabaseView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:c="clr-namespace:IpanelWpf.Controls">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 页签栏 -->
+        <Border Grid.Row="0" Style="{StaticResource CardBorder}" Padding="12,10">
+            <ListBox Style="{StaticResource HListBox}" ItemsSource="{Binding Tabs}" SelectedIndex="{Binding TabIndex}"
+                     ItemContainerStyle="{StaticResource PageTabItem}"/>
+        </Border>
+
+        <!-- 状态栏 -->
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16,10" Margin="0,12,0,0">
+            <StackPanel Orientation="Horizontal">
+                <Border Style="{StaticResource BadgeGreen}" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource BadgeGreenText}" Text="停止"/>
+                </Border>
+                <TextBlock Text="已启动" FontSize="12" Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                <TextBlock Text="版本: 8.4.11" FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                <Button Style="{StaticResource BtnLink}" Content="停止" Margin="16,0,0,0"/>
+                <Button Style="{StaticResource BtnLink}" Content="重启"/>
+                <Button Style="{StaticResource BtnLink}" Content="设置"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 数据库主卡 -->
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Margin="0,12,0,0" MinHeight="120">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- 子页签工具行 -->
+                <Grid Grid.Row="0" Margin="0,0,0,12">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource BtnBlueSmall}" Content="创建"/>
+                        <Button Style="{StaticResource BtnGhostSmall}" Content="连接信息" Margin="8,0,0,0"/>
+                        <Button Style="{StaticResource BtnGhostSmall}" Content="用户" Margin="8,0,0,0"/>
+                        <Button Style="{StaticResource BtnGhostSmall}" Content="从服务器同步" Margin="8,0,0,0"/>
+                        <Button Style="{StaticResource BtnGhostSmall}" Content="远程服务器" Margin="8,0,0,0"/>
+                        <Button Style="{StaticResource BtnGhostSmall}" Content="终端" Margin="8,0,0,0"/>
+                        <Button Style="{StaticResource BtnGhostSmall}" Content="管理 ˅" Margin="8,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBlock Text="类型:" FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"/>
+                        <ComboBox Style="{StaticResource DarkComboBox}" Width="110" Margin="6,0,0,0" SelectedIndex="0">
+                            <ComboBoxItem Content="mysql"/>
+                            <ComboBoxItem Content="postgres"/>
+                        </ComboBox>
+                        <c:SearchBoxControl Placeholder="搜索" BoxWidth="180" Margin="8,0,0,0"
+                                            Text="{Binding SearchText, Mode=TwoWay}"/>
+                        <Button Style="{StaticResource IconBtn}" Width="28" Height="28" Margin="6,0,0,0">
+                            <materialDesign:PackIcon Kind="Cog" Width="14" Height="14"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- 表头 -->
+                <Border Grid.Row="1" BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,0,0,1" Padding="0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.4*"/>
+                            <ColumnDefinition Width="1.4*"/>
+                            <ColumnDefinition Width="1.6*"/>
+                            <ColumnDefinition Width="1.6*"/>
+                            <ColumnDefinition Width="1.6*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="名称" Style="{StaticResource ThText}"/>
+                            <materialDesign:PackIcon Kind="ArrowUpDown" Width="10" Height="10" Foreground="{StaticResource TextMutedBrush}" Margin="4,1,0,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" Text="已授权用户" Style="{StaticResource ThText}"/>
+                        <TextBlock Grid.Column="2" Text="描述" Style="{StaticResource ThText}"/>
+                        <TextBlock Grid.Column="3" Text="时间" Style="{StaticResource ThText}"/>
+                        <TextBlock Grid.Column="4" Text="操作" Style="{StaticResource ThText}"/>
+                    </Grid>
+                </Border>
+
+                <!-- 数据行 -->
+                <ItemsControl Grid.Row="2" ItemsSource="{Binding Rows}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,0,0,1" Padding="0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1.4*"/>
+                                        <ColumnDefinition Width="1.4*"/>
+                                        <ColumnDefinition Width="1.6*"/>
+                                        <ColumnDefinition Width="1.6*"/>
+                                        <ColumnDefinition Width="1.6*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Name}" Style="{StaticResource TdPrimary}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Users}" Style="{StaticResource TdLink}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Desc}" Style="{StaticResource TdPrimary}"/>
+                                    <TextBlock Grid.Column="3" Text="{Binding Time}" Style="{StaticResource TdPrimary}"/>
+                                    <StackPanel Grid.Column="4" Orientation="Horizontal">
+                                        <Button Style="{StaticResource BtnLink}" Content="备份列表"/>
+                                        <Button Style="{StaticResource BtnLink}" Content="导入备份"/>
+                                        <Button Style="{StaticResource BtnLinkDanger}" Content="删除"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Border>
+
+        <!-- 分页 -->
+        <Grid Grid.Row="4" Margin="0,12,0,2">
+            <c:PagerControl TotalText="共 1 条" PageSizeIndex="1" HorizontalAlignment="Right"/>
+        </Grid>
+    </Grid>
+</UserControl>
