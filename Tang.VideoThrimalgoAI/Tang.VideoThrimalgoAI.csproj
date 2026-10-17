@@ -3,12 +3,19 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>latest</LangVersion>
     <RootNamespace>Tang.VideoThrimalgoAI</RootNamespace>
     <AssemblyName>Tang.VideoThrimalgoAI</AssemblyName>
   </PropertyGroup>
+
+  <!--  WinForms 仅用于 FolderBrowserDialog，移除隐式全局 using 以避免与 WPF/OpenCvSharp 类型名冲突  -->
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />

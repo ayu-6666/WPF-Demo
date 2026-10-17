@@ -10,11 +10,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using OpenCvSharp;
+using Tang.VideoThrimalgoAI.Models;
 using Tang.VideoThrimalgoAI.Services;
 
 namespace Tang.VideoThrimalgoAI
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : System.Windows.Window
     {
         public MainWindow()
         {
@@ -180,7 +181,7 @@ namespace Tang.VideoThrimalgoAI
                     "画质增强" => await _enhancementService.EnhanceAsync(original, BrightnessValue, ContrastValue, 1.1),
                     "高清修复" => await _enhancementService.EnhanceAsync(original, BrightnessValue, ContrastValue, 1.3),
                     "去马赛克" => await _mosaicService.RemoveMosaicAsync(original, 8),
-                    "去水印" => await _watermarkService.RemoveWatermarkAsync(original, new Rect(original.Width - 180, original.Height - 140, 180, 140)),
+                    "去水印" => await _watermarkService.RemoveWatermarkAsync(original, new OpenCvSharp.Rect(original.Width - 180, original.Height - 140, 180, 140)),
                     _ => original.Clone()
                 };
 
