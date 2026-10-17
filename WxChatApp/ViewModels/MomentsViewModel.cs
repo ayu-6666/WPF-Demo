@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using WxChatApp.Models;
+using WxChatApp.Services;
 
 namespace WxChatApp.ViewModels
 {
@@ -23,6 +24,7 @@ namespace WxChatApp.ViewModels
 
         public MomentsViewModel()
         {
+            _momentsService = new SimulatedMomentsService();
             // 初始化模拟数据
             LoadMockData();
         }
@@ -59,8 +61,7 @@ namespace WxChatApp.ViewModels
             await _momentsService.LikePostAsync(post.PostId, _currentUser.UserId);
         }
 
-        // 评论命令
-        [RelayCommand]
+        // 评论命令（参数多于一个，无法由 RelayCommand 源生成器生成命令属性，改为方法调用）
         private async Task CommentPostAsync(MomentsPost post, string commentContent, Comment? replyToComment = null)
         {
             var comment = new Comment

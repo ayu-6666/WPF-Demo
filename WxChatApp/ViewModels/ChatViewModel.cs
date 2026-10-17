@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
@@ -34,7 +34,7 @@ namespace WxChatApp.ViewModels
             var message = new Message
             {
                 SenderId = _currentUser.UserId,
-                ReceiverId = IsGroupChat ? CurrentChatPartner.GroupId : CurrentChatPartner.UserId,
+                ReceiverId = IsGroupChat ? (CurrentChatPartner.GroupId ?? Guid.Empty) : CurrentChatPartner.UserId,
                 Type = MessageType.Text,
                 Content = InputText,
                 Status = MessageStatus.Sending

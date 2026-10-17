@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -37,6 +37,7 @@ namespace WxChatApp.Models
         public string NickName { get; set; } = "我";
         public string Avatar { get; set; } = "pack://application:,,,/Resources/default_avatar.png";
         public string Signature { get; set; } = "这个人很懒，什么都没写";
+        public Guid? GroupId { get; set; } // 群聊时为所属群ID
     }
 
     // 群组实体
@@ -77,6 +78,7 @@ namespace WxChatApp.Models
         public string Content { get; set; } = string.Empty;
         public DateTime CommentTime { get; set; }
         public Guid? ReplyToCommentId { get; set; } // 回复的评论ID，为空则为评论动态
+        public Comment? ReplyToComment { get; set; } // 回复的评论实体
     }
 
 }

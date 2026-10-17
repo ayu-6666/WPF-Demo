@@ -1,8 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using ContextMenuStrip = System.Windows.Forms.ContextMenuStrip;
+using Icon = System.Drawing.Icon;
+using NotifyIcon = System.Windows.Forms.NotifyIcon;
+using ToolTipIcon = System.Windows.Forms.ToolTipIcon;
 
 namespace WxChatApp.Services
 {
