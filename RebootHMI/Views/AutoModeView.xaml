@@ -1,0 +1,144 @@
+<UserControl x:Class="RebootHMI.Views.AutoModeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:md="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+             xmlns:ctl="clr-namespace:RebootHMI.Controls"
+             xmlns:m="clr-namespace:RebootHMI.Models">
+    <Grid Margin="14">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="2.3*" />
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="1.8*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- 左列 -->
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1.1*" />
+                <RowDefinition Height="16" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+
+            <!-- 抓手控制 -->
+            <ctl:SciCard Grid.Row="0" Title="抓手控制" TitleIcon="Tune">
+                <ItemsControl ItemsSource="{Binding GripperToggles}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Height="74">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="96" />
+                                    <ColumnDefinition Width="60" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="60" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="18"
+                                           Foreground="#EAF4FF" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding LeftText}" FontSize="15"
+                                           Foreground="#5FA8E8" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <ToggleButton Grid.Column="2" Style="{StaticResource NeonSwitch}"
+                                              IsChecked="{Binding IsOn}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="3" Text="{Binding RightText}" FontSize="15"
+                                           Foreground="#5FA8E8" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ctl:SciCard>
+
+            <!-- 手控NG料道 -->
+            <ctl:SciCard Grid.Row="2" Title="手控NG料道" TitleIcon="Tune">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="96" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="14" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="呼叫AGV" FontSize="17" VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Style="{StaticResource WhiteButton}" Command="{Binding NgActionCommand}"
+                                CommandParameter="call_pick">取盘</Button>
+                        <Button Grid.Column="3" Style="{StaticResource BlueButton}" Command="{Binding NgActionCommand}"
+                                CommandParameter="call_send">送盘</Button>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="96" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="14" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="确认完毕" FontSize="17" VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Style="{StaticResource WhiteButton}" Command="{Binding NgActionCommand}"
+                                CommandParameter="done_pick">取盘</Button>
+                        <Button Grid.Column="3" Style="{StaticResource BlueButton}" Command="{Binding NgActionCommand}"
+                                CommandParameter="done_send">送盘</Button>
+                    </Grid>
+                </Grid>
+            </ctl:SciCard>
+        </Grid>
+
+        <!-- 中列：拆机盘控制 -->
+        <ctl:SciCard Grid.Column="2" Title="拆机盘控制" TitleIcon="Tune">
+            <ItemsControl ItemsSource="{Binding TrayToggles}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Height="64">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="70" />
+                                <ColumnDefinition Width="60" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="60" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="18"
+                                       Foreground="#EAF4FF" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{Binding LeftText}" FontSize="15"
+                                       Foreground="#5FA8E8" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <ToggleButton Grid.Column="2" Style="{StaticResource NeonSwitch}"
+                                          IsChecked="{Binding IsOn}" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="3" Text="{Binding RightText}" FontSize="15"
+                                       Foreground="#5FA8E8" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ctl:SciCard>
+
+        <!-- 右列：料道控制 -->
+        <ctl:SciCard Grid.Column="4" Title="料道控制" TitleIcon="Tune">
+            <ItemsControl ItemsSource="{Binding TrackRows}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="104" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="16"
+                                       Foreground="#EAF4FF" VerticalAlignment="Center" />
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding DataContext.TrackOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                      SelectedValue="{Binding Value, Mode=TwoWay}">
+                                <ComboBox.Style>
+                                    <Style TargetType="ComboBox" BasedOn="{StaticResource WhiteComboBox}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsRed}" Value="True">
+                                                <Setter Property="Foreground" Value="#E0483E" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ComboBox.Style>
+                            </ComboBox>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ctl:SciCard>
+    </Grid>
+</UserControl>

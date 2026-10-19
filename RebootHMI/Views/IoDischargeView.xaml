@@ -1,0 +1,61 @@
+<UserControl x:Class="RebootHMI.Views.IoDischargeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctl="clr-namespace:RebootHMI.Controls">
+    <Grid Margin="14">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.15*" />
+            <ColumnDefinition Width="26" />
+            <ColumnDefinition Width="1.25*" />
+        </Grid.ColumnDefinitions>
+
+        <ctl:SciCard Grid.Column="0" Title="{Binding ControlColumns[0].Title}">
+            <ItemsControl ItemsSource="{Binding ControlColumns[0].Rows}" ItemTemplate="{StaticResource IoRow2}" />
+        </ctl:SciCard>
+
+        <ItemsControl Grid.Column="1" Style="{StaticResource ChevronDecor}"
+                      ItemsSource="{Binding ControlColumns[0].Rows}" />
+
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="16" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <ctl:SciCard Grid.Row="0" Title="{Binding RealtimeColumns[0].Title}">
+                <ItemsControl ItemsSource="{Binding RealtimeColumns[0].Rows}" ItemTemplate="{StaticResource IoRow2}" />
+            </ctl:SciCard>
+
+            <!-- 实时-进料道 -->
+            <ctl:SciCard Grid.Row="2" Title="实时-进料道">
+                <StackPanel VerticalAlignment="Top" Margin="0,6">
+                    <Grid Height="56">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="104" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="拍照状态" FontSize="17" VerticalAlignment="Center" />
+                        <ComboBox Grid.Column="1" Style="{StaticResource WhiteComboBox}"
+                                  ItemsSource="{Binding PhotoOptions}"
+                                  SelectedItem="{Binding PhotoState, Mode=TwoWay}" />
+                    </Grid>
+                    <Grid Height="56" Margin="0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="104" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="外协码" FontSize="17" VerticalAlignment="Center" />
+                        <TextBox Grid.Column="1" Style="{StaticResource WhiteTextBox}"
+                                 Text="{Binding OutCode, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                        <Button Style="{StaticResource BlueButton}" Content="手动读码" Margin="0,0,14,0" />
+                        <Button Style="{StaticResource BlueButton}" Content="手动输入" Margin="0,0,14,0" />
+                        <Button Style="{StaticResource BlueButton}" Content="备用" MinWidth="86" />
+                    </StackPanel>
+                </StackPanel>
+            </ctl:SciCard>
+        </Grid>
+    </Grid>
+</UserControl>

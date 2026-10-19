@@ -1,0 +1,35 @@
+<UserControl x:Class="RebootHMI.Views.IoNgInspectView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctl="clr-namespace:RebootHMI.Controls">
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1.25*" />
+            <RowDefinition Height="16" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="26" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ctl:SciCard Grid.Column="0" Title="{Binding TopColumns[0].Title}">
+                <ItemsControl ItemsSource="{Binding TopColumns[0].Rows}" ItemTemplate="{StaticResource IoRow2}" />
+            </ctl:SciCard>
+
+            <ItemsControl Grid.Column="1" Style="{StaticResource ChevronDecor}"
+                          ItemsSource="{Binding TopColumns[0].Rows}" />
+
+            <ctl:SciCard Grid.Column="2" Title="{Binding TopColumns[1].Title}">
+                <ItemsControl ItemsSource="{Binding TopColumns[1].Rows}" ItemTemplate="{StaticResource IoRow2}" />
+            </ctl:SciCard>
+        </Grid>
+
+        <ctl:SciCard Grid.Row="2" Title="{Binding CameraColumn.Title}" TitleIcon="{Binding CameraColumn.TitleIcon}">
+            <ItemsControl ItemsSource="{Binding CameraColumn.Rows}" ItemTemplate="{StaticResource IoRow3}" />
+        </ctl:SciCard>
+    </Grid>
+</UserControl>
