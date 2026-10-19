@@ -1,0 +1,62 @@
+<UserControl x:Class="Elastic.BMS.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:md="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+             FontFamily="Microsoft YaHei">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="0" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ================= Tab 页签 ================= -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10,2,0,0">
+            <RadioButton Style="{StaticResource BmsTabToggle}"
+                         IsChecked="{Binding IsBasicSelected, Mode=TwoWay}"
+                         Command="{Binding SelectBasicCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <md:PackIcon Kind="FileDocumentOutline" Width="17" Height="17" Margin="0,0,8,0"
+                                 VerticalAlignment="Center"
+                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" />
+                    <TextBlock Text="基本设置" FontSize="15" VerticalAlignment="Center"
+                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" />
+                </StackPanel>
+            </RadioButton>
+
+            <RadioButton Style="{StaticResource BmsTabToggle}"
+                         IsChecked="{Binding IsCommSelected, Mode=TwoWay}"
+                         Command="{Binding SelectCommCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <md:PackIcon Kind="LanConnect" Width="17" Height="17" Margin="0,0,8,0"
+                                 VerticalAlignment="Center"
+                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" />
+                    <TextBlock Text="通信设置" FontSize="15" VerticalAlignment="Center"
+                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" />
+                </StackPanel>
+            </RadioButton>
+        </StackPanel>
+
+        <!-- ================= 内容 ================= -->
+        <Border Grid.Row="2" BorderBrush="#2E6FA8" BorderThickness="1.4" Background="#060F24"
+                Padding="0,0,0,14">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <ContentControl Grid.Row="0" Content="{Binding CurrentContent}" />
+
+                <!-- 底部按钮（仅基本设置显示） -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,26,0"
+                            Visibility="{Binding IsBasicSelected, Converter={StaticResource BoolToVis}}">
+                    <Button Style="{StaticResource PrimaryButton}" Content="保存" Width="74" Height="30" />
+                    <Button Style="{StaticResource WhiteButton}" Content="导入配置" Width="94" Height="30" Margin="18,0,0,0" />
+                    <Button Style="{StaticResource WhiteButton}" Content="导出配置" Width="94" Height="30" Margin="18,0,0,0" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

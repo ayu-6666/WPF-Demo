@@ -1,0 +1,78 @@
+<UserControl x:Class="Elastic.BMS.Views.SettingsBasicView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FontFamily="Microsoft YaHei">
+
+    <UserControl.Resources>
+        <!-- 一格：标签 + 可选补充 + 数值框 + 可选单位 -->
+        <DataTemplate x:Key="SettingCellTpl">
+            <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
+                <TextBlock Text="{Binding Label}" FontSize="13" Foreground="#EAF4FF" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding Sub}" FontSize="13" Foreground="#5FD0FF" Margin="3,0,0,0"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding Sub, Converter={StaticResource StringToVis}}" />
+                <Border Width="104" Height="26" CornerRadius="3" Background="#FFFFFF" Margin="9,0,0,0">
+                    <TextBox Text="{Binding Value, Mode=TwoWay}" BorderThickness="0" Background="Transparent"
+                             Foreground="#16233C" FontSize="13" HorizontalContentAlignment="Center"
+                             VerticalContentAlignment="Center" />
+                </Border>
+                <TextBlock Text="{Binding Unit}" FontSize="13" Foreground="#EAF4FF" Margin="9,0,0,0"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding Unit, Converter={StaticResource StringToVis}}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- 一行：名称 + 若干格 -->
+        <DataTemplate x:Key="SettingRowTpl">
+            <Grid Height="44">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="14" Foreground="#EAF4FF"
+                           VerticalAlignment="Center" />
+                <ItemsControl Grid.Column="1" ItemsSource="{Binding Cells}"
+                              ItemTemplate="{StaticResource SettingCellTpl}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="26,20,26,0">
+        <StackPanel>
+            <!-- ===== 总充放电容量 ===== -->
+            <TextBlock Style="{StaticResource GroupTitle}" Text="总充放电容量" />
+            <ItemsControl ItemsSource="{Binding CapacityRows}" ItemTemplate="{StaticResource SettingRowTpl}"
+                          Margin="14,14,0,0" />
+
+            <!-- ===== 报警设置 ===== -->
+            <TextBlock Style="{StaticResource GroupTitle}" Text="报警设置" Margin="0,26,0,0" />
+            <ItemsControl ItemsSource="{Binding AlarmRows}" ItemTemplate="{StaticResource SettingRowTpl}"
+                          Margin="14,14,0,0" />
+
+            <!-- ===== 电压设置 ===== -->
+            <Grid Margin="0,26,0,0">
+                <TextBlock Style="{StaticResource GroupTitle}" Text="电压设置" HorizontalAlignment="Left" />
+                <Border HorizontalAlignment="Left" Margin="440,0,0,0" Padding="16,7" CornerRadius="4"
+                        Background="#13294F" BorderBrush="#3A6BA6" BorderThickness="1">
+                    <TextBlock Text="双击查看动态组件" FontSize="14" Foreground="#DCEBFF" />
+                </Border>
+            </Grid>
+            <ItemsControl ItemsSource="{Binding VoltageRows}" ItemTemplate="{StaticResource SettingRowTpl}"
+                          Margin="14,14,0,0" />
+
+            <!-- ===== 电流设置 ===== -->
+            <TextBlock Style="{StaticResource GroupTitle}" Text="电流设置" Margin="0,26,0,0" />
+            <ItemsControl ItemsSource="{Binding CurrentRows}" ItemTemplate="{StaticResource SettingRowTpl}"
+                          Margin="14,14,0,0" />
+
+            <!-- ===== 温度设置 ===== -->
+            <TextBlock Style="{StaticResource GroupTitle}" Text="温度设置" Margin="0,26,0,0" />
+            <ItemsControl ItemsSource="{Binding TemperatureRows}" ItemTemplate="{StaticResource SettingRowTpl}"
+                          Margin="14,14,0,0" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

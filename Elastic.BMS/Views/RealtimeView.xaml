@@ -1,0 +1,228 @@
+<UserControl x:Class="Elastic.BMS.Views.RealtimeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctl="clr-namespace:Elastic.BMS.Controls"
+             xmlns:md="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+             FontFamily="Microsoft YaHei">
+
+    <UserControl.Resources>
+        <!-- 顶部数据格 -->
+        <DataTemplate x:Key="StatCellTpl">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Label}" FontSize="15" Foreground="#EAF4FF" VerticalAlignment="Center" />
+                <Border Width="86" Height="26" CornerRadius="3" Background="#F2F6FC" Margin="12,0,0,0">
+                    <TextBlock Text="{Binding Value}" FontSize="14" Foreground="#16233C"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Text="{Binding Unit}" FontSize="14" Foreground="#DCEBFF" Margin="10,0,0,0"
+                           VerticalAlignment="Center" />
+                <TextBlock Text="{Binding Extra}" FontSize="14" Foreground="#DCEBFF" Margin="18,0,0,0"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding Extra, Converter={StaticResource StringToVis}}" />
+                <Border Width="60" Height="26" CornerRadius="3" Background="#F2F6FC" Margin="10,0,0,0"
+                        Visibility="{Binding Extra, Converter={StaticResource StringToVis}}">
+                    <TextBlock Text="{Binding ExtraValue}" FontSize="14" Foreground="#16233C"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- 顶部数据组 -->
+        <DataTemplate x:Key="StatGroupTpl">
+            <Border BorderBrush="#2E5C8A" BorderThickness="1" Margin="-0.5" Padding="18,8">
+                <ItemsControl ItemsSource="{Binding Cells}" ItemTemplate="{StaticResource StatCellTpl}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><StackPanel /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </Border>
+        </DataTemplate>
+
+        <!-- 电芯行（电池 / 电芯温度） -->
+        <DataTemplate x:Key="CellRowTpl">
+            <Grid Height="22">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="62" />
+                    <ColumnDefinition Width="64" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="13" Foreground="#DCEBFF"
+                           VerticalAlignment="Center" />
+                <Border Grid.Column="1" Height="20" CornerRadius="2" Background="#F2F6FC">
+                    <TextBlock Text="{Binding Value}" FontSize="12" Foreground="#16233C"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Grid.Column="2" Text="{Binding Unit}" FontSize="13" Foreground="#DCEBFF"
+                           Margin="8,0,0,0" VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+
+        <!-- 控制状态格 -->
+        <DataTemplate x:Key="StateCellTpl">
+            <Border Margin="4" Padding="10,8" Background="#BFD0E4" CornerRadius="3">
+                <TextBlock Text="{Binding Label}" FontSize="13" Foreground="#0E7A52" VerticalAlignment="Center"
+                           HorizontalAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
+        <!-- 控制面板中的白色小按钮 -->
+        <Style x:Key="CtrlWhiteButton" TargetType="Button">
+            <Setter Property="Width" Value="72" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" CornerRadius="3" Background="#F2F6FC" BorderBrush="#B9CCE6" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#DDEAFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="14" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ================= 顶部数据条 ================= -->
+        <ItemsControl Grid.Row="0" ItemsSource="{Binding StatGroups}" ItemTemplate="{StaticResource StatGroupTpl}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="5" VerticalAlignment="Stretch" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+
+        <!-- ================= 四个面板 ================= -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="14" />
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="14" />
+                <ColumnDefinition Width="330" />
+                <ColumnDefinition Width="14" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- 电池 -->
+            <ctl:SciCard Grid.Column="0" Title="电池">
+                <ItemsControl ItemsSource="{Binding Cells}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><UniformGrid Columns="2" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource CellRowTpl}" Margin="0,1" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ctl:SciCard>
+
+            <!-- 电芯温度 -->
+            <ctl:SciCard Grid.Column="2" Title="电芯温度">
+                <ItemsControl ItemsSource="{Binding Temps}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><UniformGrid Columns="2" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource CellRowTpl}" Margin="0,1" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ctl:SciCard>
+
+            <!-- 控制 -->
+            <ctl:SciCard Grid.Column="4" Title="控制">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <!-- Pack -->
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <TextBlock Text="Pack:" FontSize="16" Foreground="#EAF4FF" VerticalAlignment="Center" />
+                            <ComboBox Style="{StaticResource WhiteComboBox}" Width="140" Margin="14,0,0,0"
+                                      ItemsSource="{Binding PackOptions}" SelectedItem="{Binding SelectedPack, Mode=TwoWay}" />
+                        </StackPanel>
+
+                        <!-- 充电MOS -->
+                        <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
+                            <TextBlock Text="充电MOS:" FontSize="16" Foreground="#EAF4FF" VerticalAlignment="Center"
+                                       Width="88" />
+                            <Button Style="{StaticResource CtrlWhiteButton}" Margin="6,0,0,0">
+                                <TextBlock Text="开" FontSize="14" Foreground="#16233C" />
+                            </Button>
+                            <Button Style="{StaticResource CtrlWhiteButton}" Width="52" Margin="10,0,0,0">
+                                <TextBlock Text="关" FontSize="14" Foreground="#16233C" />
+                            </Button>
+                        </StackPanel>
+
+                        <!-- 放电MOS -->
+                        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                            <TextBlock Text="放电MOS:" FontSize="16" Foreground="#EAF4FF" VerticalAlignment="Center"
+                                       Width="88" />
+                            <Button Style="{StaticResource CtrlWhiteButton}" Margin="6,0,0,0">
+                                <TextBlock Text="开" FontSize="14" Foreground="#16233C" />
+                            </Button>
+                            <Button Style="{StaticResource CtrlWhiteButton}" Width="52" Margin="10,0,0,0">
+                                <TextBlock Text="关" FontSize="14" Foreground="#16233C" />
+                            </Button>
+                        </StackPanel>
+
+                        <!-- 解除告警 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                            <TextBlock Text="解除告警:" FontSize="16" Foreground="#EAF4FF" VerticalAlignment="Center"
+                                       Width="88" />
+                            <Button Style="{StaticResource CtrlWhiteButton}" Width="72" Margin="6,0,0,0">
+                                <TextBlock Text="解除" FontSize="14" Foreground="#16233C" />
+                            </Button>
+                        </StackPanel>
+
+                        <!-- 休眠 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                            <TextBlock Text="休眠:" FontSize="16" Foreground="#EAF4FF" VerticalAlignment="Center"
+                                       Width="88" />
+                            <Button Style="{StaticResource CtrlWhiteButton}" Width="72" Margin="6,0,0,0">
+                                <TextBlock Text="关机" FontSize="14" Foreground="#16233C" />
+                            </Button>
+                        </StackPanel>
+
+                        <!-- 状态格 -->
+                        <ItemsControl ItemsSource="{Binding StateCells}" ItemTemplate="{StaticResource StateCellTpl}"
+                                      Margin="0,18,0,0">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><UniformGrid Columns="2" /></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </StackPanel>
+                </Grid>
+            </ctl:SciCard>
+
+            <!-- 故障 / 告警 / 保护 -->
+            <StackPanel Grid.Column="6">
+                <TextBlock Text="故障" FontSize="18" FontWeight="Bold" Foreground="#EAF4FF" Margin="0,0,0,8" />
+                <Border Height="66" BorderBrush="#8FB6E8" BorderThickness="1.2" />
+
+                <TextBlock Text="告警" FontSize="18" FontWeight="Bold" Foreground="#EAF4FF" Margin="0,22,0,8" />
+                <Border Height="66" BorderBrush="#8FB6E8" BorderThickness="1.2" />
+
+                <TextBlock Text="保护" FontSize="18" FontWeight="Bold" Foreground="#EAF4FF" Margin="0,22,0,8" />
+                <Border Height="66" BorderBrush="#8FB6E8" BorderThickness="1.2" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
