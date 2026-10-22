@@ -38,7 +38,23 @@
 <img width="1184" height="751" alt="image" src="https://github.com/user-attachments/assets/88001f43-9604-4830-a9a5-fef760026ba5" />
 <img width="984" height="691" alt="image" src="https://github.com/user-attachments/assets/c1de4f5d-c458-4047-8e9f-0088b5fde005" />
 
-- Rxbit.Calibration
+- 机器人
+<img width="1918" height="1072" alt="image" src="https://github.com/user-attachments/assets/4ab08d3e-dc24-4061-9031-7ae2004e69d9" />
+<img width="1917" height="1070" alt="image" src="https://github.com/user-attachments/assets/511279a1-b321-4547-8f5f-9f1e2ce2a152" />
+
+
+- 电源检测
+<img width="1920" height="1090" alt="image" src="https://github.com/user-attachments/assets/70ee51ed-4619-4281-8538-98bab42f3e8f" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c39a6b6d-ded8-45e5-a96c-cb0beab57559" />
+
+
+- Linux运维系统
+  <img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/8403e5f3-ad64-4743-a747-6112ef8ab620" />
+  <img width="1920" height="1169" alt="image" src="https://github.com/user-attachments/assets/3b9fb8ab-3f2e-45eb-9b30-aa83ec9a1b6c" />
+
+
+
+## 3 Rxbit.Calibration
 
 工业设备标定 / CNC 运动控制 HMI。深灰底 `#1C1F2E` + 紫蓝渐变主色调（`#8E7CFF → #6366F1 → #3B82F6`），哑铃形双色渐变时间球（左紫 `#A78BFA` / 右浅灰蓝 `#E6EDF8`），iOS 风格 ToggleSwitch，左侧图标导航栏 + 底部实时位置状态栏。
 
@@ -89,8 +105,6 @@ Rxbit.Calibration/
    ├─ OutputView.xaml              # 双表翻页
    ├─ ManualParamsView.xaml        # 6 轴参数卡 + 轴手动控制
    └─ AutoParamsView.xaml          # 6 轴参数卡
-```
-
 
 ## 3 About project
 
