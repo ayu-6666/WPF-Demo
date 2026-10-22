@@ -1,0 +1,98 @@
+<UserControl x:Class="Rxbit.Calibration.Views.ManualParamsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctl="clr-namespace:Rxbit.Calibration.Controls"
+             xmlns:md="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+             FontFamily="Microsoft YaHei">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="380" />
+        </Grid.ColumnDefinitions>
+
+        <!-- 左侧 6 轴参数卡 2x3 -->
+        <ItemsControl ItemsSource="{Binding Axes}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="3" Rows="2">
+                        <UniformGrid.Margin><Thickness Left="0" Top="0" Right="14" Bottom="0" /></UniformGrid.Margin>
+                    </UniformGrid>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <ctl:SciCard Margin="0,0,12,12">
+                        <StackPanel Margin="18,16">
+                            <TextBlock Text="{Binding AxisName}" FontSize="18" FontWeight="Bold" Foreground="#F2F4FF" Margin="0,0,0,16" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="回零速度:" FontSize="13" Foreground="#9CA3B8" />
+                                    <TextBox Style="{StaticResource AxisNumberBox}" Text="{Binding HomeSpeed}" Margin="0,4,0,14" />
+                                    <TextBlock Text="回零Acc:" FontSize="13" Foreground="#9CA3B8" />
+                                    <TextBox Style="{StaticResource AxisNumberBox}" Text="{Binding HomeAcc}" Margin="0,4,0,0" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                                    <TextBlock Text="近点速度:" FontSize="13" Foreground="#9CA3B8" />
+                                    <TextBox Style="{StaticResource AxisNumberBox}" Text="{Binding ApproachSpeed}" Margin="0,4,0,14" />
+                                    <TextBlock Text="零点偏移:" FontSize="13" Foreground="#9CA3B8" />
+                                    <TextBox Style="{StaticResource AxisNumberBox}" Text="{Binding ZeroOffset}" Margin="0,4,0,0" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </ctl:SciCard>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- 右侧 轴手动控制 -->
+        <ctl:SciCard Grid.Column="1">
+            <Grid Margin="20,18">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="轴手动控制" FontSize="18" FontWeight="Bold" Foreground="#F2F4FF" />
+
+                <ComboBox Grid.Row="1" Style="{StaticResource DarkComboBox}"
+                          ItemsSource="{Binding AxisOptions}" SelectedItem="{Binding SelectedAxis}" Margin="0,14,0,18" Height="36" />
+
+                <ItemsControl Grid.Row="2" ItemsSource="{Binding CtrlAxes}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="110" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="100" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="14" Foreground="#D6DBEC" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" Content="-" Style="{StaticResource AxisStepButton}" Margin="0,0,6,0"
+                                        Command="{Binding DataContext.DecreaseCmd, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}" />
+                                <TextBox Grid.Column="2" Style="{StaticResource AxisNumberBox}" Text="{Binding Value}" />
+                                <Button Grid.Column="3" Content="+" Style="{StaticResource AxisStepButton}" Margin="6,0,24,0"
+                                        Command="{Binding DataContext.IncreaseCmd, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}" />
+                                <Button Grid.Column="4" Content="-" Style="{StaticResource AxisStepButton}" Margin="0,0,6,0"
+                                        Command="{Binding DataContext.DecreaseCmd, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}" />
+                                <TextBox Grid.Column="5" Style="{StaticResource AxisNumberBox}" Text="{Binding Step}" Margin="6,0,6,0" Width="72" />
+                                <Button Grid.Column="6" Content="+" Style="{StaticResource AxisStepButton}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </ctl:SciCard>
+    </Grid>
+</UserControl>

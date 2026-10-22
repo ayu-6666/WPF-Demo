@@ -1,0 +1,40 @@
+<UserControl x:Class="Rxbit.Calibration.Views.AutoParamsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctl="clr-namespace:Rxbit.Calibration.Controls"
+             FontFamily="Microsoft YaHei">
+    <ItemsControl ItemsSource="{Binding Axes}">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <UniformGrid Columns="3" Rows="2" />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <ctl:SciCard Margin="0,0,12,12">
+                    <StackPanel Margin="18,16">
+                        <TextBlock Text="{Binding AxisName}" FontSize="18" FontWeight="Bold" Foreground="#F2F4FF" Margin="0,0,0,16" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="P1速度:" FontSize="13" Foreground="#9CA3B8" />
+                                <TextBox Style="{StaticResource AxisNumberBox}" Text="{Binding P1SpeedA}" Margin="0,4,0,14" />
+                                <TextBlock Text="P1速度:" FontSize="13" Foreground="#9CA3B8" />
+                                <TextBox Style="{StaticResource AxisNumberBox}" Text="{Binding P1SpeedB}" Margin="0,4,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                                <TextBlock Text="Acc:" FontSize="13" Foreground="#9CA3B8" />
+                                <TextBox Style="{StaticResource AxisNumberBox}" Text="{Binding Acc}" Margin="0,4,0,14" />
+                                <TextBlock Text="Dec:" FontSize="13" Foreground="#9CA3B8" />
+                                <TextBox Style="{StaticResource AxisNumberBox}" Text="{Binding Dec}" Margin="0,4,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </ctl:SciCard>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+</UserControl>
