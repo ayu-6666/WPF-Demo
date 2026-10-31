@@ -11,8 +11,8 @@
     <Grid>
         <controls:CodeViewer>
             <controls:CodeViewer.SourceCodes>
-                <models:SourceCodeModel CodeSource="/WPFDevelopers.SamplesCode;component/Views/BreatheLightExample.xaml" CodeType="Xaml"/>
-                <models:SourceCodeModel CodeSource="/WPFDevelopers.SamplesCode;component/Views/BreatheLightExample.xaml.cs" CodeType="CSharp"/>
+                <models:SourceCodeModel CodeSource="/Views/BreatheLightExample.xaml" CodeType="Xaml"/>
+                <models:SourceCodeModel CodeSource="/Views/BreatheLightExample.xaml.cs" CodeType="CSharp"/>
                 <models:SourceCodeModel CodeSource="Sample" CodeType="Sample"/>
             </controls:CodeViewer.SourceCodes>
         </controls:CodeViewer>

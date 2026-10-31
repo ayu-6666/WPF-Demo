@@ -13,6 +13,14 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
   </ItemGroup>
 
+  <!-- 源码文件以原文嵌入程序集（manifest 名 = RootNamespace + 路径点号形式），
+       供 CodeViewer 通过反射读取展示（打包后依然可用）；
+       .xaml 不能用 Resource（pack URI 会命中 Page 编译的 .baml 二进制），统一走 EmbeddedResource -->
+  <ItemGroup>
+    <EmbeddedResource Include="Views\BreatheLightExample.xaml" />
+    <EmbeddedResource Include="Views\BreatheLightExample.xaml.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <Folder Include="Controls\" />
     <Folder Include="ViewModels\" />

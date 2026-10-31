@@ -49,24 +49,8 @@
                 </Style>
             </TabControl.Resources>
 
-            <!-- 内容模板：支持动态加载 AvalonEdit 或 Sample 页面 -->
-            <TabControl.ContentTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <!-- 代码编辑器 (默认隐藏) -->
-                        <avalonEdit:TextEditor x:Name="Editor" 
-                                               FontFamily="Consolas" FontSize="14" 
-                                               Background="#1E1E1E" Foreground="#D4D4D4"
-                                               ShowLineNumbers="True"
-                                               HorizontalScrollBarVisibility="Auto"
-                                               VerticalScrollBarVisibility="Auto"
-                                               Visibility="Collapsed"/>
-
-                        <!-- 自定义 Sample 页面容器 (默认隐藏) -->
-                        <ContentControl x:Name="SampleContainer" Visibility="Collapsed"/>
-                    </Grid>
-                </DataTemplate>
-            </TabControl.ContentTemplate>
+            <!-- 内容直接呈现：BuildTabs 已为每个 Tab 构造好编辑器/Sample 实例并赋给 TabItem.Content，
+                 若定义 ContentTemplate 会覆盖 Content 的可视化呈现（模板内控件隐藏导致内容区全黑） -->
         </TabControl>
 
         <!-- 右下角悬浮按钮 (匹配图片中的 "+" 号) -->

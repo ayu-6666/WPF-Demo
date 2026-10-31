@@ -41,6 +41,10 @@ namespace CoderControl.Views
         public CodeViewer()
         {
             InitializeComponent();
+            // 初始化集合，避免 XAML 属性元素语法 <controls:CodeViewer.SourceCodes> 在集合为 null 时崩溃
+            SourceCodes = new ObservableCollection<SourceCodeModel>();
+            // XAML 属性元素语法 Add 项不触发 DP 回调，需监听集合变化构建 Tab
+            SourceCodes.CollectionChanged += (s, e) => BuildTabs(SourceCodes);
             // 应用 VS 深色主题配色 (C#)
             ApplyDarkTheme();
         }
@@ -106,14 +110,15 @@ namespace CoderControl.Views
         {
             try
             {
-                // 如果是以 "/" 开头的 pack URI，需要特殊处理或改用 Application.GetResourceStream
+                // "/" 开头为本程序集 EmbeddedResource 原文（manifest 名 = RootNamespace + 路径点号形式），
+                // 如 "/Views/BreatheLightExample.xaml" → "CoderControl.Views.BreatheLightExample.xaml"
                 if (path.StartsWith("/"))
                 {
-                    var uri = new Uri("pack://application:,,," + path.Replace(";component", "").Replace(";", ""));
-                    var streamInfo = Application.GetResourceStream(uri);
-                    if (streamInfo != null)
+                    string manifestName = "CoderControl" + path.Replace('/', '.');
+                    var manifestStream = typeof(CodeViewer).Assembly.GetManifestResourceStream(manifestName);
+                    if (manifestStream != null)
                     {
-                        using (var reader = new StreamReader(streamInfo.Stream))
+                        using (var reader = new StreamReader(manifestStream))
                         {
                             return reader.ReadToEnd();
                         }
