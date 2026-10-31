@@ -26,7 +26,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <IntermediateOutputPath>C:\Users\ASUS\AppData\Local\Temp\vsEA5.tmp\Debug\</IntermediateOutputPath>
+    <IntermediateOutputPath>$(USERPROFILE)\AppData\Local\Temp\WPF-Demo\obj\WpfDevDemo\Debug\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -36,7 +36,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <IntermediateOutputPath>C:\Users\ASUS\AppData\Local\Temp\vsEA5.tmp\Release\</IntermediateOutputPath>
+    <IntermediateOutputPath>$(USERPROFILE)\AppData\Local\Temp\WPF-Demo\obj\WpfDevDemo\Release\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AvalonDock, Version=5.0.1.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">

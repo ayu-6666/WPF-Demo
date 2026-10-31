@@ -1,8 +1,6 @@
 @echo off
-TITLE 软件版本平台发布中心
-COLOR A0
+COLOR FA
 setlocal EnableExtensions EnableDelayedExpansion
-
 rem ============================================================
 rem  WPF-Demo: build all project modules and package release
 rem  Usage:   build_all.bat [Release^|Debug]     (default: Release)
@@ -35,7 +33,6 @@ powershell -NoProfile -Command "if (Test-Path '%RELDIR%') { Remove-Item -Literal
 mkdir "%LOGDIR%" >nul 2>nul
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss"') do set "STAMP=%%i"
 
-echo ================================================
 echo  WPF-Demo build_all  ^|  config=%CONFIG%
 echo ================================================
 
@@ -59,8 +56,8 @@ if not defined MSBUILD (
     exit /b 1
 )
 
-rem ---------- all modules (15) ----------
-set "MODULES=BitTomrrorApp Cmp.UTools.GUI CoderControl CoordinateFunction Elastic.BMS GenealogyDemo IpanelWpf Radae3DDemo3 RadarApp RebootHMI Rxbit.Calibration Tang.RadarApplication Tang.VideoThrimalgoAI WpfDevDemo WxChatApp"
+rem ---------- all modules (18) ----------
+set "MODULES=BitTomrrorApp CPM.Recipe.Tool Cmp.UTools.GUI CoderControl CoordinateFunction Elastic.BMS GenealogyDemo IpanelWpf MindMap Radae3DDemo3 RadarApp RebootHMI Rxbit.Calibration Tang.RadarApplication Tang.VideoThrimalgoAI VisioLikeMap WpfDevDemo WxChatApp"
 
 set /a PASS=0, FAIL=0, IDX=0
 
@@ -73,7 +70,7 @@ for %%M in (%MODULES%) do (
         set /a FAIL+=1
     ) else (
         echo.
-        echo [!IDX!/15] Building %%M ...
+        echo [!IDX!/18] Building %%M ...
         if /i "!MSBUILD!"=="dotnet" (
             dotnet build "!PROJ!" -c %CONFIG% -v m --nologo > "%LOGDIR%\%%M.log" 2>&1
         ) else (
