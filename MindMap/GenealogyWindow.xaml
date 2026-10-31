@@ -1,0 +1,121 @@
+<Window x:Class="MindMapWpf48.GenealogyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="族谱世系图编辑器" Height="800" Width="1280"
+        WindowStartupLocation="CenterScreen" Background="#FFF7F4EE"
+        WindowStyle="None" ResizeMode="CanResize">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="44" ResizeBorderThickness="6" GlassFrameThickness="0"
+                      CornerRadius="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+    <Window.Resources>
+        <!-- 标题栏窗口控制按钮 -->
+        <Style x:Key="WinBtn" TargetType="Button">
+            <Setter Property="Width" Value="44"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#33FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- 工具栏按钮 -->
+        <Style x:Key="ToolBtn" TargetType="Button">
+            <Setter Property="Margin" Value="3,0"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <!-- 模式切换按钮（选中态：白底深红字） -->
+        <Style x:Key="ToolToggle" TargetType="RadioButton">
+            <Setter Property="Margin" Value="3,0"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bd" Background="Transparent" CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#22FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="White"/>
+                                <Setter Property="Foreground" Value="#FF7A1F1F"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- 缩放小按钮 -->
+        <Style x:Key="ZoomBtn" TargetType="Button" BasedOn="{StaticResource ToolBtn}">
+            <Setter Property="Padding" Value="9,6"/>
+        </Style>
+    </Window.Resources>
+    <DockPanel>
+        <!-- 顶部深红中式标题栏：标题 + 工具按钮 + 窗口控制 -->
+        <Border DockPanel.Dock="Top" Background="#FF7A1F1F" Height="76">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,0,4,0"
+                            VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button Style="{StaticResource WinBtn}" Content="&#xE921;" Click="MinBtn_Click" ToolTip="最小化"/>
+                    <Button Style="{StaticResource WinBtn}" Content="&#xE922;" Click="MaxBtn_Click" ToolTip="最大化/还原"/>
+                    <Button Style="{StaticResource WinBtn}" Content="&#xE8BB;" Click="CloseBtn_Click" ToolTip="关闭"/>
+                </StackPanel>
+                <TextBlock DockPanel.Dock="Left" Text="族谱世系图" Foreground="White" FontSize="18"
+                           FontWeight="Bold" Margin="16,0,22,0" VerticalAlignment="Center"/>
+                <WrapPanel VerticalAlignment="Center" Margin="4,0,0,0"
+                           WindowChrome.IsHitTestVisibleInChrome="True">
+                    <RadioButton x:Name="TreeModeBtn" Style="{StaticResource ToolToggle}" Content="树形图"
+                                 GroupName="ViewMode" IsChecked="True" Checked="Mode_Changed" ToolTip="矩形框世系图（图1样式）"/>
+                    <RadioButton x:Name="ChronicleModeBtn" Style="{StaticResource ToolToggle}" Content="世系谱"
+                                 GroupName="ViewMode" Checked="Mode_Changed" ToolTip="传统族谱竖排世系信息（图2/3/4样式）"/>
+                    <Button Style="{StaticResource ToolBtn}" Content="添加始祖" Click="AddRoot_Click"/>
+                    <Button Style="{StaticResource ToolBtn}" Content="重新布局" Click="Relayout_Click"/>
+                    <Button Style="{StaticResource ToolBtn}" Content="保存族谱" Click="Save_Click"/>
+                    <Button Style="{StaticResource ToolBtn}" Content="打开族谱" Click="Load_Click"/>
+                    <Button Style="{StaticResource ToolBtn}" Content="导出PNG" Click="ExportPng_Click"/>
+                    <Button Style="{StaticResource ZoomBtn}" Content="－" Click="ZoomOut_Click" ToolTip="缩小" FontWeight="Bold"/>
+                    <TextBlock x:Name="ZoomText" Text="100%" Foreground="White" FontSize="12"
+                               VerticalAlignment="Center" Margin="4,0" MinWidth="38" TextAlignment="Center"/>
+                    <Button Style="{StaticResource ZoomBtn}" Content="＋" Click="ZoomIn_Click" ToolTip="放大" FontWeight="Bold"/>
+                    <Button Style="{StaticResource ZoomBtn}" Content="1:1" Click="ZoomReset_Click" ToolTip="重置缩放"/>
+                </WrapPanel>
+            </DockPanel>
+        </Border>
+        <!-- 底部提示 -->
+        <Border DockPanel.Dock="Bottom" Background="White" Padding="8">
+            <TextBlock Text="操作：左键选中成员 → 右击菜单（添加妻子/丈夫/儿子/女儿）；世系从右到左，长子在右；滚轮缩放（以鼠标位置为原点）；顶部可切换 树形图/世系谱 模式；悬浮显示生平。"
+                       Foreground="#FF536174" FontSize="12"/>
+        </Border>
+        <!-- 画布 -->
+        <Grid Margin="12">
+            <Border Background="White" BorderBrush="#FFD6CFC2" BorderThickness="1" CornerRadius="6">
+                <ScrollViewer x:Name="GeneScroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                              PreviewMouseWheel="GeneScroll_PreviewMouseWheel">
+                    <Canvas x:Name="GeneCanvas" Width="1800" Height="1200" Background="White"/>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>

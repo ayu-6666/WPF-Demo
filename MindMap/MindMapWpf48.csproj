@@ -1,0 +1,31 @@
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="false" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A3C2B3B8-7B8A-4DA8-A2D1-21B9A1A6F148}</ProjectGuid>
+    <OutputType>WinExe</OutputType><RootNamespace>MindMapWpf48</RootNamespace><AssemblyName>MindMapWpf48</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion><FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <LangVersion>7.3</LangVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IntermediateOutputPath>$(USERPROFILE)\AppData\Local\Temp\WPF-Demo\obj\MindMapWpf48\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "><PlatformTarget>AnyCPU</PlatformTarget><DebugSymbols>true</DebugSymbols><DebugType>full</DebugType><OutputPath>bin\Debug\</OutputPath><DefineConstants>DEBUG;TRACE</DefineConstants></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "><PlatformTarget>AnyCPU</PlatformTarget><Optimize>true</Optimize><OutputPath>bin\Release\</OutputPath><DefineConstants>TRACE</DefineConstants></PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore"/><Reference Include="PresentationFramework"/><Reference Include="WindowsBase"/><Reference Include="System"/><Reference Include="System.Core"/><Reference Include="System.Xaml"/><Reference Include="System.Xml"/>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml"><Generator>MSBuild:Compile</Generator><SubType>Designer</SubType></ApplicationDefinition>
+    <Compile Include="App.xaml.cs"><DependentUpon>App.xaml</DependentUpon></Compile>
+    <Page Include="MainWindow.xaml"><Generator>MSBuild:Compile</Generator><SubType>Designer</SubType></Page>
+    <Compile Include="MainWindow.xaml.cs"><DependentUpon>MainWindow.xaml</DependentUpon></Compile>
+    <Page Include="GenealogyWindow.xaml"><Generator>MSBuild:Compile</Generator><SubType>Designer</SubType></Page>
+    <Compile Include="GenealogyWindow.xaml.cs"><DependentUpon>GenealogyWindow.xaml</DependentUpon></Compile>
+    <Page Include="PersonEditWindow.xaml"><Generator>MSBuild:Compile</Generator><SubType>Designer</SubType></Page>
+    <Compile Include="PersonEditWindow.xaml.cs"><DependentUpon>PersonEditWindow.xaml</DependentUpon></Compile>
+    <Compile Include="Models\DiagramModels.cs"/><Compile Include="Models\GenealogyModels.cs"/><Compile Include="Services\DiagramFileService.cs"/>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
+</Project>
