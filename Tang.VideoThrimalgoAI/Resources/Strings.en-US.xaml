@@ -1,0 +1,116 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!--  Video tab strings (English)  -->
+    <sys:String x:Key="Tab_Image">Images</sys:String>
+    <sys:String x:Key="Tab_Video">Video</sys:String>
+
+    <sys:String x:Key="Video_Title">Video Processing</sys:String>
+    <sys:String x:Key="Video_Subtitle">Offline &amp; local · No network</sys:String>
+
+    <sys:String x:Key="Engine_Header">Engine</sys:String>
+    <sys:String x:Key="Engine_Label">FFmpeg path</sys:String>
+    <sys:String x:Key="Engine_Browse">Browse</sys:String>
+    <sys:String x:Key="Engine_Redetect">Re-detect</sys:String>
+    <sys:String x:Key="Engine_NotSet">ffmpeg.exe not found. Click Browse to pick a local path.</sys:String>
+    <sys:String x:Key="Engine_Hint">Only local ffmpeg/ffprobe is invoked at runtime. No network access.</sys:String>
+
+    <sys:String x:Key="Source_Header">Source video</sys:String>
+    <sys:String x:Key="Source_Open">Open Video</sys:String>
+    <sys:String x:Key="Source_Output">Output Folder</sys:String>
+    <sys:String x:Key="Source_None">No video selected</sys:String>
+    <sys:String x:Key="Source_Info">Media info</sys:String>
+
+    <sys:String x:Key="Function_Header">Function</sys:String>
+    <sys:String x:Key="Param_Header">Parameters</sys:String>
+    <sys:String x:Key="Start">Start</sys:String>
+    <sys:String x:Key="Cancel">Cancel</sys:String>
+    <sys:String x:Key="Progress_Label">Progress</sys:String>
+    <sys:String x:Key="Status_Label">Status</sys:String>
+
+    <sys:String x:Key="Preview_Header">Preview</sys:String>
+    <sys:String x:Key="Preview_Empty">Select a video to show the first frame</sys:String>
+    <sys:String x:Key="Info_Resolution">Resolution</sys:String>
+    <sys:String x:Key="Info_Duration">Duration</sys:String>
+    <sys:String x:Key="Info_Fps">Frame rate</sys:String>
+    <sys:String x:Key="Info_Audio">Audio</sys:String>
+    <sys:String x:Key="Info_Yes">Yes</sys:String>
+    <sys:String x:Key="Info_No">No</sys:String>
+
+    <sys:String x:Key="Output_Header">Output</sys:String>
+    <sys:String x:Key="Output_Path">Output path</sys:String>
+    <sys:String x:Key="Output_Elapsed">Elapsed</sys:String>
+
+    <sys:String x:Key="Fn_Enhance">Enhance</sys:String>
+    <sys:String x:Key="Fn_Mosaic">Mosaic Weaken</sys:String>
+    <sys:String x:Key="Fn_Watermark">Remove Watermark</sys:String>
+    <sys:String x:Key="Fn_Compose">Multi-video Compose</sys:String>
+    <sys:String x:Key="Fn_Concat">Concatenate</sys:String>
+    <sys:String x:Key="Fn_M3u8">M3U8 to MP4</sys:String>
+    <sys:String x:Key="Fn_Audio">Extract Audio</sys:String>
+    <sys:String x:Key="Fn_Trim">Trim Clip</sys:String>
+    <sys:String x:Key="Fn_Gif">GIF Export</sys:String>
+
+    <sys:String x:Key="Param_Scale">Upscale</sys:String>
+    <sys:String x:Key="Param_Denoise">Denoise</sys:String>
+    <sys:String x:Key="Param_Sharpen">Sharpen</sys:String>
+    <sys:String x:Key="Param_Temporal">Temporal blend frames</sys:String>
+
+    <sys:String x:Key="Hint_Enhance">Filter-only pipeline: Lanczos upscale + HQDN3D denoise + Unsharp. No super-resolution model, so added detail is interpolation and quality is bounded by the source.</sys:String>
+    <sys:String x:Key="Hint_Mosaic">Denoise + sharpen + temporal blend reduce the blocky look. This is an approximation, not real reconstruction; removed detail cannot be recovered.</sys:String>
+    <sys:String x:Key="Hint_Watermark">Drag on the preview to select regions (multiple allowed). delogo interpolates over them; hidden content is not reconstructed.</sys:String>
+    <sys:String x:Key="Hint_Compose">The first video defines output size, frame rate and pixel format. Side-by-side or picture-in-picture; audio follows the first video.</sys:String>
+    <sys:String x:Key="Hint_Concat">Clips are joined in list order with normalized resolution/frame rate/pixel format. Output is silent.</sys:String>
+    <sys:String x:Key="Hint_M3u8">Pick a local m3u8 playlist (relative ts segments supported). Stream copy is tried first, then re-encode. Segments encrypted with a remote key cannot be decrypted offline.</sys:String>
+    <sys:String x:Key="Hint_Audio">Audio-only export; video is not re-encoded. Format and bitrate are selectable.</sys:String>
+    <sys:String x:Key="Hint_Trim">Fast mode copies the stream and snaps the start to a keyframe. Precise mode re-encodes with an exact start time.</sys:String>
+
+    <sys:String x:Key="Roi_Tip">Drag here to select a watermark region</sys:String>
+    <sys:String x:Key="Roi_Clear">Clear regions</sys:String>
+    <sys:String x:Key="Roi_Empty">No region selected; the bottom-right 30% area is used by default</sys:String>
+    <sys:String x:Key="Roi_Count">{0} region(s) selected</sys:String>
+
+    <sys:String x:Key="Compose_Second">Second video</sys:String>
+    <sys:String x:Key="Compose_Pick">Choose file</sys:String>
+    <sys:String x:Key="Compose_None">No second video selected</sys:String>
+    <sys:String x:Key="Compose_Layout">Layout</sys:String>
+    <sys:String x:Key="Compose_Side">Side by side</sys:String>
+    <sys:String x:Key="Compose_Pip">Picture in picture</sys:String>
+    <sys:String x:Key="Compose_PipPos">PiP position</sys:String>
+    <sys:String x:Key="Compose_PipScale">PiP size</sys:String>
+    <sys:String x:Key="Compose_PosTL">Top left</sys:String>
+    <sys:String x:Key="Compose_PosTR">Top right</sys:String>
+    <sys:String x:Key="Compose_PosBL">Bottom left</sys:String>
+    <sys:String x:Key="Compose_PosBR">Bottom right</sys:String>
+
+    <sys:String x:Key="Concat_Add">Add video</sys:String>
+    <sys:String x:Key="Concat_Empty">List is empty; add clips in playback order</sys:String>
+    <sys:String x:Key="Concat_Remove">Remove</sys:String>
+
+    <sys:String x:Key="Audio_Format">Audio format</sys:String>
+    <sys:String x:Key="Audio_Bitrate">Bitrate</sys:String>
+    <sys:String x:Key="Audio_Mp3">MP3</sys:String>
+    <sys:String x:Key="Audio_Aac">AAC (M4A)</sys:String>
+    <sys:String x:Key="Audio_Wav">WAV (PCM)</sys:String>
+
+    <sys:String x:Key="Trim_Start">Start time</sys:String>
+    <sys:String x:Key="Trim_End">End time</sys:String>
+    <sys:String x:Key="Trim_Mode">Trim mode</sys:String>
+    <sys:String x:Key="Trim_Fast">Fast (keyframe aligned)</sys:String>
+    <sys:String x:Key="Trim_Precise">Precise (re-encode)</sys:String>
+    <sys:String x:Key="Trim_ClipLen">Clip length</sys:String>
+
+    <sys:String x:Key="Gif_Fps">GIF frame rate</sys:String>
+    <sys:String x:Key="Gif_Width">GIF width</sys:String>
+    <sys:String x:Key="Gif_Loop">Loop forever</sys:String>
+    <sys:String x:Key="Gif_Dither">Dithering</sys:String>
+    <sys:String x:Key="Gif_DitherNone">None</sys:String>
+    <sys:String x:Key="Gif_DitherBayer">Bayer</sys:String>
+    <sys:String x:Key="Gif_DitherFloyd">Floyd-Steinberg</sys:String>
+    <sys:String x:Key="Gif_DitherSierra">Sierra 2-4A</sys:String>
+    <sys:String x:Key="Hint_Gif">GIF is limited to 256 colors, so quantization is inherently lossy. A global palette via palettegen/paletteuse plus dithering keeps it visually close.</sys:String>
+
+    <sys:String x:Key="Language_Toggle">中文</sys:String>
+    <sys:String x:Key="Busy_Wait">Processing…</sys:String>
+</ResourceDictionary>

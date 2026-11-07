@@ -1,0 +1,11 @@
+Real-ESRGAN x4plus 超分模型（本地 ONNX，离线推理）
+
+模型名称：RealESRGAN_x4plus（RRDBNet，4 倍放大）
+模型文件：RealESRGAN_x4plus.onnx
+文件大小：67,051,973 字节
+SHA-256：39d5218cfcef542d667821a0d2072cfa51bfd857ab0e4ae7dc067c399a88d323
+模型格式：ONNX，opset 14，动态 H/W，输入名 input，输出名 output，NCHW RGB [0,1]
+上游项目：https://github.com/xinntao/Real-ESRGAN
+许可证：BSD-3-Clause
+分发说明：模型约 64MB，不纳入源码控制（见仓库根 .gitignore），随应用输出目录分发或在本地导入到 Models 目录。
+运行方式：Microsoft.ML.OnnxRuntime CPU 推理，只读取本地文件，不发起任何网络请求。

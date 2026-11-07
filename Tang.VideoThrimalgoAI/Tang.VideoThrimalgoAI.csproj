@@ -17,6 +17,12 @@
     <Using Remove="System.Drawing" />
   </ItemGroup>
 
+  <!--  ONNX 超分模型随构建复制到输出 Models 目录；模型本体约 64MB，已被 .gitignore 排除  -->
+  <ItemGroup>
+    <None Update="Models\RealESRGAN_x4plus.onnx" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Models\NOTICE.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="MaterialDesignColors" Version="3.0.0" />

@@ -1,44 +1,28 @@
-using System;
 using System.Threading.Tasks;
 using OpenCvSharp;
 
 namespace Tang.VideoThrimalgoAI.Services
 {
-    public class ImageEnhancementService
+    public class MosaicRemovalService
     {
-        public async Task<Mat> EnhanceAsync(Mat image, double brightness, double contrast, double saturation)
+        public async Task<Mat> RemoveMosaicAsync(Mat image, int blockSize)
+            => await Task.Run(() => RemoveMosaic(image, blockSize));
+
+        public Mat RemoveMosaic(Mat image, int blockSize)
         {
-            return await Task.Run(() =>
-            {
-                var result = new Mat();
-                image.ConvertTo(result, -1, contrast, brightness);
+            using var filtered = new Mat();
+            Cv2.BilateralFilter(image, filtered, blockSize * 2 + 1, 75, 75);
 
-                var hsv = new Mat();
-                Cv2.CvtColor(result, hsv, ColorConversionCodes.BGR2HSV);
-                Cv2.Split(hsv, out Mat[] channels);
-                channels[1].ConvertTo(channels[1], -1, saturation);
-                Cv2.Merge(channels, hsv);
+            using var kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(blockSize, blockSize));
+            using var closed = new Mat();
+            Cv2.MorphologyEx(filtered, closed, MorphTypes.Close, kernel);
 
-                var rgb = new Mat();
-                Cv2.CvtColor(hsv, rgb, ColorConversionCodes.HSV2BGR);
-
-                var blurred = new Mat();
-                Cv2.GaussianBlur(rgb, blurred, new Size(3, 3), 0);
-
-                var sharpened = new Mat();
-                Cv2.AddWeighted(rgb, 1.25, blurred, -0.15, 0, sharpened);
-
-                foreach (var channel in channels)
-                {
-                    channel.Dispose();
-                }
-
-                hsv.Dispose();
-                rgb.Dispose();
-                blurred.Dispose();
-
-                return sharpened;
-            });
+            // 形态学闭运算后做一次轻度锐化，补偿平滑造成的细节损失
+            using var blurred = new Mat();
+            Cv2.GaussianBlur(closed, blurred, new Size(0, 0), 1.0);
+            var result = new Mat();
+            Cv2.AddWeighted(closed, 1.2, blurred, -0.2, 0, result);
+            return result;
         }
     }
 }
