@@ -1,0 +1,258 @@
+﻿<Window x:Class="BitTomrrorApp.Views.AddTaskWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="添加任务" Height="640" Width="700"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Border Background="{DynamicResource AppBackgroundBrush}" CornerRadius="10">
+        <Border.Effect>
+            <DropShadowEffect Color="#1A2A4A" BlurRadius="22" ShadowDepth="0" Opacity="0.3"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="44"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="{StaticResource AppTitleBarBrush}" CornerRadius="10,10,0,0"
+                    MouseLeftButtonDown="TitleBar_MouseDown">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                        <iconPacks:PackIconMaterial Kind="PlusBoxOutline" Foreground="White" Width="20" Height="20"/>
+                        <TextBlock Text="添加下载任务" Foreground="White" FontSize="14" FontWeight="SemiBold"
+                                   Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="BT / HTTP / M3U8 / Telegram / FTP" Foreground="#B0BEC5" FontSize="11"
+                                   Margin="10,2,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <Button HorizontalAlignment="Right" Click="Cancel_Click" Style="{StaticResource MaterialDesignIconButton}"
+                            Width="36" Height="36" Margin="0,0,4,0" Background="Transparent" ToolTip="关闭">
+                        <iconPacks:PackIconMaterial Kind="Close" Width="18" Height="18" Foreground="White"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <TabControl x:Name="TypeTabs" Grid.Row="1" Margin="14,10,14,0" Background="Transparent" BorderThickness="0">
+                <!-- BT -->
+                <TabItem Header="BT 下载">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="6,14,6,6">
+                            <TextBox x:Name="BtSource" md:HintAssist.Hint="磁力链接或 .torrent 文件路径"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     md:TextFieldAssist.TextFieldCornerRadius="8"/>
+                            <Button Content="选择 .torrent 文件" HorizontalAlignment="Left" Margin="0,8,0,0"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}" Click="BrowseTorrent_Click"/>
+                            <TextBlock Text="保存目录" Margin="2,14,0,4" Foreground="#607D8B" FontSize="12"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="BtSavePath" Grid.Column="0" Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         md:TextFieldAssist.TextFieldCornerRadius="8"/>
+                                <Button Grid.Column="1" Content="浏览" Margin="8,0,0,0" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Click="BrowseBtFolder_Click"/>
+                            </Grid>
+                            <Grid Margin="0,14,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="下载限速（KB/s，0=不限）" Foreground="#607D8B" FontSize="12" Margin="2,0,0,4"/>
+                                    <TextBox x:Name="BtDownLimit" Text="0" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="上传限速（KB/s，0=不限）" Foreground="#607D8B" FontSize="12" Margin="2,0,0,4"/>
+                                    <TextBox x:Name="BtUpLimit" Text="0" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Margin="0,12,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="做种比例上限（0=不限）" Foreground="#607D8B" FontSize="12" Margin="2,0,0,4"/>
+                                    <TextBox x:Name="BtSeedRatio" Text="0" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="做种时间上限（分钟，0=不限）" Foreground="#607D8B" FontSize="12" Margin="2,0,0,4"/>
+                                    <TextBox x:Name="BtSeedMinutes" Text="0" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Text="启用 DHT / PEX / 公共 Tracker；支持断点续传、分片哈希校验与失败重下。"
+                                       Foreground="#78909C" FontSize="11.5" TextWrapping="Wrap" Margin="2,14,0,0"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- HTTP -->
+                <TabItem Header="HTTP 直链">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="6,14,6,6">
+                            <TextBox x:Name="HttpUrl" md:HintAssist.Hint="http(s)://...（mp4/mp3/zip 等直链）"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                            <TextBlock Text="保存目录" Margin="2,14,0,4" Foreground="#607D8B" FontSize="12"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="HttpSavePath" Grid.Column="0" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                <Button Grid.Column="1" Content="浏览" Margin="8,0,0,0" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Click="BrowseHttpFolder_Click"/>
+                            </Grid>
+                            <TextBlock Text="并发连接数（1-8，需要服务器支持 Range）" Margin="2,14,0,4" Foreground="#607D8B" FontSize="12"/>
+                            <TextBox x:Name="HttpConnections" Text="1" Width="120" HorizontalAlignment="Left"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                            <TextBlock Text="自动跟随 301/302 重定向；支持 Range 断点续传、暂停继续与实时速度。"
+                                       Foreground="#78909C" FontSize="11.5" TextWrapping="Wrap" Margin="2,14,0,0"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- M3U8 -->
+                <TabItem Header="M3U8">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="6,14,6,6">
+                            <TextBox x:Name="M3u8Url" md:HintAssist.Hint="HLS master / media playlist 地址"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                            <TextBlock Text="保存目录" Margin="2,14,0,4" Foreground="#607D8B" FontSize="12"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="M3u8SavePath" Grid.Column="0" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                <Button Grid.Column="1" Content="浏览" Margin="8,0,0,0" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Click="BrowseM3u8Folder_Click"/>
+                            </Grid>
+                            <TextBlock Text="码率偏好（kbps，0=最高码率）" Margin="2,14,0,4" Foreground="#607D8B" FontSize="12"/>
+                            <TextBox x:Name="M3u8Quality" Text="0" Width="160" HorizontalAlignment="Left"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                            <TextBlock Text="FFmpeg 路径（留空则自动查找 PATH）" Margin="2,14,0,4" Foreground="#607D8B" FontSize="12"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="FfmpegPathBox" Grid.Column="0" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                <Button Grid.Column="1" Content="浏览" Margin="8,0,0,0" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Click="BrowseFfmpeg_Click"/>
+                                <Button Grid.Column="2" Content="检测" Margin="8,0,0,0" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Click="CheckFfmpeg_Click"/>
+                            </Grid>
+                            <TextBlock x:Name="FfmpegStatus" Foreground="#78909C" FontSize="11.5" TextWrapping="Wrap" Margin="2,8,0,0"/>
+                            <TextBlock Text="支持 master/media playlist、码率选择、AES-128 解密、EXT-X-MAP 初始化段、分片重试与断点续传；完成后优先用 FFmpeg 无损转封装。"
+                                       Foreground="#78909C" FontSize="11.5" TextWrapping="Wrap" Margin="2,14,0,0"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- Telegram -->
+                <TabItem Header="Telegram">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="6,14,6,6">
+                            <Border Background="#FFF8E1" CornerRadius="6" Padding="10" Margin="0,0,0,10">
+                                <TextBlock Text="Telegram Bot API 单文件下载上限约 20 MB。更大的文件需要本地 Bot API 服务或 MTProto，本模块未集成 MTProto。"
+                                           Foreground="#EF6C00" FontSize="11.5" TextWrapping="Wrap"/>
+                            </Border>
+                            <TextBox x:Name="TgToken" md:HintAssist.Hint="Bot Token（123456:ABC-DEF...）"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                            <TextBox x:Name="TgFileId" md:HintAssist.Hint="file_id（优先使用）"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,10,0,0"/>
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TgChatId" Grid.Column="0" md:HintAssist.Hint="chat_id（可选）"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,6,0"/>
+                                <TextBox x:Name="TgMessageId" Grid.Column="1" md:HintAssist.Hint="message_id（可选）"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="6,0,0,0"/>
+                            </Grid>
+                            <TextBlock Text="保存目录" Margin="2,14,0,4" Foreground="#607D8B" FontSize="12"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TgSavePath" Grid.Column="0" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                <Button Grid.Column="1" Content="浏览" Margin="8,0,0,0" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Click="BrowseTgFolder_Click"/>
+                            </Grid>
+                            <TextBlock Text="调用 getMe 校验 token，getFile 解析 file_path；填写 chat/message 时会通过 getUpdates 查找最近 100 条消息。"
+                                       Foreground="#78909C" FontSize="11.5" TextWrapping="Wrap" Margin="2,14,0,0"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- FTP -->
+                <TabItem Header="FTP">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="6,14,6,6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="90"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="FtpHost" Grid.Column="0" md:HintAssist.Hint="主机（host 或 IP）"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,8,0"/>
+                                <TextBox x:Name="FtpPort" Grid.Column="1" Text="21" md:HintAssist.Hint="端口"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                            </Grid>
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="FtpUser" Grid.Column="0" md:HintAssist.Hint="用户名（留空=anonymous）"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,6,0"/>
+                                <PasswordBox x:Name="FtpPassword" Grid.Column="1" md:HintAssist.Hint="密码"
+                                             Style="{StaticResource MaterialDesignOutlinedPasswordBox}" Margin="6,0,0,0"/>
+                            </Grid>
+                            <TextBox x:Name="FtpRemotePath" md:HintAssist.Hint="远程文件路径（如 /pub/file.zip）"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,10,0,0"/>
+                            <CheckBox x:Name="FtpTls" Content="使用显式 FTPS (TLS)" Margin="2,12,0,0" Foreground="#455A64"/>
+                            <TextBlock Text="保存目录" Margin="2,14,0,4" Foreground="#607D8B" FontSize="12"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="FtpSavePath" Grid.Column="0" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                <Button Grid.Column="1" Content="浏览" Margin="8,0,0,0" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Click="BrowseFtpFolder_Click"/>
+                            </Grid>
+                            <TextBlock Text="被动模式由 FTP 库自动协商；使用 REST 断点续传，暂停后保留 .part 文件。"
+                                       Foreground="#78909C" FontSize="11.5" TextWrapping="Wrap" Margin="2,14,0,0"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+
+            <Border Grid.Row="2" Background="White" Padding="16,10" BorderBrush="#EEE" BorderThickness="0,1,0,0"
+                    CornerRadius="0,0,10,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="ValidationText" Grid.Column="0" Foreground="#E53935" FontSize="12"
+                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Content="取消" Style="{StaticResource MaterialDesignOutlinedButton}" Click="Cancel_Click" Margin="0,0,8,0"/>
+                        <Button Content="添加任务" Style="{StaticResource MaterialDesignRaisedButton}" Click="Add_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

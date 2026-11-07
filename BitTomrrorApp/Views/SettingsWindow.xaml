@@ -1,0 +1,152 @@
+﻿<Window x:Class="BitTomrrorApp.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="个人设置中心" Height="620" Width="660"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Border Background="{DynamicResource AppBackgroundBrush}" CornerRadius="10">
+        <Border.Effect>
+            <DropShadowEffect Color="#1A2A4A" BlurRadius="22" ShadowDepth="0" Opacity="0.3"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="44"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="{StaticResource AppTitleBarBrush}" CornerRadius="10,10,0,0"
+                    MouseLeftButtonDown="TitleBar_MouseDown">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                        <iconPacks:PackIconMaterial Kind="CogOutline" Foreground="White" Width="20" Height="20"/>
+                        <TextBlock Text="个人设置中心" Foreground="White" FontSize="14" FontWeight="SemiBold"
+                                   Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="FTP · Telegram · 软件安全" Foreground="#B0BEC5" FontSize="11"
+                                   Margin="10,2,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <Button HorizontalAlignment="Right" Click="Cancel_Click" Style="{StaticResource MaterialDesignIconButton}"
+                            Width="36" Height="36" Margin="0,0,4,0" Background="Transparent" ToolTip="关闭">
+                        <iconPacks:PackIconMaterial Kind="Close" Width="18" Height="18" Foreground="White"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <TabControl x:Name="SectionTabs" Grid.Row="1" Margin="14,10,14,0" Background="Transparent" BorderThickness="0">
+                <!-- FTP 服务器 -->
+                <TabItem Header="FTP 服务器">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="6,14,6,6">
+                            <TextBlock Text="保存后新建 FTP 任务时自动填充以下连接信息；主界面粘贴 ftp:// 直链也将使用这组凭据。"
+                                       Foreground="#78909C" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,0,10"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="90"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="FtpHost" Grid.Column="0" md:HintAssist.Hint="主机（host 或 IP）"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,8,0"/>
+                                <TextBox x:Name="FtpPort" Grid.Column="1" Text="21" md:HintAssist.Hint="端口"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                            </Grid>
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="FtpUser" Grid.Column="0" md:HintAssist.Hint="用户名（留空=anonymous）"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,6,0"/>
+                                <PasswordBox x:Name="FtpPassword" Grid.Column="1" md:HintAssist.Hint="密码"
+                                             Style="{StaticResource MaterialDesignOutlinedPasswordBox}" Margin="6,0,0,0"/>
+                            </Grid>
+                            <TextBox x:Name="FtpRemotePath" md:HintAssist.Hint="默认远程目录/文件路径（可选，如 /pub/files/）"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,10,0,0"/>
+                            <CheckBox x:Name="FtpTls" Content="使用显式 FTPS (TLS)" Margin="2,12,0,0" Foreground="#455A64"/>
+                            <TextBlock Text="被动模式由 FTP 库自动协商；凭据仅保存在本机，密码经 Windows DPAPI 加密后写入配置文件。"
+                                       Foreground="#78909C" FontSize="11.5" TextWrapping="Wrap" Margin="2,14,0,0"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- Telegram 认证 -->
+                <TabItem Header="Telegram 认证">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="6,14,6,6">
+                            <Border Background="#FFF8E1" CornerRadius="6" Padding="10" Margin="0,0,0,10">
+                                <TextBlock Text="Bot API 单文件下载上限约 20 MB。保存 Token 后新建 Telegram 任务会自动填充，无需重复输入。"
+                                           Foreground="#EF6C00" FontSize="11.5" TextWrapping="Wrap"/>
+                            </Border>
+                            <TextBox x:Name="TgToken" md:HintAssist.Hint="Bot Token（123456:ABC-DEF...）"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                            <TextBox x:Name="TgChatId" md:HintAssist.Hint="默认 chat_id（可选，仅作为填写提示）"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,10,0,0"/>
+                            <TextBlock Text="Token 会调用 getMe 校验；文件定位支持 file_id 或 chat_id + message_id（通过 getUpdates 查找最近 100 条消息）。"
+                                       Foreground="#78909C" FontSize="11.5" TextWrapping="Wrap" Margin="2,14,0,0"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- 软件安全 -->
+                <TabItem Header="软件安全">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="6,14,6,6">
+                            <TextBlock Text="启动密码" Foreground="#37474F" FontSize="13" FontWeight="SemiBold" Margin="2,0,0,6"/>
+                            <TextBlock x:Name="LockStatus" Foreground="#43A047" FontSize="12" Margin="2,0,0,8"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <PasswordBox x:Name="LockNewPwd" Grid.Column="0" md:HintAssist.Hint="新启动密码"
+                                             Style="{StaticResource MaterialDesignOutlinedPasswordBox}" Margin="0,0,6,0"/>
+                                <PasswordBox x:Name="LockConfirmPwd" Grid.Column="1" md:HintAssist.Hint="确认新密码"
+                                             Style="{StaticResource MaterialDesignOutlinedPasswordBox}" Margin="6,0,0,0"/>
+                            </Grid>
+                            <PasswordBox x:Name="LockCurrentPwd" md:HintAssist.Hint="当前启动密码（修改或清除时必填）"
+                                         Style="{StaticResource MaterialDesignOutlinedPasswordBox}" Margin="0,10,0,0"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                <Button Content="启用 / 修改启动密码" Style="{StaticResource MaterialDesignRaisedButton}"
+                                        Click="SetLock_Click"/>
+                                <Button Content="清除启动密码" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Margin="8,0,0,0" Click="ClearLock_Click"/>
+                            </StackPanel>
+
+                            <Border Background="#ECEFF1" CornerRadius="6" Padding="10" Margin="0,18,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="凭据存储安全" Foreground="#37474F" FontSize="12.5" FontWeight="SemiBold"/>
+                                    <TextBlock Text="FTP 密码与 Telegram Token 使用 Windows DPAPI（当前用户作用域）加密后写入 settings.json，密文以 dpapi:v1: 前缀标识；其他用户或其他计算机无法解密。启动密码仅保存 PBKDF2-SHA256 哈希（10 万次迭代 + 随机盐），不保存明文。"
+                                               Foreground="#546E7A" FontSize="11.5" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Button Content="立即清除已保存的 FTP 密码与 Telegram Token"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,14,0,0"
+                                    HorizontalAlignment="Left" Click="ClearCredentials_Click"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+
+            <Border Grid.Row="2" Background="White" Padding="16,10" BorderBrush="#EEE" BorderThickness="0,1,0,0"
+                    CornerRadius="0,0,10,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="StatusText" Grid.Column="0" Foreground="#43A047" FontSize="12"
+                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Content="取消" Style="{StaticResource MaterialDesignOutlinedButton}" Click="Cancel_Click" Margin="0,0,8,0"/>
+                        <Button Content="保存设置" Style="{StaticResource MaterialDesignRaisedButton}" Click="Save_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

@@ -1,5 +1,6 @@
 using BitTomrrorApp.Models;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 
@@ -23,10 +24,20 @@ public class BoolToInverseBoolConverter : IValueConverter
         => throw new NotImplementedException();
 }
 
+public class InverseBoolToVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        => value is bool b && b ? Visibility.Collapsed : Visibility.Visible;
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+
 // 状态 -> 徽章背景色
 public class StateToColorConverter : IValueConverter
 {
     private static readonly Brush Downloading = MakeBrush("#1976D2");
+    private static readonly Brush Preparing = MakeBrush("#0288D1");
     private static readonly Brush Paused = MakeBrush("#9E9E9E");
     private static readonly Brush Completed = MakeBrush("#388E3C");
     private static readonly Brush Seeding = MakeBrush("#F57C00");
@@ -35,15 +46,18 @@ public class StateToColorConverter : IValueConverter
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is TorrentState s)
+        if (value is DownloadStatus s)
         {
             return s switch
             {
-                TorrentState.Downloading => Downloading,
-                TorrentState.Paused => Paused,
-                TorrentState.Completed => Completed,
-                TorrentState.Seeding => Seeding,
-                TorrentState.Error => Error,
+                DownloadStatus.Downloading => Downloading,
+                DownloadStatus.Preparing => Preparing,
+                DownloadStatus.Paused => Paused,
+                DownloadStatus.Completed => Completed,
+                DownloadStatus.Seeding => Seeding,
+                DownloadStatus.Error => Error,
+                DownloadStatus.Waiting => Waiting,
+                DownloadStatus.Stopped => Paused,
                 _ => Waiting
             };
         }
@@ -66,15 +80,18 @@ public class StateToPauseIconConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is TorrentState s)
+        if (value is DownloadStatus s)
         {
             return s switch
             {
-                TorrentState.Downloading => "Pause",
-                TorrentState.Seeding => "Pause",
-                TorrentState.Paused => "Play",
-                TorrentState.Completed => "Refresh",
-                TorrentState.Error => "AlertCircleOutline",
+                DownloadStatus.Downloading => "Pause",
+                DownloadStatus.Preparing => "Pause",
+                DownloadStatus.Seeding => "Pause",
+                DownloadStatus.Paused => "Play",
+                DownloadStatus.Waiting => "Play",
+                DownloadStatus.Stopped => "Play",
+                DownloadStatus.Completed => "CheckCircleOutline",
+                DownloadStatus.Error => "Refresh",
                 _ => "Play"
             };
         }

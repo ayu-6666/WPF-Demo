@@ -14,6 +14,8 @@
 
             <conv:StateToColorConverter x:Key="StateToColorConverter"/>
             <conv:StateToPauseIconConverter x:Key="StateToPauseIconConverter"/>
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
 
             <!-- 主题色与画板 -->
             <SolidColorBrush x:Key="AppAccentBrush" Color="#3F51B5"/>

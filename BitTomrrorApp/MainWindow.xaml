@@ -8,89 +8,97 @@
         xmlns:local="clr-namespace:BitTomrrorApp"
         xmlns:models="clr-namespace:BitTomrrorApp.Models"
         xmlns:vm="clr-namespace:BitTomrrorApp.ViewModels"
-        xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         Title="极速资源下载器" Height="840" Width="960"
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="CanResizeWithGrip"
         ShowInTaskbar="True" WindowStartupLocation="CenterScreen"
-        TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="ClearType"
-        xmlns:i="http://schemas.microsoft.com/xaml/behaviors" >
+        TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="ClearType">
     <i:Interaction.Triggers>
-            <i:EventTrigger  EventName="Loaded" >
-                <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
-            </i:EventTrigger>
-        </i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
     <Window.Resources>
-        <!-- 数据模板：列表项卡片 -->
-        <DataTemplate DataType="{x:Type models:TorrentItem}">
+        <DataTemplate DataType="{x:Type models:DownloadTask}">
             <md:Card Margin="6" UniformCornerRadius="10">
                 <Grid Margin="14,10">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="28"/>
+                        <ColumnDefinition Width="26"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="92"/>
+                        <ColumnDefinition Width="130"/>
+                        <ColumnDefinition Width="86"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- 状态指示色条 -->
-                    <Border Grid.Column="0" Width="4" HorizontalAlignment="Left"
-                            CornerRadius="2" Margin="-6,0,4,0"
-                            Background="{Binding State, Converter={StaticResource StateToColorConverter}}"/>
+                    <Border Grid.Column="0" Width="4" HorizontalAlignment="Left" CornerRadius="2" Margin="-6,0,4,0"
+                            Background="{Binding Status, Converter={StaticResource StateToColorConverter}}"/>
 
-                    <!-- 种子信息 + 进度 -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14"
-                                   TextTrimming="CharacterEllipsis" Foreground="#212121"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,4,0,6">
-                            <TextBlock Text="{Binding SizeDisplay}" Foreground="#757575" FontSize="11.5"/>
-                            <TextBlock Text=" · " Foreground="#BDBDBD"/>
-                            <TextBlock Text="{Binding RemainingTime}" Foreground="#9E9E9E" FontSize="11.5"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Background="#ECEFF1" CornerRadius="4" Padding="5,1" Margin="0,0,7,0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding TypeText}" FontSize="10.5" FontWeight="SemiBold" Foreground="#455A64"/>
+                            </Border>
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14"
+                                       TextTrimming="CharacterEllipsis" Foreground="#212121" VerticalAlignment="Center"/>
                         </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,3">
+                            <TextBlock Text="{Binding DownloadedText}" Foreground="#757575" FontSize="11.5"/>
+                            <TextBlock Text=" · " Foreground="#BDBDBD"/>
+                            <TextBlock Text="{Binding RemainingText}" Foreground="#9E9E9E" FontSize="11.5"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding PeerText}" Foreground="#90A4AE" FontSize="11"
+                                   TextTrimming="CharacterEllipsis" Margin="0,0,0,5"/>
                         <ProgressBar Value="{Binding Progress}" Maximum="100" Height="6"
                                      Style="{StaticResource MaterialDesignLinearProgressBar}"/>
+                        <TextBlock Text="{Binding ErrorText}" Foreground="#D32F2F" FontSize="11"
+                                   TextWrapping="Wrap" Margin="0,5,0,0"
+                                   Visibility="{Binding HasError, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     </StackPanel>
 
-                    <!-- 下载/上传速度 -->
                     <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="6,0">
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconMaterial Kind="ArrowDown" Width="14" Height="14"
                                                         Foreground="#43A047" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding DownloadSpeed}" Foreground="#43A047"
+                            <TextBlock Text="{Binding DownloadSpeedText}" Foreground="#43A047"
                                        FontSize="12" Margin="4,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                             <iconPacks:PackIconMaterial Kind="ArrowUp" Width="14" Height="14"
                                                         Foreground="#FB8C00" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding UploadSpeed}" Foreground="#FB8C00"
+                            <TextBlock Text="{Binding UploadSpeedText}" Foreground="#FB8C00"
                                        FontSize="12" Margin="4,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- 状态徽章 -->
                     <Border Grid.Column="3" CornerRadius="11" Padding="10,3"
                             HorizontalAlignment="Center" VerticalAlignment="Center"
-                            Background="{Binding State, Converter={StaticResource StateToColorConverter}}">
-                        <TextBlock Text="{Binding State}" Foreground="White"
-                                   FontSize="11" FontWeight="Medium"/>
+                            Background="{Binding Status, Converter={StaticResource StateToColorConverter}}">
+                        <TextBlock Text="{Binding StateText}" Foreground="White" FontSize="11" FontWeight="Medium"/>
                     </Border>
 
-                    <!-- 单项操作按钮 -->
                     <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Command="{Binding DataContext.PauseCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                 CommandParameter="{Binding}"
                                 Style="{StaticResource MaterialDesignIconButton}"
                                 Width="36" Height="36" ToolTip="暂停/继续">
-                            <iconPacks:PackIconMaterial Kind="{Binding State, Converter={StaticResource StateToPauseIconConverter}}"/>
+                            <iconPacks:PackIconMaterial Kind="{Binding Status, Converter={StaticResource StateToPauseIconConverter}}"/>
+                        </Button>
+                        <Button Command="{Binding DataContext.OpenFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="{Binding}"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                Width="36" Height="36" Margin="2,0,0,0" ToolTip="打开保存目录">
+                            <iconPacks:PackIconMaterial Kind="FolderOpenOutline" Foreground="#546E7A"/>
                         </Button>
                         <Button Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                 CommandParameter="{Binding}"
                                 Style="{StaticResource MaterialDesignIconButton}"
-                                Width="36" Height="36" Margin="2,0,0,0" ToolTip="删除">
+                                Width="36" Height="36" Margin="2,0,0,0" ToolTip="删除任务">
                             <iconPacks:PackIconMaterial Kind="Delete" Foreground="#E53935"/>
                         </Button>
                     </StackPanel>
@@ -99,20 +107,18 @@
         </DataTemplate>
     </Window.Resources>
 
-    <!-- 主窗口边框：圆角 + 投影 -->
     <Border Background="{DynamicResource AppBackgroundBrush}" CornerRadius="10">
         <Border.Effect>
             <DropShadowEffect Color="#1A2A4A" BlurRadius="22" ShadowDepth="0" Opacity="0.28"/>
         </Border.Effect>
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="44"/>  <!-- 标题栏 -->
-                <RowDefinition Height="Auto"/> <!-- 添加任务条 -->
-                <RowDefinition Height="*"/>    <!-- 列表 -->
-                <RowDefinition Height="Auto"/> <!-- 底部状态/批量 -->
+                <RowDefinition Height="44"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- 顶部标题栏 -->
             <Border x:Name="TitleBar" Grid.Row="0" Background="{StaticResource AppTitleBarBrush}"
                     CornerRadius="10,10,0,0" MouseLeftButtonDown="TitleBar_MouseDown">
                 <Grid>
@@ -121,16 +127,18 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
-                        <iconPacks:PackIconMaterial Kind="Download" Foreground="White" Width="22" Height="22"
-                                                    VerticalAlignment="Center"/>
-                        <TextBlock Text="极速资源下载器" Foreground="White" FontSize="14"
-                                   FontWeight="SemiBold" Margin="10,0,0,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="BitTomrror App" Foreground="#B0BEC5" FontSize="11"
+                        <iconPacks:PackIconMaterial Kind="Download" Foreground="White" Width="22" Height="22" VerticalAlignment="Center"/>
+                        <TextBlock Text="极速资源下载器" Foreground="White" FontSize="14" FontWeight="SemiBold"
+                                   Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="BT · HTTP · M3U8 · Telegram · FTP" Foreground="#B0BEC5" FontSize="11"
                                    Margin="10,2,0,0" VerticalAlignment="Center"/>
                     </StackPanel>
 
-                    <!-- 窗口控制按钮 -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,4,0">
+                        <Button x:Name="BtnSettings" Click="BtnSettings_Click" Style="{StaticResource MaterialDesignIconButton}"
+                                Width="36" Height="36" ToolTip="个人设置中心（FTP / Telegram / 安全）" Background="Transparent">
+                            <iconPacks:PackIconMaterial Kind="Cog" Width="18" Height="18" Foreground="White"/>
+                        </Button>
                         <Button x:Name="BtnMinimize" Click="BtnMinimize_Click" Style="{StaticResource MaterialDesignIconButton}"
                                 Width="36" Height="36" ToolTip="最小化" Background="Transparent">
                             <iconPacks:PackIconMaterial Kind="WindowMinimize" Width="18" Height="18" Foreground="White"/>
@@ -147,16 +155,16 @@
                 </Grid>
             </Border>
 
-            <!-- 添加任务条 -->
             <Border Grid.Row="1" Background="White" Padding="20,16">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBox x:Name="InputBox" Grid.Column="0"
-                             md:HintAssist.Hint="粘贴磁力链接资源文件路径"
+                             md:HintAssist.Hint="粘贴磁力链接 / http(s) 直链 / m3u8 地址 / .torrent 文件路径"
                              Style="{StaticResource MaterialDesignOutlinedTextBox}"
                              md:TextFieldAssist.TextFieldCornerRadius="8"
                              VerticalAlignment="Center"/>
@@ -170,33 +178,40 @@
                         </StackPanel>
                     </Button>
                     <Button Grid.Column="2" Margin="8,0,0,0" Height="44"
+                            Command="{Binding AddAdvancedCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}" ToolTip="选择类型并配置完整参数">
+                        <StackPanel Orientation="Horizontal">
+                            <iconPacks:PackIconMaterial Kind="Tune" Width="18" Height="18" Margin="0,0,6,0"/>
+                            <TextBlock Text="高级添加" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="3" Margin="8,0,0,0" Height="44"
                             Style="{StaticResource MaterialDesignOutlinedButton}"
                             Click="SelectFile_Click" ToolTip="选择 .torrent 文件">
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconMaterial Kind="FileUpload" Width="18" Height="18" Margin="0,0,6,0"/>
-                            <TextBlock Text="选择资源" VerticalAlignment="Center"/>
+                            <TextBlock Text="选择种子" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </Grid>
             </Border>
 
-            <!-- 列表区 -->
-            <Grid Grid.Row="2" Margin="20 1" Background="Transparent">
-                <!-- 空状态 -->
-                <Border x:Name="EmptyState" Background="Transparent" Visibility="Visible">
+            <Grid Grid.Row="2" Margin="20,1" Background="Transparent">
+                <Border Background="Transparent"
+                        Visibility="{Binding Managed.IsEmpty, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                         <iconPacks:PackIconMaterial Kind="CloudDownloadOutline" Width="80" Height="80"
-                                                    Foreground="blue" HorizontalAlignment="Center"/>
+                                                    Foreground="#3F51B5" HorizontalAlignment="Center"/>
                         <TextBlock Text="还没有下载任务" FontSize="16" FontWeight="Medium"
                                    Foreground="#90A4AE" Margin="0,16,0,4" HorizontalAlignment="Center"/>
-                        <TextBlock Text="添加磁力链接或选择 .torrent 文件开始下载" FontSize="12.5"
+                        <TextBlock Text="支持 BT 种子/磁力、HTTP 直链、M3U8、Telegram Bot、FTP" FontSize="12.5"
                                    Foreground="#B0BEC5" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Border>
 
-                <ListView x:Name="TorrentList" Visibility="Collapsed"
-                          Background="Transparent" BorderThickness="0"
-                          ItemsSource="{Binding TorrentItems}"
+                <ListView x:Name="TorrentList" Background="Transparent" BorderThickness="0"
+                          ItemsSource="{Binding Tasks}"
+                          Visibility="{Binding Managed.HasTasks, Converter={StaticResource BoolToVisibilityConverter}}"
                           SelectionMode="Extended"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                           ScrollViewer.VerticalScrollBarVisibility="Auto">
@@ -208,7 +223,6 @@
                 </ListView>
             </Grid>
 
-            <!-- 底部状态栏 + 批量操作 -->
             <Border Grid.Row="3" Background="White" Padding="20,10"
                     BorderBrush="#EEE" BorderThickness="0,1,0,0">
                 <Grid>
@@ -217,25 +231,24 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- 全局统计 -->
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" Margin="0,0,18,0">
-                            <iconPacks:PackIconMaterial Kind="ArrowDown" Width="16" Height="16"
-                                                        Foreground="#43A047" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="TotalDown" Text="0 KB/s" Foreground="#43A047"
+                            <iconPacks:PackIconMaterial Kind="ArrowDown" Width="16" Height="16" Foreground="#43A047" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Managed.TotalDownloadRateText}" Foreground="#43A047"
                                        Margin="6,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,18,0">
-                            <iconPacks:PackIconMaterial Kind="ArrowUp" Width="16" Height="16"
-                                                        Foreground="#FB8C00" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="TotalUp" Text="0 KB/s" Foreground="#FB8C00"
+                            <iconPacks:PackIconMaterial Kind="ArrowUp" Width="16" Height="16" Foreground="#FB8C00" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Managed.TotalUploadRateText}" Foreground="#FB8C00"
                                        Margin="6,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <TextBlock x:Name="TaskCount" Text="0 个任务" Foreground="#9E9E9E"
-                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Managed.TaskSummaryText}" Foreground="#9E9E9E" VerticalAlignment="Center"/>
+                        <Border Width="1" Height="16" Background="#E0E0E0" Margin="16,0" VerticalAlignment="Center"/>
+                        <iconPacks:PackIconMaterial Kind="Filmstrip" Width="15" Height="15" Foreground="#78909C" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Managed.FfmpegStatusText}" ToolTip="{Binding Managed.FfmpegPathText}"
+                                   Foreground="#78909C" FontSize="11.5" Margin="6,0,0,0" VerticalAlignment="Center"/>
                     </StackPanel>
 
-                    <!-- 批量按钮 -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <Button Command="{Binding BatchPauseCommand}"
                                 CommandParameter="{Binding SelectedItems, ElementName=TorrentList}"
@@ -247,8 +260,7 @@
                         </Button>
                         <Button Command="{Binding BatchDeleteCommand}"
                                 CommandParameter="{Binding SelectedItems, ElementName=TorrentList}"
-                                Style="{StaticResource MaterialDesignOutlinedButton}"
-                                Margin="8,0,0,0">
+                                Style="{StaticResource MaterialDesignOutlinedButton}" Margin="8,0,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Kind="Delete" Width="18" Height="18" Margin="0,0,6,0"/>
                                 <TextBlock Text="批量删除" VerticalAlignment="Center"/>
