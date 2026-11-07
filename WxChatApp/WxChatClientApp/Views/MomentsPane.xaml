@@ -1,0 +1,242 @@
+<UserControl x:Class="WxChatApp.Views.MomentsPane"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="White">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="200" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ============ 封面（仅此区域受自定义封面图影响） ============ -->
+        <Grid Grid.Row="0" ClipToBounds="True">
+            <!-- 默认渐变封面（未设置封面图时显示） -->
+            <Border x:Name="CoverDefault">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#FF5C7A80" Offset="0" />
+                        <GradientStop Color="#FF8FA6A0" Offset="0.45" />
+                        <GradientStop Color="#FFC9D4CB" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+            <Grid x:Name="CoverDecor">
+                <Ellipse Width="220" Height="220" Fill="#22FFFFFF" HorizontalAlignment="Left"
+                         VerticalAlignment="Top" Margin="-60,-80,0,0" />
+                <Ellipse Width="180" Height="180" Fill="#18FFFFFF" HorizontalAlignment="Right"
+                         VerticalAlignment="Bottom" Margin="0,0,-40,-70" />
+            </Grid>
+
+            <!-- 自定义封面图（Stretch=UniformToFill 保证铺满且不变形） -->
+            <Image x:Name="MomentsCoverImage" Stretch="UniformToFill" Visibility="Collapsed"
+                   AutomationProperties.AutomationId="MomentsCoverImage" />
+            <!-- 封面可读性遮罩：上浅下深，保证底部白色昵称清晰 -->
+            <Border x:Name="MomentsCoverShade" Visibility="Collapsed">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#33000000" Offset="0" />
+                        <GradientStop Color="#00000000" Offset="0.5" />
+                        <GradientStop Color="#66000000" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top"
+                        Margin="0,10,12,0">
+                <Button Style="{StaticResource WxIconButton}" Width="32" Height="32" FontSize="16"
+                        Content="&#xE91B;" Foreground="White" ToolTip="{DynamicResource Moments.SetCover}"
+                        AutomationProperties.AutomationId="MomentsCoverButton"
+                        Click="Cover_Click">
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="{DynamicResource Moments.ResetCover}" Click="ResetCover_Click"
+                                      AutomationProperties.AutomationId="MomentsCoverReset" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+                <Button Style="{StaticResource WxIconButton}" Width="32" Height="32" FontSize="16"
+                        Content="&#xE722;" Foreground="White" ToolTip="{DynamicResource Moments.Publish}"
+                        Click="Publish_Click"
+                        AutomationProperties.AutomationId="PublishMomentButton" />
+                <Button Style="{StaticResource WxIconButton}" Width="32" Height="32" FontSize="16"
+                        Content="&#xE72C;" Foreground="White" ToolTip="{DynamicResource Moments.Refresh}"
+                        Click="Refresh_Click"
+                        AutomationProperties.AutomationId="RefreshMomentsButton" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                        Margin="0,0,88,12">
+                <TextBlock Text="{Binding OwnerName}" Foreground="White" FontSize="15" FontWeight="SemiBold"
+                           VerticalAlignment="Bottom" Margin="0,0,10,20" />
+                <Border Width="52" Height="52" CornerRadius="6" Background="{Binding OwnerAvatar}"
+                        ClipToBounds="True">
+                    <Grid>
+                        <TextBlock Text="{Binding OwnerAvatarText}" Foreground="White" FontSize="22"
+                                   FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Visibility="{Binding OwnerHasAvatarImage, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}" />
+                        <Image Source="{Binding OwnerAvatarImage}" Stretch="UniformToFill"
+                               Visibility="{Binding OwnerHasAvatarImage, Converter={StaticResource BoolToVis}}" />
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- ============ 时间线 ============ -->
+        <Image x:Name="MomentsBgImage" Grid.Row="1" Stretch="UniformToFill" Visibility="Collapsed"
+               AutomationProperties.AutomationId="MomentsBgImage" />
+        <Border x:Name="MomentsBgOverlay" Grid.Row="1" Background="#B8FFFFFF" Visibility="Collapsed" />
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel MaxWidth="760" HorizontalAlignment="Center" Margin="0,14,0,40">
+
+                <Grid Margin="0,0,20,6">
+                    <TextBlock Text="{Binding ErrorText}" Foreground="#FFE64340" FontSize="12"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding ErrorText, Converter={StaticResource StringToVis}}" />
+                    <Button HorizontalAlignment="Right" Style="{StaticResource WxTextButton}"
+                            Content="{Binding OnlyMineText}" Command="{Binding ToggleOnlyMineCommand}"
+                            ToolTip="{DynamicResource Moments.FilterTip}"
+                            AutomationProperties.AutomationId="OnlyMineButton" />
+                </Grid>
+
+                <Border Background="#FFF7F7F7" CornerRadius="4" Padding="30,26" Margin="0,0,20,10"
+                        Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}">
+                    <StackPanel>
+                        <TextBlock Text="{DynamicResource Moments.Title}" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Moments.EmptyHint}"
+                                   FontSize="12" Foreground="{StaticResource WxTextSecondaryBrush}"
+                                   Margin="0,10,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,6,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="52" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="42" Height="42" CornerRadius="6"
+                                        Background="{Binding AvatarBrush}" VerticalAlignment="Top"
+                                        ClipToBounds="True">
+                                    <Grid>
+                                        <TextBlock Text="{Binding AvatarText}" Foreground="White" FontSize="17"
+                                                   FontWeight="SemiBold" HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   Visibility="{Binding HasAvatarImage, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}" />
+                                        <Image Source="{Binding AvatarImage}" Stretch="UniformToFill"
+                                               Visibility="{Binding HasAvatarImage, Converter={StaticResource BoolToVis}}" />
+                                    </Grid>
+                                </Border>
+
+                                <StackPanel Grid.Column="1" Margin="10,0,20,0">
+                                    <TextBlock Text="{Binding UserName}" FontSize="14" FontWeight="SemiBold"
+                                               Foreground="{StaticResource WxLinkBrush}" />
+                                    <TextBlock Text="{Binding Content}" FontSize="14" TextWrapping="Wrap"
+                                               LineHeight="21" Margin="0,6,0,0"
+                                               Visibility="{Binding HasText, Converter={StaticResource BoolToVis}}" />
+
+                                    <ItemsControl ItemsSource="{Binding Images}" Margin="0,8,0,0"
+                                                  MaxWidth="320"
+                                                  Visibility="{Binding HasImages, Converter={StaticResource BoolToVis}}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid Columns="{Binding Images.Count, Converter={StaticResource ImageGridColumns}}"
+                                                            Rows="{Binding Images.Count, Converter={StaticResource ImageGridRows}}" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Margin="2" Background="#FFEFEFEF" ClipToBounds="True">
+                                                    <Image Source="{Binding Converter={StaticResource ImageUrl}}"
+                                                           Stretch="UniformToFill"
+                                                           Cursor="Hand"
+                                                           MouseLeftButtonDown="Image_Click" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <!-- 时间 + 操作 -->
+                                    <Grid Margin="0,8,0,0">
+                                        <TextBlock Text="{Binding TimeText}" FontSize="11"
+                                                   Foreground="{StaticResource WxTextMutedBrush}"
+                                                   VerticalAlignment="Center" />
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Content="&#xE70F;" Style="{StaticResource WxIconButton}"
+                                                    Width="24" Height="22" FontSize="13" Margin="0,0,2,0"
+                                                    Foreground="#FF576B95" ToolTip="{DynamicResource Moments.EditToolTip}"
+                                                    Visibility="{Binding IsMine, Converter={StaticResource BoolToVis}}"
+                                                    AutomationProperties.AutomationId="MomentEditButton"
+                                                    Click="EditMoment_Click" />
+                                            <Button Content="&#xE74D;" Style="{StaticResource WxIconButton}"
+                                                    Width="24" Height="22" FontSize="13" Margin="0,0,2,0"
+                                                    Foreground="#FF576B95" ToolTip="{DynamicResource Moments.DeleteToolTip}"
+                                                    Visibility="{Binding IsMine, Converter={StaticResource BoolToVis}}"
+                                                    AutomationProperties.AutomationId="MomentDeleteButton"
+                                                    Click="DeleteMoment_Click" />
+                                            <Button Content="{Binding LikeActionText}" FontSize="11"
+                                                    Foreground="#FF576B95" Background="Transparent"
+                                                    BorderThickness="0" Cursor="Hand" Padding="6,2"
+                                                    Command="{Binding DataContext.ToggleLikeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" />
+                                            <Button Content="{DynamicResource Moments.Comment}" FontSize="11" Foreground="#FF576B95"
+                                                    Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                                    Padding="6,2"
+                                                    Command="{Binding DataContext.OpenCommentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- 点赞与评论 -->
+                                    <Border Background="#FFF7F7F7" CornerRadius="3" Padding="8,6" Margin="0,4,0,0"
+                                            Visibility="{Binding HasLikes, Converter={StaticResource BoolToVis}}">
+                                        <WrapPanel>
+                                            <TextBlock Text="♥" FontSize="11" Foreground="#FF576B95" Margin="0,0,4,0" />
+                                            <TextBlock Text="{Binding LikeText}" FontSize="11"
+                                                       Foreground="{StaticResource WxLinkBrush}" TextWrapping="Wrap"
+                                                       MaxWidth="600" />
+                                        </WrapPanel>
+                                    </Border>
+
+                                    <Border Background="#FFF7F7F7" CornerRadius="3" Padding="8,6" Margin="0,2,0,0"
+                                            Visibility="{Binding HasComments, Converter={StaticResource BoolToVis}}">
+                                        <ItemsControl ItemsSource="{Binding Comments}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding DisplayText}" FontSize="11"
+                                                               TextWrapping="Wrap" Margin="0,1"
+                                                               Foreground="#FF333333" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Border>
+
+                                    <!-- 评论输入 -->
+                                    <Border Margin="0,4,0,0" Visibility="{Binding IsCommentBoxOpen, Converter={StaticResource BoolToVis}}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Background="#FFF7F7F7" CornerRadius="3">
+                                                <TextBox Style="{StaticResource WxSearchBox}" Height="30" FontSize="12"
+                                                         Background="Transparent" Margin="6,0"
+                                                         Text="{Binding CommentDraft, UpdateSourceTrigger=PropertyChanged}"
+                                                         AutomationProperties.AutomationId="CommentInput" />
+                                            </Border>
+                                            <Button Grid.Column="1" Style="{StaticResource WxPrimaryButton}"
+                                                    Height="30" Padding="12,0" Margin="6,0,0,0" Content="{DynamicResource Moments.Post}"
+                                                    Command="{Binding DataContext.SubmitCommentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" />
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

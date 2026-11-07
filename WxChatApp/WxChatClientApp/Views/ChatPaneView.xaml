@@ -1,0 +1,644 @@
+<UserControl x:Class="WxChatApp.Views.ChatPaneView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{StaticResource WxPageBrush}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="56" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- ============ 顶栏：返回 + 名称 + 右侧菜单 ============ -->
+        <Border Grid.Row="0" Background="#FFF5F5F5" BorderBrush="{StaticResource WxDividerBrush}"
+                BorderThickness="0,0,0,1">
+            <Grid Margin="10,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Style="{StaticResource WxIconButton}" Width="34" Height="34"
+                        FontSize="15" Content="&#xE72B;" ToolTip="{DynamicResource Common.Back}"
+                        Command="{Binding BackCommand}"
+                        AutomationProperties.AutomationId="BackButton" />
+                <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center"
+                            Orientation="Horizontal">
+                    <Border Width="30" Height="30" CornerRadius="6" Margin="0,0,8,0" VerticalAlignment="Center"
+                            Visibility="{Binding HasPeerAvatar, Converter={StaticResource BoolToVis}}"
+                            ClipToBounds="True" AutomationProperties.AutomationId="ChatPeerAvatar">
+                        <Image Source="{Binding PeerAvatarImage}" Stretch="UniformToFill" />
+                    </Border>
+                    <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding MemberSummary}" FontSize="13"
+                               Foreground="{StaticResource WxTextSecondaryBrush}"
+                               Margin="6,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource WxIconButton}" Width="34" Height="34" FontSize="15"
+                            Content="&#xE717;" ToolTip="{DynamicResource Contact.VoiceCall}" Click="CallVoice_Click" />
+                    <Button Style="{StaticResource WxIconButton}" Width="34" Height="34" FontSize="15"
+                            Content="&#xE714;" ToolTip="{DynamicResource Contact.VideoCall}" Click="CallVideo_Click" />
+                    <Button Style="{StaticResource WxIconButton}" Width="34" Height="34" FontSize="15"
+                            Content="&#xE712;" ToolTip="{DynamicResource Common.More}" Click="More_Click"
+                            AutomationProperties.AutomationId="MoreButton" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ============ 群成员头像条 ============ -->
+        <Border Grid.Row="1" Background="#FFF7F7F7" BorderBrush="{StaticResource WxDividerBrush}"
+                BorderThickness="0,0,0,1" Height="44"
+                Visibility="{Binding HasMembers, Converter={StaticResource BoolToVis}}">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                          Margin="10,6">
+                <ItemsControl ItemsSource="{Binding Members}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
+                                <Border Width="28" Height="28" CornerRadius="5" Background="{Binding Id, Converter={StaticResource AvatarBrush}}">
+                                    <TextBlock Text="{Binding NickName, Converter={StaticResource AvatarText}}"
+                                               Foreground="White" FontSize="12" FontWeight="SemiBold"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="{Binding NickName}" FontSize="11" Margin="5,0,0,0"
+                                           Foreground="{StaticResource WxTextSecondaryBrush}"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <!-- ============ 消息区 ============ -->
+        <Image x:Name="ChatBgImage" Grid.Row="2" Stretch="UniformToFill" Visibility="Collapsed"
+               AutomationProperties.AutomationId="ChatBgImage" />
+        <Border x:Name="ChatBgOverlay" Grid.Row="2" Background="#B8FFFFFF" Visibility="Collapsed" />
+        <ScrollViewer x:Name="MessagesScroll" Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled" Background="{StaticResource WxPageBrush}"
+                      AutomationProperties.AutomationId="MessagesScroll">
+            <Grid>
+                <TextBlock Text="{DynamicResource Chat.Empty}" FontSize="12"
+                           Foreground="{StaticResource WxTextMutedBrush}"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,120,0,0"
+                           Visibility="{Binding ShowEmpty, Converter={StaticResource BoolToVis}}" />
+
+                <ItemsControl ItemsSource="{Binding Messages}" Margin="16,8,16,16">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <!-- 时间分组 -->
+                                <TextBlock Text="{Binding TimeText}" FontSize="11"
+                                           Foreground="{StaticResource WxTextMutedBrush}"
+                                           HorizontalAlignment="Center" Margin="0,12,0,4"
+                                           Visibility="{Binding ShowTime, Converter={StaticResource BoolToVis}}" />
+
+                                <!-- 系统消息 -->
+                                <Grid HorizontalAlignment="Center" Margin="0,4"
+                                      Visibility="{Binding IsSystem, Converter={StaticResource BoolToVis}}">
+                                    <Border Background="#FFDADADA" CornerRadius="4" Padding="10,5" MaxWidth="620">
+                                        <TextBlock Text="{Binding Content}" FontSize="12" TextWrapping="Wrap"
+                                                   Foreground="#FF6B6B6B" HorizontalAlignment="Center" />
+                                    </Border>
+                                </Grid>
+
+                                <!-- 对方消息 -->
+                                <Grid Margin="0,3" HorizontalAlignment="Left"
+                                      Visibility="{Binding ShowOther, Converter={StaticResource BoolToVis}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="40" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox Grid.Column="0" VerticalAlignment="Top" Margin="0,6,4,0"
+                                              IsChecked="{Binding IsSelected}">
+                                        <CheckBox.Style>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding MultiSelectMode, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </CheckBox.Style>
+                                    </CheckBox>
+                                    <Border Grid.Column="1" Width="36" Height="36" CornerRadius="6"
+                                            Background="{Binding AvatarBrush}" VerticalAlignment="Top"
+                                            ClipToBounds="True">
+                                        <Grid>
+                                            <TextBlock Text="{Binding AvatarText}" Foreground="White" FontSize="15"
+                                                       FontWeight="SemiBold" HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       Visibility="{Binding HasAvatarImage, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}" />
+                                            <Image Source="{Binding AvatarImage}" Stretch="UniformToFill"
+                                                   Visibility="{Binding HasAvatarImage, Converter={StaticResource BoolToVis}}" />
+                                        </Grid>
+                                    </Border>
+                                    <StackPanel Grid.Column="2" Margin="9,0,0,0" HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding SenderName}" FontSize="11" Margin="4,0,0,3"
+                                                   Foreground="{StaticResource WxTextMutedBrush}"
+                                                   Visibility="{Binding ShowSender, Converter={StaticResource BoolToVis}}" />
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="6" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Path Data="M0,0 L6,6 L0,12" Fill="{StaticResource WxBubbleOtherBrush}"
+                                                  Width="6" Height="12" VerticalAlignment="Top" Margin="0,13,0,0"
+                                                  Stretch="None" />
+                                            <Border Grid.Column="1" Background="{StaticResource WxBubbleOtherBrush}"
+                                                    CornerRadius="4" Padding="10,8" MaxWidth="460"
+                                                    HorizontalAlignment="Left">
+                                                <Border.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="{DynamicResource Common.Copy}" Click="CopyText_Click" />
+                                                        <MenuItem Header="{DynamicResource Chat.Forward}" Click="ForwardMessage_Click" />
+                                                        <Separator />
+                                                        <MenuItem Header="{DynamicResource Chat.Favorite}" Command="{Binding DataContext.FavoriteMessageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                                        <MenuItem Header="{DynamicResource Chat.MultiSelect}" Click="ToggleMultiSelect_Click" />
+                                                        <Separator />
+                                                        <MenuItem Header="{DynamicResource Common.Delete}" Click="DeleteMessage_Click" Foreground="#FFE64340" />
+                                                    </ContextMenu>
+                                                </Border.ContextMenu>
+                                                <Grid>
+                                                    <TextBlock Text="{Binding Content}" TextWrapping="Wrap" FontSize="14"
+                                                               LineHeight="20"
+                                                               Visibility="{Binding HasText, Converter={StaticResource BoolToVis}}" />
+                                                    <Border CornerRadius="4" ClipToBounds="True"
+                                                            Visibility="{Binding IsImage, Converter={StaticResource BoolToVis}}"
+                                                            AutomationProperties.AutomationId="{Binding Id}">
+                                                        <Border.ContextMenu>
+                                                            <ContextMenu>
+                                                                <MenuItem Header="{DynamicResource Chat.SaveImageAs}" Click="SaveImageAs_Click" />
+                                                                <MenuItem Header="{DynamicResource Chat.Download}" Click="DownloadImage_Click" />
+                                                                <Separator />
+                                                                <MenuItem Header="{DynamicResource Chat.OpenImage}" Click="OpenImage_Click" />
+                                                            </ContextMenu>
+                                                        </Border.ContextMenu>
+                                                        <Image Source="{Binding ImageUrl, Converter={StaticResource ImageUrl}}"
+                                                               MaxWidth="220" MaxHeight="260" Stretch="Uniform" />
+                                                    </Border>
+                                                    <!-- 语音消息：点击播放/停止 -->
+                                                    <Button Visibility="{Binding IsVoice, Converter={StaticResource BoolToVis}}"
+                                                            Background="Transparent" BorderThickness="0" Padding="0"
+                                                            MinWidth="{Binding VoiceMinWidth}" Cursor="Hand"
+                                                            HorizontalContentAlignment="Left"
+                                                            Command="{Binding DataContext.PlayVoiceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            AutomationProperties.AutomationId="{Binding Id}"
+                                                            ToolTip="{DynamicResource Chat.ClickToPlay}">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock FontFamily="{StaticResource WxIconFont}" FontSize="15"
+                                                                       VerticalAlignment="Center"
+                                                                       Text="{Binding IsPlaying, Converter={StaticResource VoiceGlyph}}" />
+                                                            <TextBlock Text="{Binding VoiceDurationText}" FontSize="14"
+                                                                       VerticalAlignment="Center" Margin="10,0,2,0" />
+                                                        </StackPanel>
+                                                    </Button>
+                                                    <!-- 文件消息：点击另存 -->
+                                                    <Button Visibility="{Binding IsFile, Converter={StaticResource BoolToVis}}"
+                                                            Background="Transparent" BorderThickness="0" Padding="0"
+                                                            MinWidth="190" Cursor="Hand" HorizontalContentAlignment="Stretch"
+                                                            Click="FileBubble_Click"
+                                                            AutomationProperties.AutomationId="{Binding Id}"
+                                                            ToolTip="{DynamicResource Chat.ClickToSaveFile}">
+                                                        <StackPanel>
+                                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                                <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE8A5;"
+                                                                           FontSize="22" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                                                <TextBlock Text="{Binding FileName}" FontSize="13" MaxWidth="180"
+                                                                           TextWrapping="Wrap" VerticalAlignment="Center" />
+                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding FileSizeText}" FontSize="11"
+                                                                       HorizontalAlignment="Right"
+                                                                       Foreground="{StaticResource WxTextSecondaryBrush}" />
+                                                        </StackPanel>
+                                                    </Button>
+                                                    <!-- 合并转发的聊天记录 -->
+                                                    <Border Visibility="{Binding IsMerge, Converter={StaticResource BoolToVis}}"
+                                                            Background="White" BorderBrush="#FFE2E2E2" BorderThickness="1"
+                                                            CornerRadius="4" Padding="10,8" MinWidth="210" Cursor="Hand"
+                                                            MouseLeftButtonDown="MergeBubble_Click"
+                                                            AutomationProperties.AutomationId="{Binding Id}"
+                                                            ToolTip="{DynamicResource Chat.ClickToViewHistory}">
+                                                        <StackPanel>
+                                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                                                <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE8A5;"
+                                                                           FontSize="14" VerticalAlignment="Center"
+                                                                           Foreground="{StaticResource WxTextSecondaryBrush}"
+                                                                           Margin="0,0,6,0" />
+                                                                <TextBlock Text="{Binding MergeTitle}" FontSize="13"
+                                                                           FontWeight="SemiBold" VerticalAlignment="Center" />
+                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding MergePreviewText}" FontSize="12"
+                                                                       TextWrapping="Wrap" MaxHeight="84"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       Foreground="{StaticResource WxTextSecondaryBrush}" />
+                                                            <TextBlock Text="{DynamicResource Chat.ViewFullHistory}" FontSize="11" Margin="0,6,0,0"
+                                                                       Foreground="{StaticResource WxGreenBrush}" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- 我的消息 -->
+                                <Grid Margin="0,3" HorizontalAlignment="Right"
+                                      Visibility="{Binding ShowMine, Converter={StaticResource BoolToVis}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="40" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox Grid.Column="2" VerticalAlignment="Top" Margin="4,6,0,0"
+                                              IsChecked="{Binding IsSelected}">
+                                        <CheckBox.Style>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding MultiSelectMode, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </CheckBox.Style>
+                                    </CheckBox>
+                                    <StackPanel Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,9,0">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="6" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Background="{StaticResource WxBubbleSelfBrush}"
+                                                    CornerRadius="4" Padding="10,8" MaxWidth="460"
+                                                    HorizontalAlignment="Right">
+                                                <Border.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="{DynamicResource Common.Copy}" Click="CopyText_Click" />
+                                                        <MenuItem Header="{DynamicResource Chat.Forward}" Click="ForwardMessage_Click" />
+                                                        <Separator />
+                                                        <MenuItem Header="{DynamicResource Chat.Favorite}" Command="{Binding DataContext.FavoriteMessageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                                        <MenuItem Header="{DynamicResource Chat.MultiSelect}" Click="ToggleMultiSelect_Click" />
+                                                        <Separator />
+                                                        <MenuItem Header="{DynamicResource Common.Delete}" Click="DeleteMessage_Click" Foreground="#FFE64340" />
+                                                    </ContextMenu>
+                                                </Border.ContextMenu>
+                                                <Grid>
+                                                    <TextBlock Text="{Binding Content}" TextWrapping="Wrap" FontSize="14"
+                                                               LineHeight="20"
+                                                               Visibility="{Binding HasText, Converter={StaticResource BoolToVis}}" />
+                                                    <Border CornerRadius="4" ClipToBounds="True"
+                                                            Visibility="{Binding IsImage, Converter={StaticResource BoolToVis}}"
+                                                            AutomationProperties.AutomationId="{Binding Id}">
+                                                        <Border.ContextMenu>
+                                                            <ContextMenu>
+                                                                <MenuItem Header="{DynamicResource Chat.SaveImageAs}" Click="SaveImageAs_Click" />
+                                                                <MenuItem Header="{DynamicResource Chat.Download}" Click="DownloadImage_Click" />
+                                                                <Separator />
+                                                                <MenuItem Header="{DynamicResource Chat.OpenImage}" Click="OpenImage_Click" />
+                                                            </ContextMenu>
+                                                        </Border.ContextMenu>
+                                                        <Image Source="{Binding ImageUrl, Converter={StaticResource ImageUrl}}"
+                                                               MaxWidth="220" MaxHeight="260" Stretch="Uniform" />
+                                                    </Border>
+                                                    <!-- 语音消息：点击播放/停止 -->
+                                                    <Button Visibility="{Binding IsVoice, Converter={StaticResource BoolToVis}}"
+                                                            Background="Transparent" BorderThickness="0" Padding="0"
+                                                            MinWidth="{Binding VoiceMinWidth}" Cursor="Hand"
+                                                            HorizontalContentAlignment="Left"
+                                                            Command="{Binding DataContext.PlayVoiceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            AutomationProperties.AutomationId="{Binding Id}"
+                                                            ToolTip="{DynamicResource Chat.ClickToPlay}">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock FontFamily="{StaticResource WxIconFont}" FontSize="15"
+                                                                       VerticalAlignment="Center"
+                                                                       Text="{Binding IsPlaying, Converter={StaticResource VoiceGlyph}}" />
+                                                            <TextBlock Text="{Binding VoiceDurationText}" FontSize="14"
+                                                                       VerticalAlignment="Center" Margin="10,0,2,0" />
+                                                        </StackPanel>
+                                                    </Button>
+                                                    <!-- 文件消息：点击另存 -->
+                                                    <Button Visibility="{Binding IsFile, Converter={StaticResource BoolToVis}}"
+                                                            Background="Transparent" BorderThickness="0" Padding="0"
+                                                            MinWidth="190" Cursor="Hand" HorizontalContentAlignment="Stretch"
+                                                            Click="FileBubble_Click"
+                                                            AutomationProperties.AutomationId="{Binding Id}"
+                                                            ToolTip="{DynamicResource Chat.ClickToSaveFile}">
+                                                        <StackPanel>
+                                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                                <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE8A5;"
+                                                                           FontSize="22" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                                                <TextBlock Text="{Binding FileName}" FontSize="13" MaxWidth="180"
+                                                                           TextWrapping="Wrap" VerticalAlignment="Center" />
+                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding FileSizeText}" FontSize="11"
+                                                                       HorizontalAlignment="Right"
+                                                                       Foreground="{StaticResource WxTextSecondaryBrush}" />
+                                                        </StackPanel>
+                                                    </Button>
+                                                    <!-- 合并转发的聊天记录 -->
+                                                    <Border Visibility="{Binding IsMerge, Converter={StaticResource BoolToVis}}"
+                                                            Background="White" BorderBrush="#FFE2E2E2" BorderThickness="1"
+                                                            CornerRadius="4" Padding="10,8" MinWidth="210" Cursor="Hand"
+                                                            MouseLeftButtonDown="MergeBubble_Click"
+                                                            AutomationProperties.AutomationId="{Binding Id}"
+                                                            ToolTip="{DynamicResource Chat.ClickToViewHistory}">
+                                                        <StackPanel>
+                                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                                                <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE8A5;"
+                                                                           FontSize="14" VerticalAlignment="Center"
+                                                                           Foreground="{StaticResource WxTextSecondaryBrush}"
+                                                                           Margin="0,0,6,0" />
+                                                                <TextBlock Text="{Binding MergeTitle}" FontSize="13"
+                                                                           FontWeight="SemiBold" VerticalAlignment="Center" />
+                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding MergePreviewText}" FontSize="12"
+                                                                       TextWrapping="Wrap" MaxHeight="84"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       Foreground="{StaticResource WxTextSecondaryBrush}" />
+                                                            <TextBlock Text="{DynamicResource Chat.ViewFullHistory}" FontSize="11" Margin="0,6,0,0"
+                                                                       Foreground="{StaticResource WxGreenBrush}" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                            <Path Grid.Column="1" Data="M0,0 L6,6 L0,12"
+                                                  Fill="{StaticResource WxBubbleSelfBrush}"
+                                                  Width="6" Height="12" VerticalAlignment="Top" Margin="0,13,0,0"
+                                                  Stretch="None" />
+                                        </Grid>
+                                        <TextBlock Text="{Binding ReadStateText}" FontSize="10"
+                                                   Foreground="{StaticResource WxTextMutedBrush}"
+                                                   HorizontalAlignment="Right" Margin="0,2,2,0"
+                                                   Visibility="{Binding ShowReadState, Converter={StaticResource BoolToVis}}" />
+                                    </StackPanel>
+                                    <Border Grid.Column="1" Width="36" Height="36" CornerRadius="6"
+                                            Background="{Binding AvatarBrush}" VerticalAlignment="Top"
+                                            ClipToBounds="True">
+                                        <Grid>
+                                            <TextBlock Text="{Binding AvatarText}" Foreground="White" FontSize="15"
+                                                       FontWeight="SemiBold" HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       Visibility="{Binding HasAvatarImage, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}" />
+                                            <Image Source="{Binding AvatarUrl, Converter={StaticResource ImageUrl}}" Stretch="UniformToFill"
+                                                   Visibility="{Binding HasAvatarImage, Converter={StaticResource BoolToVis}}" />
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- ============ 表情面板（Emoji / 表情包 双页） ============ -->
+        <Border Grid.Row="3" Background="#FFF7F7F7" BorderBrush="{StaticResource WxDividerBrush}"
+                BorderThickness="0,1,0,0" Height="{Binding EmojiPanelHeight}"
+                Visibility="{Binding EmojiOpen, Converter={StaticResource BoolToVis}}">
+            <Grid Margin="8,4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="28" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Tab 切换条 -->
+                <Grid Grid.Row="0" HorizontalAlignment="Stretch">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                        <StackPanel>
+                            <Button Height="24" MinWidth="70" FontSize="12" Background="Transparent"
+                                    BorderThickness="0" Cursor="Hand" Content="{DynamicResource Chat.Emoji}"
+                                    Command="{Binding SelectEmojiTabCommand}" CommandParameter="emoji"
+                                    AutomationProperties.AutomationId="EmojiTabButton" />
+                            <Border Height="2" Margin="16,0" Background="{StaticResource WxGreenBrush}"
+                                    Visibility="{Binding IsStickerTab, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}" />
+                        </StackPanel>
+                        <StackPanel Margin="10,0,0,0">
+                            <Button Height="24" MinWidth="70" FontSize="12" Background="Transparent"
+                                    BorderThickness="0" Cursor="Hand" Content="{DynamicResource Chat.Stickers}"
+                                    Command="{Binding SelectEmojiTabCommand}" CommandParameter="sticker"
+                                    AutomationProperties.AutomationId="StickerTabButton" />
+                            <Border Height="2" Margin="16,0" Background="{StaticResource WxGreenBrush}"
+                                    Visibility="{Binding IsStickerTab, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Button Height="24" Width="30" FontSize="14" Background="Transparent" BorderThickness="0"
+                            Cursor="Hand" Content="&#xE710;" HorizontalAlignment="Right"
+                            ToolTip="{DynamicResource Chat.AddSticker}" Command="{Binding AddStickerCommand}"
+                            AutomationProperties.AutomationId="AddStickerButton"
+                            Visibility="{Binding IsStickerTab, Converter={StaticResource BoolToVis}}" />
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <!-- Emoji 页 -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  Visibility="{Binding IsStickerTab, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
+                        <ItemsControl ItemsSource="{Binding Emojis}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Width="34" Height="34" FontSize="18" Background="Transparent"
+                                            BorderThickness="0" Cursor="Hand" Content="{Binding}"
+                                            Command="{Binding DataContext.InsertEmojiCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- 表情包页 -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  Visibility="{Binding IsStickerTab, Converter={StaticResource BoolToVis}}">
+                        <ItemsControl ItemsSource="{Binding Stickers}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Width="56" Height="56" Margin="3" Background="Transparent"
+                                            BorderThickness="0" Cursor="Hand" ToolTip="{Binding Name}"
+                                            Command="{Binding DataContext.SendStickerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding Path}"
+                                            AutomationProperties.AutomationId="StickerItem">
+                                        <Image Source="{Binding Path, Converter={StaticResource LocalImagePath}}"
+                                               Width="50" Height="50" Stretch="Uniform" />
+                                        <Button.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="{DynamicResource Common.Send}" Click="StickerSend_Click" />
+                                                <MenuItem Header="{DynamicResource Chat.DeleteSticker}" Click="StickerDelete_Click" />
+                                            </ContextMenu>
+                                        </Button.ContextMenu>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- ============ @ 提及面板 ============ -->
+        <Border Grid.Row="4" Background="#FFF7F7F7" BorderBrush="{StaticResource WxDividerBrush}"
+                BorderThickness="0,1,0,0" Height="58"
+                Visibility="{Binding AtPanelOpen, Converter={StaticResource BoolToVis}}">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                          Margin="10,7">
+                <ItemsControl ItemsSource="{Binding Members}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Margin="0,0,10,0" Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                    Command="{Binding DataContext.InsertMentionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding NickName}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Width="28" Height="28" CornerRadius="5"
+                                            Background="{Binding Id, Converter={StaticResource AvatarBrush}}">
+                                        <TextBlock Text="{Binding NickName, Converter={StaticResource AvatarText}}"
+                                                   Foreground="White" FontSize="12" FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <TextBlock Text="{Binding NickName}" FontSize="12" Margin="5,0,0,0"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <!-- ============ 输入区 ============ -->
+        <Border Grid.Row="5" Background="#FFF7F7F7" BorderBrush="{StaticResource WxDividerBrush}"
+                BorderThickness="0,1,0,0" Padding="10,8">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="1" Background="White" CornerRadius="4" MinHeight="82" MaxHeight="150"
+                        Visibility="{Binding VoiceMode, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
+                    <TextBox x:Name="InputBox" Style="{StaticResource WxInputBox}" Margin="10,8"
+                             Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
+                             KeyDown="Input_KeyDown"
+                             ToolTip="{DynamicResource Chat.InputHint}"
+                             AutomationProperties.AutomationId="InputBox" />
+                </Border>
+
+                <!-- 多选工具栏 -->
+                <Border Grid.Row="0" Background="#FFF7F7F7" CornerRadius="4" MinHeight="40" Padding="14,8"
+                        Visibility="{Binding MultiSelectMode, Converter={StaticResource BoolToVis}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding SelectedCountText}"
+                                   FontSize="13" Foreground="{StaticResource WxTextSecondaryBrush}"
+                                   VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Content="{DynamicResource Chat.MergeForward}" Height="28" Padding="10,0" Margin="0,0,8,0"
+                                    FontSize="12" Foreground="White" Background="{StaticResource WxGreenBrush}"
+                                    BorderThickness="0" Click="MergeForward_Click" Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="4">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="bd" Property="Background" Value="#FF3DBE5A" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            <Button Content="{DynamicResource Chat.BatchDelete}" Height="28" Padding="10,0" Margin="0,0,8,0"
+                                    FontSize="12" Foreground="White" Background="#FFE64340" BorderThickness="0"
+                                    Command="{Binding BatchDeleteSelectedCommand}" Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="4">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="bd" Property="Background" Value="#FFFF5A55" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            <Button Content="{DynamicResource Chat.CancelMultiSelect}" Height="28" Padding="10,0" FontSize="12"
+                                    Style="{StaticResource WxGhostButton}"
+                                    Command="{Binding CancelMultiSelectCommand}" Cursor="Hand" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 语音模式：按住说话 -->
+                <Border Grid.Row="1" Background="White" CornerRadius="4" MinHeight="82"
+                        Visibility="{Binding VoiceMode, Converter={StaticResource BoolToVis}}">
+                    <Button Content="{Binding VoiceHoldText}" Background="Transparent" BorderThickness="0"
+                            FontSize="15" Foreground="{StaticResource WxTextSecondaryBrush}" Cursor="Hand"
+                            PreviewMouseLeftButtonDown="VoiceHold_Down"
+                            PreviewMouseLeftButtonUp="VoiceHold_Up"
+                            MouseLeave="VoiceHold_Leave"
+                            AutomationProperties.AutomationId="VoiceHoldButton" />
+                </Border>
+
+                <Grid Grid.Row="2" Margin="0,6,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource WxIconButton}" Width="30" Height="30" FontSize="17"
+                                Content="&#xE76E;" ToolTip="{DynamicResource Chat.Emoji}" Command="{Binding ToggleEmojiCommand}"
+                                AutomationProperties.AutomationId="EmojiButton" />
+                        <Button Style="{StaticResource WxIconButton}" Width="30" Height="30" FontSize="16"
+                                Content="&#xE8B9;" ToolTip="{DynamicResource Chat.SendImage}" Command="{Binding AttachImageCommand}"
+                                AutomationProperties.AutomationId="AttachButton" />
+                        <Button Style="{StaticResource WxIconButton}" Width="30" Height="30" FontSize="16"
+                                Content="&#xE8A5;" ToolTip="{DynamicResource Chat.SendFile}" Command="{Binding SendFileCommand}"
+                                AutomationProperties.AutomationId="FileButton" />
+                        <Button Style="{StaticResource WxIconButton}" Width="30" Height="30" FontSize="16"
+                                Content="&#xE720;" ToolTip="{DynamicResource Chat.VoiceInput}" Command="{Binding ToggleVoiceModeCommand}"
+                                AutomationProperties.AutomationId="VoiceModeButton" />
+                        <Button Style="{StaticResource WxIconButton}" Width="30" Height="30" FontSize="15"
+                                Content="@" ToolTip="{DynamicResource Chat.Mention}" Command="{Binding ToggleAtCommand}"
+                                Visibility="{Binding IsGroup, Converter={StaticResource BoolToVis}}" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding ErrorText}" FontSize="11" Foreground="#FFE64340"
+                               HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,86,0"
+                               Visibility="{Binding ErrorText, Converter={StaticResource StringToVis}}" />
+                    <Button x:Name="SendButton" Style="{StaticResource WxPrimaryButton}" Width="70" Height="28" Padding="0"
+                            Content="{DynamicResource Common.Send}" HorizontalAlignment="Right" IsEnabled="{Binding CanSend}"
+                            Command="{Binding SendCommand}"
+                            AutomationProperties.AutomationId="SendButton" />
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

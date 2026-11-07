@@ -1,0 +1,86 @@
+<Window x:Class="WxChatApp.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:WxChatApp.Views"
+        Title="{DynamicResource App.LoginTitle}"
+        Width="420" Height="580"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" ShowInTaskbar="True">
+
+    <Grid>
+        <Border Margin="16" CornerRadius="10" Background="#FFF7F7F7" BorderBrush="#FFE2E2E2"
+                BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.25" Color="#FF000000" />
+            </Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                    <Button HorizontalAlignment="Right" Width="32" Height="28" Margin="0,2,6,0"
+                            Style="{StaticResource WxIconButton}" FontSize="12" Content="&#xE8BB;"
+                            Click="Close_Click" ToolTip="{DynamicResource Common.Close}" />
+                </Grid>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="44,4,44,28">
+                        <Image Width="54" Height="54" Stretch="Uniform" HorizontalAlignment="Left"
+                               Source="pack://application:,,,/Resources/Brand/logo-128.png" />
+
+                        <TextBlock Text="{DynamicResource App.Name}" FontSize="23" FontWeight="Bold" Margin="0,14,0,4" />
+                        <TextBlock Text="{Binding SubtitleText}" Style="{StaticResource WxSecondaryText}"
+                                   TextWrapping="Wrap" />
+
+                        <TextBlock Text="{DynamicResource Login.Account}" Margin="0,22,0,6" Style="{StaticResource WxSecondaryText}" />
+                        <TextBox x:Name="AccountTextBox" Style="{StaticResource WxLabelInput}"
+                                 Text="{Binding Account, UpdateSourceTrigger=PropertyChanged}" MaxLength="20"
+                                 AutomationProperties.AutomationId="AccountTextBox" />
+
+                        <StackPanel Visibility="{Binding IsRegisterMode, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="{DynamicResource Login.Nickname}" Margin="0,14,0,6" Style="{StaticResource WxSecondaryText}" />
+                            <TextBox Style="{StaticResource WxLabelInput}"
+                                     Text="{Binding Nickname, UpdateSourceTrigger=PropertyChanged}" MaxLength="20" />
+                        </StackPanel>
+
+                        <TextBlock Text="{DynamicResource Login.Password}" Margin="0,14,0,6" Style="{StaticResource WxSecondaryText}" />
+                        <PasswordBox x:Name="PasswordBox" Style="{StaticResource WxPasswordBox}" MaxLength="32"
+                                     KeyDown="PasswordBox_KeyDown" AutomationProperties.AutomationId="PasswordBox" />
+
+                        <TextBlock Text="{Binding ErrorMessage}" Foreground="#FFE64340" FontSize="12"
+                                   TextWrapping="Wrap" Margin="0,10,0,0"
+                                   Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVis}}" />
+
+                        <Button Content="{Binding SubmitText}" Margin="0,14,0,0" Height="40"
+                                Style="{StaticResource WxPrimaryButton}" Click="Submit_Click"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}"
+                                AutomationProperties.AutomationId="SubmitButton" />
+
+                        <Button Content="{Binding SwitchText}" HorizontalAlignment="Center" Margin="0,10,0,0"
+                                Style="{StaticResource WxTextButton}" Click="Switch_Click"
+                                AutomationProperties.AutomationId="SwitchModeButton" />
+
+                        <CheckBox Content="{DynamicResource Login.Remember}" IsChecked="{Binding RememberAccount}" Margin="0,20,0,0"
+                                  Foreground="{StaticResource WxTextSecondaryBrush}" />
+
+                        <TextBlock Text="{Binding ServerHint}" Margin="0,24,0,0" FontSize="10"
+                                   Foreground="{StaticResource WxTextMutedBrush}" />
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 左下角服务状态信号灯 -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom" Margin="18,0,0,16" Cursor="Hand"
+                            ToolTip="{DynamicResource Login.StatusRefresh}" MouseLeftButtonUp="Status_Click">
+                    <Ellipse x:Name="StatusLight" Width="10" Height="10" Fill="#FFBDBDBD"
+                             Stroke="#33000000" StrokeThickness="0.5" VerticalAlignment="Center" />
+                    <TextBlock x:Name="StatusText" Text="{DynamicResource Login.StatusChecking}" FontSize="10" Margin="6,0,0,0"
+                               Foreground="{StaticResource WxTextMutedBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

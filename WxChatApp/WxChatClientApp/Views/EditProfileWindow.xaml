@@ -1,0 +1,87 @@
+<Window x:Class="WxChatApp.Views.EditProfileWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource Me.Profile}" Width="420" SizeToContent="Height" MinHeight="360" MaxHeight="720"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent" ResizeMode="NoResize"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        ShowInTaskbar="False" KeyDown="Window_KeyDown">
+    <Grid>
+        <Border Margin="12" CornerRadius="8" Background="White" BorderBrush="#FFE2E2E2" BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="16" ShadowDepth="0" Opacity="0.22" />
+            </Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Background="#FFF7F7F7" MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                    <TextBlock Text="{DynamicResource Me.Profile}" FontSize="14" FontWeight="SemiBold"
+                               VerticalAlignment="Center" Margin="16,0" />
+                    <Button Style="{StaticResource WxCloseWindowButton}" Width="40" Height="32"
+                            HorizontalAlignment="Right" Content="&#xE8BB;" ToolTip="{DynamicResource Common.Close}"
+                            Click="Close_Click"
+                            AutomationProperties.AutomationId="CloseButton" />
+                </Grid>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                              MaxHeight="620">
+                    <StackPanel Margin="18,12,18,16">
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="AvatarBorder" Grid.Column="0" Width="64" Height="64" CornerRadius="32"
+                                    Background="#FF4C9BD6" ClipToBounds="True">
+                                <Grid>
+                                    <TextBlock x:Name="AvatarInitial" Text="?" Foreground="White" FontSize="24"
+                                               FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <Image x:Name="AvatarImage" Visibility="Collapsed" Stretch="UniformToFill" />
+                                </Grid>
+                            </Border>
+                            <StackPanel Grid.Column="1" Margin="12,14,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="{DynamicResource Profile.Avatar}" FontSize="13" FontWeight="SemiBold" />
+                                <TextBlock x:Name="AvatarHint" Text="{DynamicResource Profile.AvatarHint}"
+                                           FontSize="11" Foreground="#FF8A8A8A" Margin="0,4,0,0" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Button x:Name="ChangeAvatarButton" Grid.Column="2" Content="{DynamicResource Profile.ChangeAvatar}"
+                                    Style="{StaticResource WxGhostButton}" Width="88" Height="32" Margin="0,16,0,0"
+                                    Click="ChangeAvatar_Click" />
+                        </Grid>
+                        <TextBlock Text="{DynamicResource Profile.NicknameLabel}" FontSize="12"
+                                   Foreground="{StaticResource WxTextSecondaryBrush}" Margin="0,4,0,0" />
+                        <TextBox x:Name="NicknameBox" Style="{StaticResource WxLabelInput}" Margin="0,8,0,0"
+                                 MaxLength="20" AutomationProperties.AutomationId="NicknameBox" />
+                        <TextBlock Text="{DynamicResource Profile.WxIdLabel}" FontSize="12"
+                                   Foreground="{StaticResource WxTextSecondaryBrush}" Margin="0,14,0,0" />
+                        <TextBox x:Name="WxIdBox" Style="{StaticResource WxLabelInput}" Margin="0,8,0,0"
+                                 MaxLength="20" AutomationProperties.AutomationId="WxIdBox" />
+                        <TextBlock Text="{DynamicResource Profile.WxIdHint}" FontSize="11"
+                                   Foreground="{StaticResource WxTextMutedBrush}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        <TextBlock Text="{DynamicResource Profile.SignatureLabel}" FontSize="12"
+                                   Foreground="{StaticResource WxTextSecondaryBrush}" Margin="0,14,0,0" />
+                        <TextBox x:Name="SignatureBox" Style="{StaticResource WxLabelInput}" Margin="0,8,0,0"
+                                 MaxLength="60" AutomationProperties.AutomationId="SignatureBox" />
+                        <TextBlock Text="{DynamicResource Profile.PhoneLabel}" FontSize="12"
+                                   Foreground="{StaticResource WxTextSecondaryBrush}" Margin="0,14,0,0" />
+                        <TextBox x:Name="PhoneBox" Style="{StaticResource WxLabelInput}" Margin="0,8,0,0"
+                                 MaxLength="11" AutomationProperties.AutomationId="PhoneBox" />
+                        <TextBlock Text="{DynamicResource Profile.PhoneHint}" FontSize="11"
+                                   Foreground="{StaticResource WxTextMutedBrush}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        <TextBlock x:Name="ErrorText" Foreground="#FFE64340" FontSize="11" Margin="0,8,0,0"
+                                   TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                            <Button Style="{StaticResource WxGhostButton}" Content="{DynamicResource Common.Cancel}" Width="72"
+                                    Click="Cancel_Click" AutomationProperties.AutomationId="CancelButton" />
+                            <Button x:Name="SaveButton" Style="{StaticResource WxPrimaryButton}" Content="{DynamicResource Common.Save}"
+                                    Width="72" Margin="8,0,0,0" Click="Save_Click"
+                                    AutomationProperties.AutomationId="SaveButton" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

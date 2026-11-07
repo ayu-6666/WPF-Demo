@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>WxChatApp</RootNamespace>
+    <AssemblyName>WxChatApp</AssemblyName>
+    <ApplicationIcon>Resources\Brand\logo.ico</ApplicationIcon>
+    <!-- 服务端是独立项目，不能被客户端的默认通配符纳入编译 -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);WxChatServer\**;obj\**;bin\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="WxChatServer\**" />
+    <Page Remove="WxChatServer\**" />
+    <None Remove="WxChatServer\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.11" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
+  </ItemGroup>
+
+  <!-- 品牌图标需要以 Resource 方式嵌入，否则 pack://application:,,,/Resources/... 取不到 -->
+  <ItemGroup>
+    <Resource Include="Resources\Brand\*.png" />
+    <Resource Include="Resources\Brand\*.ico" />
+  </ItemGroup>
+
+</Project>

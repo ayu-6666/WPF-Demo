@@ -1,0 +1,48 @@
+<Window x:Class="WxChatApp.Views.AppDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource Dialog.InfoTitle}"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner" UseLayoutRounding="True" SnapsToDevicePixels="True"
+        KeyDown="Window_KeyDown">
+    <Grid x:Name="RootGrid" Background="#66000000" MouseLeftButtonDown="Root_MouseLeftButtonDown">
+        <Border Width="400" MaxHeight="520" Margin="24" Background="White" CornerRadius="8"
+                BorderBrush="#FFE2E2E2" BorderThickness="1" VerticalAlignment="Center"
+                HorizontalAlignment="Center">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="18" ShadowDepth="0" Opacity="0.25" />
+            </Border.Effect>
+            <StackPanel Margin="20,18,20,16">
+                <StackPanel Orientation="Horizontal">
+                    <Border x:Name="IconBorder" Width="40" Height="40" CornerRadius="20" Background="#FFEAF2FF"
+                            VerticalAlignment="Top">
+                        <Grid>
+                            <Ellipse x:Name="IconRing" Width="32" Height="32" Stroke="#FF2B6CF0" StrokeThickness="2" />
+                            <Path x:Name="IconGlyph" Stroke="#FF2B6CF0" StrokeThickness="2.2"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            <Ellipse x:Name="IconDot" Width="3.6" Height="3.6" Fill="#FF2B6CF0"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0"
+                                     Visibility="Collapsed" />
+                            <TextBlock x:Name="IconText" Text="?" FontSize="19" FontWeight="SemiBold"
+                                       Foreground="#FF2B6CF0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="Collapsed" />
+                        </Grid>
+                    </Border>
+                    <TextBlock x:Name="TitleText" Text="{DynamicResource Dialog.InfoTitle}" FontSize="15" FontWeight="SemiBold"
+                               Margin="10,9,0,0" VerticalAlignment="Top" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <TextBlock x:Name="MessageText" Margin="42,14,0,0" FontSize="13" Foreground="#FF555555"
+                           TextWrapping="Wrap" LineHeight="20" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                    <Button x:Name="CancelButton" Style="{StaticResource WxGhostButton}" Content="{DynamicResource Common.Cancel}"
+                            Width="72" Height="32" Visibility="Collapsed" Click="Cancel_Click"
+                            AutomationProperties.AutomationId="DialogCancel" />
+                    <Button x:Name="OkButton" Style="{StaticResource WxPrimaryButton}" Content="{DynamicResource Common.Know}"
+                            Width="80" Height="32" Margin="8,0,0,0" Click="Ok_Click" IsDefault="True"
+                            AutomationProperties.AutomationId="DialogOk" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
