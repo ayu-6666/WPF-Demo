@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using CPM.Recipe.Tool.Models;
 
 namespace CPM.Recipe.Tool.Services
@@ -61,9 +62,9 @@ namespace CPM.Recipe.Tool.Services
 
         public static RecipeModel Load(string filePath)
         {
-            if (!File.Exists(filePath)) throw new FileNotFoundException("文件不存在", filePath);
-            var json = File.ReadAllText(filePath);
-            return JsonConvert.DeserializeObject<RecipeModel>(json);
+            // 改为统一走 JsonDocumentService：自动探测编码（无 BOM 的 GBK 文件不再乱码）
+            var doc = JsonDocumentService.Load(filePath);
+            return doc.Root?.ToObject<RecipeModel>();
         }
 
         public static string ToJson(RecipeModel recipe)
@@ -126,8 +127,9 @@ namespace CPM.Recipe.Tool.Services
             if (!string.IsNullOrEmpty(destDir) && !Directory.Exists(destDir))
                 Directory.CreateDirectory(destDir!);
 
-            var json = JsonConvert.SerializeObject(recipe, Formatting.Indented);
-            File.WriteAllText(destPath, json);
+            // 写回时沿用源文件的编码与缩进风格（修复原实现固定 UTF-8 无 BOM / 2 空格的问题）
+            var root = JToken.FromObject(recipe);
+            JsonDocumentService.SaveWithOriginalFormat(originalPath, destPath, root);
             return destPath;
         }
 

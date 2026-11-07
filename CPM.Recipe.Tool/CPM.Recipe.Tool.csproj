@@ -15,6 +15,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <LangVersion>latest</LangVersion>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -58,7 +59,11 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!-- 直接引用本机 NuGet 缓存中的 Newtonsoft.Json（避免依赖 PackageReference 还原） -->
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>D:\tang\donet_librarys\global_package\newtonsoft.json\13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -66,7 +71,28 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Models\RecipeModel.cs" />
+    <Compile Include="Models\EcEntry.cs" />
     <Compile Include="Services\RecipeMigrationService.cs" />
+    <Compile Include="Services\EcConfigService.cs" />
+    <Compile Include="Services\JsonDocumentService.cs" />
+    <Compile Include="Services\SettingsService.cs" />
+    <Compile Include="Services\LocalizationService.cs" />
+    <Compile Include="DeleteByIdDialog.xaml.cs">
+      <DependentUpon>DeleteByIdDialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EditItemDialog.xaml.cs">
+      <DependentUpon>EditItemDialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EcEditDialog.xaml.cs">
+      <DependentUpon>EcEditDialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MessageDialog.xaml.cs">
+      <DependentUpon>MessageDialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Templates\ConditionRecipeTemplate.cs" />
     <Compile Include="Templates\DechuckRecipeTemplate.cs" />
     <Compile Include="Templates\DryRecipeTemplate.cs" />
@@ -78,6 +104,30 @@
     <Compile Include="Templates\RollRecipeTemplate.cs" />
     <Compile Include="Templates\UnloadRecipeTemplate.cs" />
     <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EditItemDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DeleteByIdDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EcEditDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MessageDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\DarkTheme.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\LightTheme.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -115,6 +165,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Content Include="Help\help-zh.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <!-- 作为 WPF 资源嵌入，供 Window.Icon 与标题栏 Logo 在运行期加载 -->
+    <Resource Include="app.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

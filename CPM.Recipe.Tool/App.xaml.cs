@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Threading;
+using CPM.Recipe.Tool.Services;
 
 namespace CPM.Recipe.Tool
 {
@@ -13,6 +14,11 @@ namespace CPM.Recipe.Tool
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+            // 启动前恢复上次的主题与语言（StartupUri 窗口在 base.OnStartup 之后创建）
+            var settings = SettingsService.Load();
+            ThemeManager.Apply(settings.Theme);
+            L.SetLanguage(settings.Language);
+
             base.OnStartup(e);
 
             // 全局异常捕获 —— 避免 WinExe 静默退出
@@ -22,8 +28,7 @@ namespace CPM.Recipe.Tool
                 args.Handled = true;
                 try
                 {
-                    MessageBox.Show(args.Exception.ToString(),
-                        "未处理异常", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageDialog.Error(null, args.Exception.ToString(), "未处理异常");
                 }
                 catch { }
                 Shutdown(-1);

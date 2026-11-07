@@ -49,12 +49,7 @@ namespace CPM.Recipe.Tool.Models
                 set => SetProperty(ref _steps, value);
             }
 
-            public string TemplateKey => Type?.ToLower() switch
-            {
-                "option" or "list" => "ComboBox",
-                "int" or "float" => "NumericUpDown",
-                _ => "TextBox"
-            };
+            public string TemplateKey => SectionTypeCatalog.TemplateKeyFor(Type);
         }
 
         public class Step : ObservableObject
@@ -71,6 +66,34 @@ namespace CPM.Recipe.Tool.Models
             {
                 get => _value;
                 set => SetProperty(ref _value, value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Section.Type 取值与 TemplateKey 映射的唯一来源：
+    /// 编辑器下拉取值、TemplateKey 自动推导都从这里取，避免多处硬编码不一致。
+    /// 依据：现有 UnitRecipe 数据中实际出现的 Type 为 float / list / option / int / text（另有少量空值），
+    /// 其余（double / bool / string）按控件能力补充，用于兼容历史文件。
+    /// </summary>
+    public static class SectionTypeCatalog
+    {
+        public static readonly string[] Types = { "int", "float", "double", "bool", "string", "text", "option", "list" };
+
+        /// <summary>Type → 控件模板键：数值类用 NumericUpDown，枚举类用 ComboBox，其余 TextBox。</summary>
+        public static string TemplateKeyFor(string type)
+        {
+            switch ((type ?? "").Trim().ToLowerInvariant())
+            {
+                case "int":
+                case "float":
+                case "double":
+                    return "NumericUpDown";
+                case "option":
+                case "list":
+                    return "ComboBox";
+                default:
+                    return "TextBox";
             }
         }
     }
