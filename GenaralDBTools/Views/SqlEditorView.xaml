@@ -1,0 +1,87 @@
+<UserControl x:Class="GenaralDBTools.Views.SqlEditorView"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+ FontFamily="Microsoft YaHei UI" FontSize="13">
+ <Grid Margin="14">
+  <Grid.RowDefinitions>
+   <RowDefinition Height="Auto"/>
+   <RowDefinition Height="2*"/>
+   <RowDefinition Height="7"/>
+   <RowDefinition Height="3*"/>
+   <RowDefinition Height="Auto"/>
+  </Grid.RowDefinitions>
+
+  <Grid Grid.Row="0" Margin="0,0,0,10">
+   <Grid.ColumnDefinitions>
+    <ColumnDefinition Width="*"/>
+    <ColumnDefinition Width="Auto"/>
+   </Grid.ColumnDefinitions>
+   <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+    <TextBlock Text="目标连接：" Foreground="{StaticResource MutedBrush}"/>
+    <TextBlock Text="{Binding TargetConnection}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"/>
+    <TextBlock Text="（执行时使用左侧当前选中的连接）" Foreground="#FF94A3B8" FontSize="12" Margin="8,0,0,0"/>
+   </StackPanel>
+   <StackPanel Grid.Column="1" Orientation="Horizontal">
+    <Button Content="执行 SQL" Style="{StaticResource PrimaryButton}" MinWidth="104"
+     Command="{Binding DataContext.ExecuteSqlCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+     IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}"/>
+    <Button Content="清空结果" Margin="8,0,0,0" Click="ClearResult_Click"/>
+   </StackPanel>
+  </Grid>
+
+  <Border Grid.Row="1" Style="{StaticResource Card}" Padding="0" ClipToBounds="True">
+   <Grid>
+    <Grid.RowDefinitions>
+     <RowDefinition Height="Auto"/>
+     <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Border Grid.Row="0" Background="#FFF8FAFC" CornerRadius="10,10,0,0" Padding="12,6"
+     BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="0,0,0,1">
+     <TextBlock Text="SQL 编辑器" FontWeight="SemiBold" FontSize="13" Foreground="#FF475569"/>
+    </Border>
+    <avalonEdit:TextEditor Grid.Row="1" x:Name="Editor" FontFamily="Cascadia Code,Consolas" FontSize="13"
+     ShowLineNumbers="True" WordWrap="False" HorizontalScrollBarVisibility="Auto"
+     VerticalScrollBarVisibility="Auto" Padding="8,6"/>
+   </Grid>
+  </Border>
+
+  <GridSplitter Grid.Row="2" Height="7" HorizontalAlignment="Stretch" Background="Transparent"
+   ResizeBehavior="PreviousAndNext" ResizeDirection="Rows" Cursor="SizeNS"/>
+
+  <Border Grid.Row="3" Style="{StaticResource Card}" Padding="0" ClipToBounds="True">
+   <Grid>
+    <Grid.RowDefinitions>
+     <RowDefinition Height="Auto"/>
+     <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Border Grid.Row="0" Background="#FFF8FAFC" CornerRadius="10,10,0,0" Padding="12,6"
+     BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="0,0,0,1">
+     <DockPanel>
+      <TextBlock DockPanel.Dock="Left" Text="执行结果" FontWeight="SemiBold" FontSize="13" Foreground="#FF475569"/>
+      <TextBlock DockPanel.Dock="Right" Text="{Binding ResultSummary}" Foreground="{StaticResource MutedBrush}"
+       FontSize="12" VerticalAlignment="Center"/>
+     </DockPanel>
+    </Border>
+
+    <Grid Grid.Row="1">
+     <DataGrid ItemsSource="{Binding ResultData}" AutoGenerateColumns="True" IsReadOnly="True"
+      Visibility="{Binding HasResult, Converter={StaticResource BoolToVisibility}}"/>
+     <TextBlock Text="执行 SQL 后在此显示结果集或影响行数。" Foreground="#FF94A3B8"
+      HorizontalAlignment="Center" VerticalAlignment="Center"
+      Visibility="{Binding HasResult, Converter={StaticResource InverseBoolToVisibility}}"/>
+    </Grid>
+   </Grid>
+  </Border>
+
+  <StackPanel Grid.Row="4" Margin="2,6,2,0">
+   <TextBlock Text="{Binding ErrorText}" Foreground="{StaticResource DangerBrush}" TextWrapping="Wrap"
+    Visibility="{Binding ErrorText, Converter={StaticResource StringToVisibility}}"/>
+   <Expander Header="执行输出" Foreground="{StaticResource MutedBrush}" IsExpanded="False">
+    <TextBox Text="{Binding OutputText, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True"
+     Style="{StaticResource MultilineTextBox}" Height="110" FontFamily="Cascadia Code,Consolas" FontSize="12"
+     TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
+   </Expander>
+  </StackPanel>
+ </Grid>
+</UserControl>

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
+  <OutputType>WinExe</OutputType><TargetFramework>net6.0-windows7.0</TargetFramework>
+  <UseWPF>true</UseWPF><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings>
+  <RootNamespace>GenaralDBTools</RootNamespace><AssemblyName>GenaralDBTools</AssemblyName>
+  <Version>0.2.0</Version><Company>GenaralDBTools</Company><Product>GenaralDBTools</Product>
+  <LangVersion>11.0</LangVersion>
+ </PropertyGroup>
+ <ItemGroup>
+  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
+  <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.28" />
+  <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="6.0.0" />
+  <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
+  <PackageReference Include="MySqlConnector" Version="2.3.7" />
+  <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.130" />
+  <PackageReference Include="StackExchange.Redis" Version="2.7.17" />
+  <PackageReference Include="MongoDB.Driver" Version="2.28.0" />
+ </ItemGroup>
+</Project>
