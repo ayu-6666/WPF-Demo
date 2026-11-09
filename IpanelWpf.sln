@@ -23,8 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cmp.UTools.GUI", "Cmp.UTool
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitTomrrorApp", "BitTomrrorApp\BitTomrrorApp.csproj", "{E25F00F0-57CF-E6ED-EDA4-E53EF4FA95CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WxChatApp", "WxChatApp\WxChatApp.csproj", "{6B7CC0DE-C89D-7B84-ABCF-6B4ABDCB237A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tang.VideoThrimalgoAI", "Tang.VideoThrimalgoAI\Tang.VideoThrimalgoAI.csproj", "{813AFBB2-D61A-63EE-AB79-6C85554AA4C0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RebootHMI", "RebootHMI\RebootHMI.csproj", "{C462E466-A1C0-8180-7D65-A81C82E9E7FB}"
@@ -41,6 +39,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisioLikeWpf48", "VisioLikeMap\VisioLikeWpf48.csproj", "{7E41D30B-5D8B-49AA-9A71-9C3B16D64802}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MindMapWpf48", "MindMap\MindMapWpf48.csproj", "{A3C2B3B8-7B8A-4DA8-A2D1-21B9A1A6F148}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WxChatApp", "WxChatApp\WxChatClientApp\WxChatApp.csproj", "{C336852C-54B4-4936-D8F4-ECFFDCFACC5D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WxChatServer", "WxChatApp\WxChatServer\WxChatServer.csproj", "{52A4E744-BA53-B392-DD50-C5A564E350C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,10 +90,6 @@ Global
 		{E25F00F0-57CF-E6ED-EDA4-E53EF4FA95CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E25F00F0-57CF-E6ED-EDA4-E53EF4FA95CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E25F00F0-57CF-E6ED-EDA4-E53EF4FA95CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6B7CC0DE-C89D-7B84-ABCF-6B4ABDCB237A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B7CC0DE-C89D-7B84-ABCF-6B4ABDCB237A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6B7CC0DE-C89D-7B84-ABCF-6B4ABDCB237A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6B7CC0DE-C89D-7B84-ABCF-6B4ABDCB237A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{813AFBB2-D61A-63EE-AB79-6C85554AA4C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{813AFBB2-D61A-63EE-AB79-6C85554AA4C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{813AFBB2-D61A-63EE-AB79-6C85554AA4C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -116,6 +114,14 @@ Global
 		{A3C2B3B8-7B8A-4DA8-A2D1-21B9A1A6F148}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3C2B3B8-7B8A-4DA8-A2D1-21B9A1A6F148}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3C2B3B8-7B8A-4DA8-A2D1-21B9A1A6F148}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C336852C-54B4-4936-D8F4-ECFFDCFACC5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C336852C-54B4-4936-D8F4-ECFFDCFACC5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C336852C-54B4-4936-D8F4-ECFFDCFACC5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C336852C-54B4-4936-D8F4-ECFFDCFACC5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52A4E744-BA53-B392-DD50-C5A564E350C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52A4E744-BA53-B392-DD50-C5A564E350C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52A4E744-BA53-B392-DD50-C5A564E350C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52A4E744-BA53-B392-DD50-C5A564E350C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
