@@ -15,11 +15,12 @@ using MindMapWpf48.Models;
 
 namespace MindMapWpf48
 {
-    /// <summary>族谱世系图编辑器：竖排姓名矩形框 + 直角世系连线（从右到左，长子在右）+ 右键添加妻子/丈夫/儿子/女儿</summary>
+    /// <summary>族谱世系图编辑器：统一尺寸矩形框（横排姓名两行换行+省略号，独子竖直直连）+ 规则世系连线（夫妻按嫁入/嫁出排布：妻左夫右、女左婿右；子女自连线中点箭头下行，长子在右）+ 身份底色图例 + 右键添加妻子/丈夫/儿子/女儿</summary>
     public partial class GenealogyWindow : Window
     {
         // ===== 布局常量（中式世系图风格，从右到左） =====
         private const double NodeW = 46;      // 单个成员框宽
+        private const double NodeH = 80;      // 统一成员框高（容纳两行姓名 + 止/入标记，所有节点一致）
         private const double SpouseGap = 22;  // 夫妻间距（容纳连线中点⊖圆圈）
         private const double FamGap = 30;     // 兄弟分支间距
         private const double RowH = 150;      // 世代行高
@@ -28,15 +29,15 @@ namespace MindMapWpf48
         private const double RightX = 90;     // 画布右侧留白（世代标签）
         private const string LineColor = "#9E2B22";      // 世系线深红
         private const string SelStroke = "#1565C0";      // 选中蓝
-        // ===== 四色区分：血亲 / 姻亲（图1配色） =====
-        private const string SonFill = "#A9D3F5";        // 血亲男（儿子）：浅蓝
-        private const string SonStroke = "#2E6DA4";
-        private const string DaughterFill = "#FCE4C0";   // 血亲女（女儿）：浅橙
-        private const string DaughterStroke = "#C0762A";
-        private const string WifeFill = "#F5AFB8";       // 妻子（姻亲女）：粉红
-        private const string WifeStroke = "#C2455A";
-        private const string HusbandFill = "#C8E6BE";    // 女婿（姻亲男）：浅绿
-        private const string HusbandStroke = "#4E8C46";
+        // ===== 身份配色映射（集中定义，便于统一换色；[0]=底色，[1]=边框色） =====
+        private static readonly Dictionary<string, string[]> IdentityPalette = new Dictionary<string, string[]>
+        {
+            { "本家男",   new[] { "#A9C7F0", "#2E6DA4" } },   // 本家男性：蓝色系
+            { "本家女",   new[] { "#F5C4D8", "#C24E7E" } },   // 本家女性（未嫁）：粉色系
+            { "嫁入妻子", new[] { "#F7E3B5", "#B08A2E" } },   // 嫁入的妻子：浅琥珀
+            { "外嫁女儿", new[] { "#DCC8F0", "#7A4EA3" } },   // 外嫁的女儿：紫色系
+            { "女婿",     new[] { "#C5D6E8", "#4A708C" } }    // 女婿：灰蓝色系
+        };
         private const string ChronInk = "#1A1A1A";       // 世系谱墨色
         private const string ChronSub = "#555555";       // 世系谱小字
         // ===== 世系谱模式常量 =====
@@ -191,66 +192,66 @@ namespace MindMapWpf48
 
         /// <summary>
         /// 布局并绘制成员单元，返回成员框中心 x（供父级连线）。
-        /// 从右到左排行：子女按添加顺序反向放置（第一个添加的占最右块）。
+        /// 夫妻左右顺序（按嫁入/嫁出）：男成员之妻在左、本家成员在右（娶入）；女成员在左、女婿在右（嫁出）。
+        /// 所有节点统一 NodeW×NodeH 固定尺寸；相邻框相对边中点水平直连（⊖ 圆圈节点）；
+        /// 子女连线从首段夫妻连线中点（无配偶时为成员框底边中点）出发，箭头指向子女框上边中点；
+        /// 独子（alignCenterX 给出且对齐成功）时为单条竖直直线箭头，不绕横向总线。
         /// </summary>
-        private double Layout(Person p, double left, int gen)
+        private double Layout(Person p, double left, int gen, double? alignCenterX = null)
         {
             double y = TopY + gen * RowH;
 
-            // ---- 成员自己（在单元最左），配偶依次向右 ----
+            // ---- 成员单元（成员 + 配偶框，统一固定尺寸） ----
             double unitW = UnitWidth(p);
             double occupy = Occupy(p);
             double unitLeft = left + (occupy - unitW) / 2;
 
-            double h;
-            var hb = MakeNode(p, out h);
-            Canvas.SetLeft(hb, unitLeft);
-            Canvas.SetTop(hb, y);
-            GeneCanvas.Children.Add(hb);
-
-            // 配偶（右侧并排 + 高边中点连线 + ⊖圆圈节点 + 标签）
-            double sx = unitLeft + NodeW + SpouseGap;
             var sps = Spouses(p);
-            for (int k = 0; k < sps.Count; k++)
+            bool wifeSide = p.Gender != "女";   // 男成员配偶取自 Wives（嫁入妻子），女成员配偶取自 Husbands（女婿）
+            bool memberLeft = !wifeSide;        // 左右顺序：女成员在左、配偶向右（嫁出）；妻子在左、男成员在最右（娶入）
+
+            // 独子竖直连线：在本单元占用跨度内平移，使成员框中心对齐父级指定的下行线起点
+            //（不与相邻兄弟分支重叠）；平移后仍无法精确对齐时保持居中，由父级退化为直角连线
+            if (alignCenterX.HasValue)
             {
-                var sp = sps[k];
-                double sh;
-                var sb = MakeNode(sp, out sh, true);
-                Canvas.SetLeft(sb, sx);
-                Canvas.SetTop(sb, y);
-                GeneCanvas.Children.Add(sb);
-
-                // 夫妻连线：成员框右宽边（高边）中点 → 配偶框左宽边中点，两框不等高时中间折线过渡
-                double xEdge1 = unitLeft + NodeW, xEdge2 = sx;
-                double y1c = y + h / 2, y2c = y + sh / 2;
-                double midX = (xEdge1 + xEdge2) / 2;
-                if (Math.Abs(y1c - y2c) < 0.5)
-                {
-                    AddLine(xEdge1, y1c, xEdge2, y2c, 1.0);
-                }
-                else
-                {
-                    var pl = new Polyline
-                    {
-                        Stroke = new SolidColorBrush((Color)ColorConverter.ConvertFromString(LineColor)),
-                        StrokeThickness = 1.0
-                    };
-                    pl.Points = new PointCollection
-                    {
-                        new Point(xEdge1, y1c), new Point(midX, y1c),
-                        new Point(midX, y2c), new Point(xEdge2, y2c)
-                    };
-                    GeneCanvas.Children.Add(pl);
-                }
-                // 连线中点 ⊖ 圆圈节点（图1样式）
-                AddSpouseJoint(midX, (y1c + y2c) / 2);
-                AddTag(midX - 9, Math.Min(y1c, y2c) - 22, p.Gender == "女" ? "丈夫" : "妻子");
-
-                sx += NodeW + SpouseGap;
+                double curCenter = (memberLeft ? unitLeft : unitLeft + sps.Count * (NodeW + SpouseGap)) + NodeW / 2;
+                double dx = alignCenterX.Value - curCenter;
+                unitLeft = Math.Max(left, Math.Min(left + occupy - unitW, unitLeft + dx));
             }
 
-            double centerX = unitLeft + NodeW / 2;   // 世系线起点 = 成员框宽中点
-            double bottom = y + h;
+            var member = MakeNode(p, false, false);
+            var spouseBorders = new List<Border>();
+            foreach (var sp in sps)
+                spouseBorders.Add(MakeNode(sp, true, wifeSide));
+
+            var ordered = new List<Border>();
+            if (memberLeft) { ordered.Add(member); ordered.AddRange(spouseBorders); }
+            else { ordered.AddRange(spouseBorders); ordered.Add(member); }
+
+            for (int k = 0; k < ordered.Count; k++)
+            {
+                Canvas.SetLeft(ordered[k], unitLeft + k * (NodeW + SpouseGap));
+                Canvas.SetTop(ordered[k], y);
+                GeneCanvas.Children.Add(ordered[k]);
+            }
+
+            double boxBottom = y + NodeH;
+            double yMid = y + NodeH / 2;      // 夫妻连线所在高度（统一框高中点）
+            double memberX = memberLeft ? unitLeft : unitLeft + spouseBorders.Count * (NodeW + SpouseGap);
+            double centerX = memberX + NodeW / 2;   // 成员框宽中点（父级竖线落点）
+
+            // 相邻框相对边中点水平直连 + ⊖圆圈节点；首段连线挂 妻子/丈夫 标签
+            double? firstJointX = null;
+            for (int k = 0; k + 1 < ordered.Count; k++)
+            {
+                double x1 = unitLeft + k * (NodeW + SpouseGap) + NodeW;
+                double midX = x1 + SpouseGap / 2;
+                AddLine(x1, yMid, x1 + SpouseGap, yMid);
+                if (k == 0) firstJointX = midX;
+                AddSpouseJoint(midX, yMid);
+                if (k == 0)
+                    AddTagCentered(midX, yMid - 26, p.Gender == "女" ? "丈夫" : "妻子");
+            }
 
             // ---- 子女：从右到左排行（长子占最右块） ----
             if (p.Children.Count > 0)
@@ -265,60 +266,93 @@ namespace MindMapWpf48
                     if (i < n - 1) total += FamGap;
                 }
 
-                double hLine = bottom + 22;
                 double childTop = TopY + (gen + 1) * RowH;
 
-                // 父垂直下行线（从框底宽中点出发）
-                AddLine(centerX, bottom, centerX, hLine);
+                // 子女连线起点：首段夫妻连线中点（⊖圆圈下缘出发）；无配偶时为成员框底边中点
+                double originX = firstJointX ?? centerX;
+                double originY = firstJointX.HasValue ? yMid + 8 : boxBottom;
 
-                // 反向放置：最后添加的放最左，长子（第一个）放最右
+                // 排行方向：子女从右到左依次排列（长子最右、次子在其左），游标自左向右推进
                 double cursor = left + (occupy - total) / 2;
-                var centers = new List<double>();
-                for (int i = n - 1; i >= 0; i--)
-                {
-                    double ccx = Layout(p.Children[i], cursor, gen + 1);
-                    centers.Add(ccx);
-                    AddLine(ccx, hLine, ccx, childTop);
-                    // 排行/过继标签（竖线中点旁）
-                    var child = p.Children[i];
-                    string tag = child.Adopted ? "过继" : (n > 1 ? RankName(i + 1, child.Gender) : "");
-                    if (tag != "")
-                        AddTag(ccx + 3, (hLine + childTop) / 2 - 6, tag);
-                    cursor += widths[i] + FamGap;
-                }
+                double hLine = Math.Min(boxBottom + Math.Max(12, (childTop - boxBottom) * 0.4), childTop - 8);
 
-                // 兄弟横向总线
-                if (centers.Count > 1)
-                    AddLine(centers.Min(), hLine, centers.Max(), hLine);
+                if (n == 1)
+                {
+                    // ---- 独子：单条竖直直线箭头（无拐角、不绕横向总线） ----
+                    double ccx = Layout(p.Children[0], cursor, gen + 1, originX);
+                    if (Math.Abs(ccx - originX) < 0.5)
+                    {
+                        AddLine(originX, originY, originX, childTop);
+                        AddArrowDown(originX, childTop);
+                        if (p.Children[0].Adopted)
+                            AddTagCentered(originX, (originY + childTop) / 2 - 6, "过继");
+                    }
+                    else
+                    {
+                        // 子女占用跨度钳制导致无法对齐：退化为直角连线（竖-横-竖）
+                        AddLine(originX, originY, originX, hLine);
+                        AddLine(Math.Min(originX, ccx), hLine, Math.Max(originX, ccx), hLine);
+                        AddLine(ccx, hLine, ccx, childTop);
+                        AddArrowDown(ccx, childTop);
+                        if (p.Children[0].Adopted)
+                            AddTagCentered(ccx, (hLine + childTop) / 2 - 6, "过继");
+                    }
+                }
+                else
+                {
+                    // ---- 多子女：长子占最右块、后续依次向左 ----
+                    AddLine(originX, originY, originX, hLine);   // 父垂直下行线
+                    var centers = new List<double>();
+                    for (int i = n - 1; i >= 0; i--)
+                    {
+                        double ccx = Layout(p.Children[i], cursor, gen + 1);
+                        centers.Add(ccx);
+                        AddLine(ccx, hLine, ccx, childTop);      // 竖线到子女框上边中点
+                        AddArrowDown(ccx, childTop);             // 单向箭头指向子女框上边中点
+                        // 排行/过继标签（竖线中点，白底居中贴合连线）
+                        var child = p.Children[i];
+                        string tag = child.Adopted ? "过继" : RankName(i + 1, child.Gender);
+                        if (tag != "")
+                            AddTagCentered(ccx, (hLine + childTop) / 2 - 6, tag);
+                        cursor += widths[i] + FamGap;
+                    }
+
+                    // 兄弟横向总线：覆盖下行线起点与全部子女竖线，保证整体连通不断线
+                    double busL = Math.Min(originX, centers.Min());
+                    double busR = Math.Max(originX, centers.Max());
+                    if (busR - busL > 0.5)
+                        AddLine(busL, hLine, busR, hLine);
+                }
             }
 
             return centerX;
         }
 
         /// <summary>
-        /// 创建成员矩形框：竖排姓名 + 顶部圆圈（男空心/女实心）+ 止/入标记 + 悬浮生平提示。
-        /// 配色区分：血亲男=浅蓝、血亲女=浅橙、妻子（姻亲女）=粉红、女婿（姻亲男）=浅绿。
+        /// 依据数据模型关系路径判定身份（映射见 IdentityPalette）：
+        /// Wives 列表=嫁入妻子；Husbands 列表=女婿；
+        /// 血缘路径（Roots/Children）成员：男=本家男；女=有丈夫（嫁出）为外嫁女儿，否则本家女。
         /// </summary>
-        private Border MakeNode(Person p, out double height, bool spouse = false)
+        private static string IdentityOf(Person p, bool spouse, bool wifeSide)
+        {
+            if (spouse) return wifeSide ? "嫁入妻子" : "女婿";
+            if (p.Gender == "女") return p.Husbands.Count > 0 ? "外嫁女儿" : "本家女";
+            return "本家男";
+        }
+
+        /// <summary>
+        /// 创建成员矩形框：所有节点统一 NodeW×NodeH 固定尺寸（宽高完全一致，不随姓名长度变化）；
+        /// 姓名横排、最多两行自动换行，仍放不下时末尾省略号（悬浮 Tooltip 显示全名）
+        /// + 顶部圆圈（男空心/女实心）+ 止/入标记 + 悬浮生平提示。
+        /// 底色按身份区分（集中映射见 IdentityPalette）：本家男=蓝、本家女=粉、嫁入妻子=琥珀、外嫁女儿=紫、女婿=灰蓝。
+        /// </summary>
+        private Border MakeNode(Person p, bool spouse = false, bool wifeSide = false)
         {
             string name = string.IsNullOrWhiteSpace(p.Name) ? "?" : p.Name.Trim();
 
-            bool female = p.Gender == "女";
-            string fill, stroke;
-            if (spouse)
-            {
-                fill = female ? WifeFill : HusbandFill;      // 妻子=粉红，女婿=浅绿
-                stroke = female ? WifeStroke : HusbandStroke;
-            }
-            else
-            {
-                fill = female ? DaughterFill : SonFill;      // 血亲女=浅橙，血亲男=浅蓝
-                stroke = female ? DaughterStroke : SonStroke;
-            }
-
-            double lineH = 20;
-            double markerH = (p.LineEnded || p.Adopted) ? 15 : 0;
-            height = 6 + 16 + 4 + name.Length * lineH + markerH + 8;
+            string[] colors = IdentityPalette[IdentityOf(p, spouse, wifeSide)];
+            string fill = colors[0], stroke = colors[1];
+            bool female = p.Gender == "女";   // 顶部圆圈：男空心/女实心
 
             var circle = new Ellipse
             {
@@ -330,17 +364,21 @@ namespace MindMapWpf48
                 HorizontalAlignment = HorizontalAlignment.Center
             };
 
+            // 姓名横排：框内最多两行换行，仍放不下时省略号截断（全名见 Tooltip），不溢出、不撑大框
             var nameTxt = new TextBlock
             {
-                Text = Vertical(name),
+                Text = name,
                 FontSize = 15,
-                LineHeight = lineH,
+                LineHeight = 19,
+                MaxHeight = 38,
+                TextWrapping = TextWrapping.Wrap,
+                TextTrimming = TextTrimming.CharacterEllipsis,
                 TextAlignment = TextAlignment.Center,
                 Foreground = new SolidColorBrush(Color.FromRgb(0x22, 0x22, 0x22)),
                 FontFamily = new FontFamily("KaiTi, SimSun")
             };
 
-            var stack = new StackPanel { Margin = new Thickness(3, 6, 3, 4), HorizontalAlignment = HorizontalAlignment.Center };
+            var stack = new StackPanel { Margin = new Thickness(3, 6, 3, 4), VerticalAlignment = VerticalAlignment.Center };
             stack.Children.Add(circle);
             stack.Children.Add(nameTxt);
             if (p.LineEnded || p.Adopted)
@@ -372,6 +410,10 @@ namespace MindMapWpf48
             border.MouseLeftButtonDown += Node_MouseLeftButtonDown;
             border.ContextMenu = BuildMenu(p);
             _borderMap[p.Id] = border;
+
+            // 统一固定尺寸：所有节点（含配偶）宽高完全一致，连线端点按常量计算
+            border.Width = NodeW;
+            border.Height = NodeH;
             return border;
         }
 
@@ -446,8 +488,25 @@ namespace MindMapWpf48
             GeneCanvas.Children.Add(line);
         }
 
-        /// <summary>连线上小标签（妻子/丈夫/排行/过继）</summary>
-        private void AddTag(double x, double y, string text, string color = LineColor)
+        /// <summary>子女连线末端的单向箭头（实心三角，指向子女框上边中点）</summary>
+        private void AddArrowDown(double cx, double tipY)
+        {
+            const double w = 7, h = 6;
+            var poly = new Polygon
+            {
+                Points = new PointCollection
+                {
+                    new Point(cx - w / 2, tipY - h),
+                    new Point(cx + w / 2, tipY - h),
+                    new Point(cx, tipY)
+                },
+                Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(LineColor))
+            };
+            GeneCanvas.Children.Add(poly);
+        }
+
+        /// <summary>连线上小标签（妻子/丈夫/排行/过继）：白底，水平居中贴合连线，不被裁剪</summary>
+        private void AddTagCentered(double cx, double y, string text, string color = LineColor)
         {
             var txt = new TextBlock
             {
@@ -458,7 +517,8 @@ namespace MindMapWpf48
                 Background = Brushes.White,   // 白底避免与连线重叠看不清
                 Padding = new Thickness(1, 0, 1, 0)
             };
-            Canvas.SetLeft(txt, x);
+            txt.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            Canvas.SetLeft(txt, cx - txt.DesiredSize.Width / 2);
             Canvas.SetTop(txt, y);
             GeneCanvas.Children.Add(txt);
         }
@@ -483,6 +543,38 @@ namespace MindMapWpf48
             Canvas.SetLeft(label, GeneCanvas.Width - 56);   // 世代标签显示在最右侧
             Canvas.SetTop(label, TopY + gen * RowH + 12);
             GeneCanvas.Children.Add(label);
+        }
+
+        /// <summary>身份颜色图例（画布顶部左侧，树形图模式）</summary>
+        private void DrawLegend()
+        {
+            var panel = new StackPanel { Orientation = Orientation.Horizontal };
+            foreach (var kv in IdentityPalette)
+            {
+                panel.Children.Add(new Border
+                {
+                    Width = 14,
+                    Height = 14,
+                    Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(kv.Value[0])),
+                    BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(kv.Value[1])),
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(2),
+                    Margin = new Thickness(0, 0, 4, 0),
+                    VerticalAlignment = VerticalAlignment.Center
+                });
+                panel.Children.Add(new TextBlock
+                {
+                    Text = kv.Key,
+                    FontSize = 12,
+                    Foreground = new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33)),
+                    FontFamily = new FontFamily("KaiTi, SimSun"),
+                    Margin = new Thickness(0, 0, 14, 0),
+                    VerticalAlignment = VerticalAlignment.Center
+                });
+            }
+            Canvas.SetLeft(panel, LeftX);
+            Canvas.SetTop(panel, 16);
+            GeneCanvas.Children.Add(panel);
         }
 
         /// <summary>世代序号 → 中文（1→一世，12→十二世）</summary>
@@ -520,6 +612,7 @@ namespace MindMapWpf48
             GeneCanvas.Width = Math.Max(1000, cursor + 110);   // 内容右界 + 世代标签空间
             GeneCanvas.Height = Math.Max(900, (maxGen + 1) * RowH + 90);
             for (int g = 0; g <= maxGen; g++) DrawGenLabel(g);
+            DrawLegend();   // 画布顶部身份颜色图例
         }
 
         // ================= 世系谱模式（传统竖排世系信息，图2/3/4样式） =================
