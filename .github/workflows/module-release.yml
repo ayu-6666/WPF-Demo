@@ -1,0 +1,82 @@
+name: Build and Release Modules
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    tags:
+      - "v*"
+      - "V*"
+      - "RELEASE-*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (for example 1.2.3)"
+        required: true
+        default: "1.0.0"
+permissions:
+  contents: write
+concurrency:
+  group: module-release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build-and-package:
+    name: Build all WPF modules and package versioned ZIPs
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET SDKs
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+      - name: Prepare, build and package all modules
+        shell: pwsh
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if ($env:EVENT_NAME -eq "pull_request") {
+            # GitHub uses refs/pull/<number>/merge for PR runs, not a release tag.
+            $version = "0.0.0-pr.$($env:PR_NUMBER)"
+          }
+          elseif (![string]::IsNullOrWhiteSpace($env:RELEASE_VERSION)) {
+            $version = $env:RELEASE_VERSION
+          }
+          else {
+            $version = $env:REF_NAME
+          }
+          ./scripts/prepare-release.ps1 -Version $version
+      - name: Upload versioned module packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: WPF-AppDemo-Module-Packages-${{ github.run_number }}
+          path: |
+            Publish/*_V*.zip
+            Publish/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: WPF-AppDemo-Build-Logs-${{ github.run_number }}
+          path: Publish/logs/**
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: WPF-AppDemo ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            Publish/*_V*.zip
+            Publish/SHA256SUMS.txt
