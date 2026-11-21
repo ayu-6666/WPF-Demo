@@ -20,7 +20,7 @@
     <Compile Include="App.xaml.cs"><DependentUpon>App.xaml</DependentUpon></Compile>
     <Page Include="MainWindow.xaml"><Generator>MSBuild:Compile</Generator><SubType>Designer</SubType></Page>
     <Compile Include="MainWindow.xaml.cs"><DependentUpon>MainWindow.xaml</DependentUpon></Compile>
-    <Compile Include="Models\DiagramModels.cs"/><Compile Include="Services\DiagramSerializer.cs"/><Compile Include="Services\HistoryManager.cs"/><Compile Include="Controls\DiagramSurface.cs"/>
+    <Compile Include="Models\DiagramModels.cs"/><Compile Include="Services\DiagramSerializer.cs"/><Compile Include="Services\HistoryManager.cs"/><Compile Include="Services\ConnectionGeometry.cs"/><Compile Include="Controls\DiagramSurface.cs"/>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
 </Project>

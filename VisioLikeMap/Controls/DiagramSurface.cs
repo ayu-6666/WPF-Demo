@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using VisioLikeWpf48.Models;
+using VisioLikeWpf48.Services;
 
 namespace VisioLikeWpf48.Controls
 {
@@ -61,29 +62,26 @@ namespace VisioLikeWpf48.Controls
         {
             Children.Clear();Children.Add(selectionBox);
             if(Model==null)return;
+            // 每次重绘前统一重算自动描点：节点移动/尺寸变化后连线立即跟随，手动指定的端保持不变。
+            foreach(var c in Model.Connections.ToList())
+            {
+                var a=Model.Nodes.FirstOrDefault(n=>n.Id==c.FromNodeId);
+                var b=Model.Nodes.FirstOrDefault(n=>n.Id==c.ToNodeId);
+                ConnectionGeometry.Resolve(c,a,b);
+            }
             foreach(var c in Model.Connections)DrawConnection(c);
             foreach(var n in Model.Nodes)DrawNode(n);
+            if(draggingEndpoint&&snapNode!=null)
+            {
+                Point p=Anchor(snapNode,snapSide);
+                var ring=new Ellipse{Width=18,Height=18,Stroke=Brushes.ForestGreen,StrokeThickness=2.5,Fill=new SolidColorBrush(Color.FromArgb(60,35,139,87)),IsHitTestVisible=false};
+                Canvas.SetLeft(ring,p.X-9);Canvas.SetTop(ring,p.Y-9);Children.Add(ring);
+            }
             Panel.SetZIndex(selectionBox,99999);
         }
         private Brush B(string s){try{return (Brush)new BrushConverter().ConvertFromString(s);}catch{return Brushes.LightBlue;}}
-        private Point Center(NodeModel n){return new Point(n.X+n.Width/2,n.Y+n.Height/2);}
-        private Point Anchor(NodeModel n,AnchorSide s)
-        {
-            switch(s){case AnchorSide.Top:return new Point(n.X+n.Width/2,n.Y);case AnchorSide.Bottom:return new Point(n.X+n.Width/2,n.Y+n.Height);case AnchorSide.Left:return new Point(n.X,n.Y+n.Height/2);default:return new Point(n.X+n.Width,n.Y+n.Height/2);}
-        }
-        private AnchorSide BestAnchor(NodeModel n,Point toward)
-        {
-            Vector v=toward-Center(n);
-            if(Model.Direction==DiagramDirection.LeftToRight)return v.X>=0?AnchorSide.Right:AnchorSide.Left;
-            return v.Y>=0?AnchorSide.Bottom:AnchorSide.Top;
-        }
-        private List<Point> Route(Point a,Point b,AnchorSide from)
-        {
-            var p=new List<Point>{a};
-            if(Model.Direction==DiagramDirection.LeftToRight){double mid=(a.X+b.X)/2;p.Add(new Point(mid,a.Y));p.Add(new Point(mid,b.Y));}
-            else {double mid=(a.Y+b.Y)/2;p.Add(new Point(a.X,mid));p.Add(new Point(b.X,mid));}
-            p.Add(b);return p;
-        }
+        private Point Anchor(NodeModel n,AnchorSide s){return ConnectionGeometry.AnchorPoint(n,s);}
+        private List<Point> Route(Point a,Point b,AnchorSide from,AnchorSide to){return ConnectionGeometry.BuildRoute(a,b,from,to);}
         private void DrawConnection(ConnectionModel c)
         {
             var a=Model.Nodes.FirstOrDefault(n=>n.Id==c.FromNodeId);var b=Model.Nodes.FirstOrDefault(n=>n.Id==c.ToNodeId);if(a==null||b==null)return;
@@ -92,26 +90,26 @@ namespace VisioLikeWpf48.Controls
             {
                 if(endpointFrom) p1=endpointDragWorld; else p2=endpointDragWorld;
             }
-            var pts=Route(p1,p2,c.FromAnchor);
+            var pts=Route(p1,p2,c.FromAnchor,c.ToAnchor);
             var geo=new StreamGeometry();using(var g=geo.Open()){g.BeginFigure(pts[0],false,false);g.PolyLineTo(pts.Skip(1).ToList(),true,false);}
             bool selected=SelectedConnection==c.Id;
             var pen=new Pen(selected?new SolidColorBrush(Color.FromRgb(34,155,85)):new SolidColorBrush(Color.FromRgb(83,105,132)),selected?3.5:2.2);
             if(c.IsDashed)pen.DashStyle=DashStyles.Dash;
             var path=new Path{Data=geo,Stroke=pen.Brush,StrokeThickness=pen.Thickness,StrokeDashArray=c.IsDashed?new DoubleCollection{6,4}:null,Tag=c.Id,Cursor=Cursors.Hand};
             path.MouseLeftButtonDown+=(s,e)=>{SelectConnection(c.Id);e.Handled=true;};
-            path.MouseRightButtonDown+=(s,e)=>{SelectConnection(c.Id);ShowConnectionMenu(c,e.GetPosition(this));e.Handled=true;};
+            path.MouseRightButtonDown+=(s,e)=>{SelectConnection(c.Id);ShowConnectionMenu(c);e.Handled=true;};
             Children.Add(path);
             DrawArrowHead(pts[pts.Count-2],p2,pen.Brush,c.ShowArrow);
             if(c.Bidirectional)DrawArrowHead(pts[1],p1,pen.Brush,true);
             if(!string.IsNullOrWhiteSpace(c.TagText))
             {
-                Point m=pts[pts.Count/2];var tag=new Border{Background=selected?new SolidColorBrush(Color.FromRgb(220,250,228)):Brushes.White,BorderBrush=selected?Brushes.ForestGreen:new SolidColorBrush(Color.FromRgb(210,218,228)),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(8),Padding=new Thickness(7,2,7,2),Child=new TextBlock{Text=c.TagText,FontSize=11,Foreground=Brushes.DarkSlateGray},Cursor=Cursors.Hand,Tag=c.Id};
-                Canvas.SetLeft(tag,m.X-tag.ActualWidth/2);Canvas.SetTop(tag,m.Y-22);tag.MouseLeftButtonDown+=(s,e)=>{SelectConnection(c.Id);e.Handled=true;};tag.MouseRightButtonDown+=(s,e)=>{SelectConnection(c.Id);ShowConnectionMenu(c,e.GetPosition(this));e.Handled=true;};Children.Add(tag);
+                Point m=ConnectionGeometry.MidPoint(pts);var tag=new Border{Background=selected?new SolidColorBrush(Color.FromRgb(220,250,228)):Brushes.White,BorderBrush=selected?Brushes.ForestGreen:new SolidColorBrush(Color.FromRgb(210,218,228)),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(8),Padding=new Thickness(7,2,7,2),Child=new TextBlock{Text=c.TagText,FontSize=11,Foreground=Brushes.DarkSlateGray},Cursor=Cursors.Hand,Tag=c.Id};
+                Canvas.SetLeft(tag,m.X-tag.ActualWidth/2);Canvas.SetTop(tag,m.Y-22);tag.MouseLeftButtonDown+=(s,e)=>{SelectConnection(c.Id);e.Handled=true;};tag.MouseRightButtonDown+=(s,e)=>{SelectConnection(c.Id);ShowConnectionMenu(c);e.Handled=true;};Children.Add(tag);
                 tag.Measure(new Size(double.PositiveInfinity,double.PositiveInfinity));Canvas.SetLeft(tag,m.X-tag.DesiredSize.Width/2);Canvas.SetTop(tag,m.Y-22);
             }
             if(selected)
             {
-                DrawEndpointHandle(p1,true);DrawEndpointHandle(p2,false);
+                DrawEndpointHandle(p1,true,c.FromAnchorManual);DrawEndpointHandle(p2,false,c.ToAnchorManual);
             }
         }
         private void DrawArrowHead(Point prev,Point tip,Brush brush,bool show)
@@ -119,9 +117,10 @@ namespace VisioLikeWpf48.Controls
             if(!show)return;Vector v=tip-prev;if(v.Length<.1)return;v.Normalize();Vector n=new Vector(-v.Y,v.X);
             Children.Add(new Polygon{Points=new PointCollection{tip,tip-v*12+n*5,tip-v*12-n*5},Fill=brush,IsHitTestVisible=false});
         }
-        private void DrawEndpointHandle(Point p,bool from)
+        private void DrawEndpointHandle(Point p,bool from,bool manual)
         {
-            var h=new Ellipse{Width=12,Height=12,Fill=Brushes.White,Stroke=Brushes.ForestGreen,StrokeThickness=2,Cursor=Cursors.SizeAll,Tag=from?"FROM":"TO"};
+            Brush stroke=manual?new SolidColorBrush(Color.FromRgb(226,146,34)):Brushes.ForestGreen;
+            var h=new Ellipse{Width=12,Height=12,Fill=Brushes.White,Stroke=stroke,StrokeThickness=2,Cursor=Cursors.SizeAll,Tag=from?"FROM":"TO",ToolTip=manual?"手动描点 · 拖动可重新指定":"自动描点 · 拖动可手动指定"};
             Canvas.SetLeft(h,p.X-6);Canvas.SetTop(h,p.Y-6);
             h.MouseLeftButtonDown+=(s,e)=>{draggingEndpoint=true;endpointFrom=from;activeConnection=SelectedConnection;endpointDragWorld=ToWorld(e.GetPosition(this));snapNode=null;CaptureMouse();e.Handled=true;};
             Children.Add(h);
@@ -153,7 +152,7 @@ namespace VisioLikeWpf48.Controls
             }
             panel.Children.Add(stack);Canvas.SetLeft(panel,n.X);Canvas.SetTop(panel,n.Y);Children.Add(panel);
             panel.MouseLeftButtonDown+=(s,e)=>NodeDown(n,e);
-            panel.MouseRightButtonDown+=(s,e)=>{SelectedNodes.Clear();SelectedNodes.Add(n.Id);RenderDiagram();ShowNodeMenu(n,e.GetPosition(this));e.Handled=true;};
+            panel.MouseRightButtonDown+=(s,e)=>{SelectedNodes.Clear();SelectedNodes.Add(n.Id);RenderDiagram();ShowNodeMenu(n);e.Handled=true;};
             foreach(AnchorSide side in Enum.GetValues(typeof(AnchorSide)))
             {
                 Point p=Anchor(n,side);var port=new Ellipse{Width=9,Height=9,Fill=Brushes.White,Stroke=selected?Brushes.ForestGreen:Brushes.DodgerBlue,StrokeThickness=1.5,IsHitTestVisible=false};
@@ -226,8 +225,9 @@ namespace VisioLikeWpf48.Controls
                 bool snapped=FindNearestAnchor(endpointDragWorld,excluded,24,out target,out targetSide);
                 if(c!=null&&snapped&&target!=null)
                 {
-                    if(endpointFrom){c.FromNodeId=target.Id;c.FromAnchor=targetSide;}
-                    else {c.ToNodeId=target.Id;c.ToAnchor=targetSide;}
+                    if(endpointFrom){c.FromNodeId=target.Id;c.FromAnchor=targetSide;c.FromAnchorManual=true;}
+                    else {c.ToNodeId=target.Id;c.ToAnchor=targetSide;c.ToAnchorManual=true;}
+                    Hint?.Invoke("已手动指定描点，移动图形后保持不变。");
                     Changed?.Invoke();
                 }
                 draggingEndpoint=false;activeConnection=null;snapNode=null;
@@ -269,27 +269,96 @@ namespace VisioLikeWpf48.Controls
         public void CreateConnection(Guid from,Guid to)
         {
             if(from==to)return;var a=Model.Nodes.FirstOrDefault(n=>n.Id==from);var b=Model.Nodes.FirstOrDefault(n=>n.Id==to);if(a==null||b==null)return;
-            var c=new ConnectionModel{FromNodeId=from,ToNodeId=to};c.FromAnchor=BestAnchor(a,Center(b));c.ToAnchor=BestAnchor(b,Center(a));Model.Connections.Add(c);SelectedConnection=c.Id;RenderDiagram();Changed?.Invoke();
+            var c=new ConnectionModel{FromNodeId=from,ToNodeId=to};ConnectionGeometry.Resolve(c,a,b);Model.Connections.Add(c);SelectedConnection=c.Id;RenderDiagram();Changed?.Invoke();
         }
         private void SelectConnection(Guid id){SelectedConnection=id;SelectedNodes.Clear();RenderDiagram();SelectionChanged?.Invoke();}
-        private void ShowConnectionMenu(ConnectionModel c,Point p)
+
+        private sealed class MenuIcons
         {
-            var m=new ContextMenu();
-            AddMenu(m,"反转箭头方向",()=>{var id=c.FromNodeId;c.FromNodeId=c.ToNodeId;c.ToNodeId=id;var side=c.FromAnchor;c.FromAnchor=c.ToAnchor;c.ToAnchor=side;RenderDiagram();Changed?.Invoke();});
-            AddMenu(m,c.IsDashed?"改为实线":"改为虚线",()=>{c.IsDashed=!c.IsDashed;RenderDiagram();Changed?.Invoke();});
-            AddMenu(m,c.Bidirectional?"改为单向箭头":"改为双向箭头",()=>{c.Bidirectional=!c.Bidirectional;RenderDiagram();Changed?.Invoke();});
-            AddMenu(m,"编辑连接 Tag…",()=>{var s=PromptText("编辑连接标签",c.TagText);if(s!=null){c.TagText=s;RenderDiagram();Changed?.Invoke();}});
-            AddMenu(m,"删除连接",()=>{Model.Connections.Remove(c);SelectedConnection=null;RenderDiagram();Changed?.Invoke();});
-            m.PlacementTarget=this;m.Placement=System.Windows.Controls.Primitives.PlacementMode.MousePoint;m.IsOpen=true;
+            public const string Edit="M2,12 L11,3 L13,5 L4,14 L2,14 Z";
+            public const string Tag="M2,8 L8,2 L13.5,2 L13.5,7.5 L8,13.5 Z";
+            public const string Trash="M3,4 L13,4 M5,4 L5,13 L11,13 L11,4 M6.5,4 L6.5,2 L9.5,2 L9.5,4";
+            public const string Swap="M2,5 L12,5 M9,2 L12,5 L9,8 M12,11 L2,11 M5,8 L2,11 L5,14";
+            public const string Dash="M2,8 L14,8";
+            public const string DoubleArrow="M2,8 L14,8 M5,5 L2,8 L5,11 M11,5 L14,8 L11,11";
+            public const string Refresh="M13,8 A5,5 0 1 1 9.2,3.2 M9.2,3.2 L12,1.4 M9.2,3.2 L12,6";
+            public const string Anchor="M8,3.2 A2.2,2.2 0 1 0 8,7.6 A2.2,2.2 0 1 0 8,3.2 M8,7.6 L8,13.2 M4.4,11 A3.8,3.8 0 0 0 11.6,11";
         }
-        private void ShowNodeMenu(NodeModel n,Point p)
+
+        private static ContextMenu NewMenu(){return new ContextMenu{PlacementTarget=null,Placement=System.Windows.Controls.Primitives.PlacementMode.MousePoint};}
+        private static System.Windows.Shapes.Path MenuIcon(string data)
         {
-            var m=new ContextMenu();AddMenu(m,"编辑节点文字…",()=>{var s=PromptText("编辑节点",n.Text);if(s!=null){n.Text=s;RenderDiagram();Changed?.Invoke();}});
-            AddMenu(m,"添加 Tag…",()=>{var s=PromptText("添加 Tag","新标签");if(!string.IsNullOrWhiteSpace(s)){n.Tags.Add(new TagModel{Text=s});RenderDiagram();Changed?.Invoke();}});
-            AddMenu(m,"删除节点",()=>{SelectedNodes.Clear();SelectedNodes.Add(n.Id);DeleteSelection();});
-            m.PlacementTarget=this;m.Placement=System.Windows.Controls.Primitives.PlacementMode.MousePoint;m.IsOpen=true;
+            return new System.Windows.Shapes.Path{Data=Geometry.Parse(data),Width=13,Height=13,Stretch=Stretch.Uniform,Stroke=new SolidColorBrush(Color.FromRgb(102,122,148)),StrokeThickness=1.4,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round,StrokeLineJoin=PenLineJoin.Round};
         }
-        private void AddMenu(ContextMenu m,string text,Action action){var item=new MenuItem{Header=text};item.Click+=(s,e)=>action();m.Items.Add(item);}
+        private static Separator MenuSeparator()
+        {
+            var style=Application.Current!=null?Application.Current.TryFindResource("MenuSeparatorStyle") as Style:null;
+            return new Separator{Style=style};
+        }
+        private static MenuItem MenuAction(string header,string iconData,Action action,bool enabled=true)
+        {
+            var item=new MenuItem{Header=header,IsEnabled=enabled};
+            if(iconData!=null)item.Icon=MenuIcon(iconData);
+            if(action!=null)item.Click+=(s,e)=>action();
+            return item;
+        }
+        private void ShowConnectionMenu(ConnectionModel c)
+        {
+            var m=NewMenu();
+            m.Items.Add(BuildAnchorMenu("起点描点",c,true));
+            m.Items.Add(BuildAnchorMenu("终点描点",c,false));
+            m.Items.Add(MenuSeparator());
+            m.Items.Add(MenuAction("恢复自动描点（最短）",MenuIcons.Refresh,()=>RestoreAutoAnchors(c),c.FromAnchorManual||c.ToAnchorManual));
+            m.Items.Add(MenuSeparator());
+            m.Items.Add(MenuAction("反转箭头方向",MenuIcons.Swap,()=>{
+                var id=c.FromNodeId;c.FromNodeId=c.ToNodeId;c.ToNodeId=id;
+                var side=c.FromAnchor;c.FromAnchor=c.ToAnchor;c.ToAnchor=side;
+                var manual=c.FromAnchorManual;c.FromAnchorManual=c.ToAnchorManual;c.ToAnchorManual=manual;
+                RenderDiagram();Changed?.Invoke();}));
+            m.Items.Add(MenuAction(c.IsDashed?"改为实线":"改为虚线",MenuIcons.Dash,()=>{c.IsDashed=!c.IsDashed;RenderDiagram();Changed?.Invoke();},true));
+            m.Items.Add(MenuAction(c.Bidirectional?"改为单向箭头":"改为双向箭头",MenuIcons.DoubleArrow,()=>{c.Bidirectional=!c.Bidirectional;RenderDiagram();Changed?.Invoke();}));
+            m.Items.Add(MenuAction("编辑连接 Tag…",MenuIcons.Tag,()=>{var s=PromptText("编辑连接标签",c.TagText);if(s!=null){c.TagText=s;RenderDiagram();Changed?.Invoke();}}));
+            m.Items.Add(MenuSeparator());
+            m.Items.Add(MenuAction("删除连接",MenuIcons.Trash,()=>{Model.Connections.Remove(c);SelectedConnection=null;RenderDiagram();Changed?.Invoke();}));
+            m.PlacementTarget=this;m.IsOpen=true;
+        }
+        private MenuItem BuildAnchorMenu(string header,ConnectionModel c,bool from)
+        {
+            var parent=new MenuItem{Header=header,Icon=MenuIcon(MenuIcons.Anchor)};
+            bool manual=from?c.FromAnchorManual:c.ToAnchorManual;
+            AnchorSide current=from?c.FromAnchor:c.ToAnchor;
+            string[] labels={"自动描点（最短）","上边描点","右边描点","下边描点","左边描点"};
+            AnchorSide?[] sides={null,AnchorSide.Top,AnchorSide.Right,AnchorSide.Bottom,AnchorSide.Left};
+            for(int i=0;i<labels.Length;i++)
+            {
+                AnchorSide? side=sides[i];
+                var item=new MenuItem{Header=labels[i],IsCheckable=true,IsChecked=side.HasValue?(manual&&current==side.Value):!manual};
+                item.Click+=(s,e)=>
+                {
+                    if(from){c.FromAnchorManual=side.HasValue;if(side.HasValue)c.FromAnchor=side.Value;}
+                    else{c.ToAnchorManual=side.HasValue;if(side.HasValue)c.ToAnchor=side.Value;}
+                    RenderDiagram();Changed?.Invoke();
+                    Hint?.Invoke(side.HasValue?"已手动指定描点，移动图形后保持不变。":"该端已恢复自动描点。");
+                };
+                parent.Items.Add(item);
+            }
+            return parent;
+        }
+        private void RestoreAutoAnchors(ConnectionModel c)
+        {
+            c.FromAnchorManual=false;c.ToAnchorManual=false;
+            RenderDiagram();Changed?.Invoke();
+            Hint?.Invoke("已恢复为自动描点（最短）。");
+        }
+        private void ShowNodeMenu(NodeModel n)
+        {
+            var m=NewMenu();
+            m.Items.Add(MenuAction("编辑节点文字…",MenuIcons.Edit,()=>{var s=PromptText("编辑节点",n.Text);if(s!=null){n.Text=s;RenderDiagram();Changed?.Invoke();}}));
+            m.Items.Add(MenuAction("添加 Tag…",MenuIcons.Tag,()=>{var s=PromptText("添加 Tag","新标签");if(!string.IsNullOrWhiteSpace(s)){n.Tags.Add(new TagModel{Text=s});RenderDiagram();Changed?.Invoke();}}));
+            m.Items.Add(MenuSeparator());
+            m.Items.Add(MenuAction("删除节点",MenuIcons.Trash,()=>{SelectedNodes.Clear();SelectedNodes.Add(n.Id);DeleteSelection();}));
+            m.PlacementTarget=this;m.IsOpen=true;
+        }
         private string PromptText(string title,string initial)
         {
             var w=new Window{Title=title,Width=330,Height=135,WindowStartupLocation=WindowStartupLocation.CenterOwner,ResizeMode=ResizeMode.NoResize};
@@ -305,11 +374,6 @@ namespace VisioLikeWpf48.Controls
                 var n=Model.Nodes[i];
                 if(direction==DiagramDirection.LeftToRight){n.X=x;n.Y=y+(i%3)*145;x+=230;if(i%3==2){x+=0;}}
                 else {n.X=x+(i%3)*230;n.Y=y+i/3*155;}
-            }
-            foreach(var c in Model.Connections)
-            {
-                var a=Model.Nodes.FirstOrDefault(n=>n.Id==c.FromNodeId);var b=Model.Nodes.FirstOrDefault(n=>n.Id==c.ToNodeId);
-                if(a!=null&&b!=null){c.FromAnchor=BestAnchor(a,Center(b));c.ToAnchor=BestAnchor(b,Center(a));}
             }
             RenderDiagram();Changed?.Invoke();
         }

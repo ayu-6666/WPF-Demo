@@ -44,10 +44,8 @@ namespace VisioLikeWpf48
         }
         private void AddInitialConnection(NodeModel a,NodeModel b,string tag)
         {
-            var c=new ConnectionModel{FromNodeId=a.Id,ToNodeId=b.Id,TagText=tag};
-            c.FromAnchor=model.Direction==DiagramDirection.LeftToRight?AnchorSide.Right:AnchorSide.Bottom;
-            c.ToAnchor=model.Direction==DiagramDirection.LeftToRight?AnchorSide.Left:AnchorSide.Top;
-            model.Connections.Add(c);
+            // 初始连线不写死描点，交给 ConnectionGeometry 按图形实际位置自动解析。
+            model.Connections.Add(new ConnectionModel{FromNodeId=a.Id,ToNodeId=b.Id,TagText=tag});
         }
         private void AddShape_Click(object sender,RoutedEventArgs e)
         {
@@ -86,6 +84,11 @@ namespace VisioLikeWpf48
         private void Export_Click(object sender,RoutedEventArgs e)
         {
             if(model.Nodes.Count==0)return;var d=new SaveFileDialog{Filter="PNG 图片 (*.png)|*.png",FileName="流程图高清.png"};if(d.ShowDialog()!=true)return;
+            foreach(var c in model.Connections)
+            {
+                var a=model.Nodes.FirstOrDefault(n=>n.Id==c.FromNodeId);var b=model.Nodes.FirstOrDefault(n=>n.Id==c.ToNodeId);
+                ConnectionGeometry.Resolve(c,a,b);
+            }
             var input=Prompt("高清导出倍率（1、2、4、8）","4");int factor;if(!int.TryParse(input,out factor)||!(factor==1||factor==2||factor==4||factor==8)){MessageBox.Show("请输入 1、2、4 或 8。");return;}
             double minX=model.Nodes.Min(n=>n.X),minY=model.Nodes.Min(n=>n.Y),maxX=model.Nodes.Max(n=>n.X+n.Width),maxY=model.Nodes.Max(n=>n.Y+n.Height);
             const double margin=45;double w=maxX-minX+margin*2,h=maxY-minY+margin*2;
@@ -101,16 +104,22 @@ namespace VisioLikeWpf48
             var enc=new PngBitmapEncoder();enc.Frames.Add(BitmapFrame.Create(bitmap));using(var fs=System.IO.File.Create(d.FileName))enc.Save(fs);
             StatusText.Text="PNG 已导出（"+factor+"x）。";
         }
-        private Point GetAnchor(NodeModel n,AnchorSide s){switch(s){case AnchorSide.Top:return new Point(n.X+n.Width/2,n.Y);case AnchorSide.Bottom:return new Point(n.X+n.Width/2,n.Y+n.Height);case AnchorSide.Left:return new Point(n.X,n.Y+n.Height/2);default:return new Point(n.X+n.Width,n.Y+n.Height/2);}}
+        private Point GetAnchor(NodeModel n,AnchorSide s){return ConnectionGeometry.AnchorPoint(n,s);}
         private void DrawConnectionExport(DrawingContext dc,ConnectionModel c)
         {
             var a=model.Nodes.FirstOrDefault(n=>n.Id==c.FromNodeId);var b=model.Nodes.FirstOrDefault(n=>n.Id==c.ToNodeId);if(a==null||b==null)return;
-            Point p1=GetAnchor(a,c.FromAnchor),p2=GetAnchor(b,c.ToAnchor);var points=new System.Collections.Generic.List<Point>{p1};
-            if(model.Direction==DiagramDirection.LeftToRight){double mid=(p1.X+p2.X)/2;points.Add(new Point(mid,p1.Y));points.Add(new Point(mid,p2.Y));}else{double mid=(p1.Y+p2.Y)/2;points.Add(new Point(p1.X,mid));points.Add(new Point(p2.X,mid));}points.Add(p2);
+            Point p1=GetAnchor(a,c.FromAnchor),p2=GetAnchor(b,c.ToAnchor);
+            var points=ConnectionGeometry.BuildRoute(p1,p2,c.FromAnchor,c.ToAnchor);
             var geo=new StreamGeometry();using(var g=geo.Open()){g.BeginFigure(points[0],false,false);g.PolyLineTo(points.GetRange(1,points.Count-1),true,false);}
             var pen=new Pen(Brushes.SlateGray,2);if(c.IsDashed)pen.DashStyle=DashStyles.Dash;dc.DrawGeometry(null,pen,geo);
             DrawExportArrow(dc,points[points.Count-2],p2,pen.Brush,c.ShowArrow);if(c.Bidirectional)DrawExportArrow(dc,points[1],p1,pen.Brush,true);
-            if(!string.IsNullOrWhiteSpace(c.TagText)){var ft=new FormattedText(c.TagText,System.Globalization.CultureInfo.CurrentCulture,FlowDirection.LeftToRight,new Typeface("Segoe UI"),11,Brushes.DarkSlateGray);dc.DrawRoundedRectangle(new SolidColorBrush(Color.FromRgb(239,247,242)),new Pen(Brushes.DarkSeaGreen,1),new Rect((p1.X+p2.X)/2-ft.Width/2-5,(p1.Y+p2.Y)/2-10,ft.Width+10,ft.Height+4),6,6);dc.DrawText(ft,new Point((p1.X+p2.X)/2-ft.Width/2,(p1.Y+p2.Y)/2-8));}
+            if(!string.IsNullOrWhiteSpace(c.TagText))
+            {
+                Point m=ConnectionGeometry.MidPoint(points);
+                var ft=new FormattedText(c.TagText,System.Globalization.CultureInfo.CurrentCulture,FlowDirection.LeftToRight,new Typeface("Segoe UI"),11,Brushes.DarkSlateGray);
+                dc.DrawRoundedRectangle(new SolidColorBrush(Color.FromRgb(239,247,242)),new Pen(Brushes.DarkSeaGreen,1),new Rect(m.X-ft.Width/2-5,m.Y-16,ft.Width+10,ft.Height+4),6,6);
+                dc.DrawText(ft,new Point(m.X-ft.Width/2,m.Y-14));
+            }
         }
         private void DrawExportArrow(DrawingContext dc,Point from,Point to,Brush brush,bool show){if(!show)return;Vector v=to-from;if(v.Length<.1)return;v.Normalize();Vector n=new Vector(-v.Y,v.X);var g=new StreamGeometry();using(var c=g.Open()){c.BeginFigure(to,true,true);c.LineTo(to-v*12+n*5,true,false);c.LineTo(to-v*12-n*5,true,false);}dc.DrawGeometry(brush,null,g);}
         private void DrawNodeExport(DrawingContext dc,NodeModel n)

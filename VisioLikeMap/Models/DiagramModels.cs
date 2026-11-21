@@ -46,6 +46,9 @@ namespace VisioLikeWpf48.Models
         public Guid ToNodeId { get; set; }
         public AnchorSide FromAnchor { get; set; }
         public AnchorSide ToAnchor { get; set; }
+        // 手动指定描点后，自动重算不再覆盖该端；false 表示跟随自动规则（最短/按排列方向）。
+        public bool FromAnchorManual { get; set; }
+        public bool ToAnchorManual { get; set; }
         public string TagText { get; set; }
         public bool ShowArrow { get; set; }
         public bool Bidirectional { get; set; }
