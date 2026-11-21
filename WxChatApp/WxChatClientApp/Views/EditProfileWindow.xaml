@@ -57,7 +57,7 @@
                         <TextBlock Text="{DynamicResource Profile.WxIdLabel}" FontSize="12"
                                    Foreground="{StaticResource WxTextSecondaryBrush}" Margin="0,14,0,0" />
                         <TextBox x:Name="WxIdBox" Style="{StaticResource WxLabelInput}" Margin="0,8,0,0"
-                                 MaxLength="20" AutomationProperties.AutomationId="WxIdBox" />
+                                 MaxLength="20" IsReadOnly="True" AutomationProperties.AutomationId="WxIdBox" />
                         <TextBlock Text="{DynamicResource Profile.WxIdHint}" FontSize="11"
                                    Foreground="{StaticResource WxTextMutedBrush}" Margin="0,4,0,0" TextWrapping="Wrap" />
                         <TextBlock Text="{DynamicResource Profile.SignatureLabel}" FontSize="12"

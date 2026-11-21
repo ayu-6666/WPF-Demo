@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
 using WxChatServer.Auth;
@@ -7,9 +8,19 @@ using WxChatServer.Hubs;
 using WxChatServer.Models;
 using WxChatServer.Services;
 
+// 单文件上限 200MB：默认 Kestrel 只有 30MB，稍大的 mp4 会在读完请求体前被直接断开
+const long MaxUploadBytes = 200L * 1024 * 1024;
+
 var builder = WebApplication.CreateBuilder(args);
 var port = Environment.GetEnvironmentVariable("WXCHAT_PORT") ?? "5210";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = MaxUploadBytes);
+builder.Services.Configure<FormOptions>(o =>
+{
+    o.MultipartBodyLengthLimit = MaxUploadBytes;
+    o.ValueLengthLimit = int.MaxValue;
+    o.MultipartHeadersLengthLimit = int.MaxValue;
+});
 builder.Services.AddSingleton<Db>();
 builder.Services.AddSignalR(o => o.MaximumReceiveMessageSize = 20L * 1024 * 1024);
 
@@ -118,7 +129,6 @@ app.MapPut("/api/me", (HttpContext ctx, ProfileBody body) =>
     var me = Me(ctx);
     var nickname = (body.NickName ?? "").Trim();
     var signature = (body.Signature ?? "").Trim();
-    var wxid = (body.WxId ?? "").Trim();
     var phone = (body.Phone ?? "").Trim();
     if (nickname.Length < 1 || nickname.Length > 20)
     {
@@ -128,15 +138,7 @@ app.MapPut("/api/me", (HttpContext ctx, ProfileBody body) =>
     {
         return Results.Json(new { error = "个性签名最多 60 个字符", code = "signature_invalid" }, statusCode: 400);
     }
-    // 微信号：6-20 位，字母开头，仅允许字母/数字/下划线/短横线
-    if (wxid.Length < 6 || wxid.Length > 20 || !Regex.IsMatch(wxid, "^[A-Za-z][-A-Za-z0-9_]{5,19}$"))
-    {
-        return Results.Json(new { error = "微信号需为 6-20 位，字母开头，只能包含字母/数字/下划线/短横线", code = "wxid_invalid" }, statusCode: 400);
-    }
-    if (db.IsWxIdTaken(wxid, me.Id))
-    {
-        return Results.Json(new { error = "该微信号已被其它账号使用", code = "wxid_taken" }, statusCode: 409);
-    }
+    // 微信号不再单独维护，始终等于登录账号（注册时已写入）
     // 手机号：可留空；填写时须为 11 位中国大陆手机号
     if (phone.Length > 0 && !Regex.IsMatch(phone, "^1[3-9]\\d{9}$"))
     {
@@ -156,7 +158,7 @@ app.MapPut("/api/me", (HttpContext ctx, ProfileBody body) =>
             avatar = a;
         }
     }
-    db.UpdateProfile(me.Id, nickname, signature, wxid, phone, avatar);
+    db.UpdateProfile(me.Id, nickname, signature, phone, avatar);
     var updated = db.GetUserById(me.Id)!;
     return Results.Json(DtoFactory.User(updated));
 });
@@ -505,9 +507,9 @@ app.MapPost("/api/upload", async (HttpContext ctx) =>
     {
         return Results.Json(new { error = "未收到文件" }, statusCode: 400);
     }
-    if (file.Length > 20 * 1024 * 1024)
+    if (file.Length > MaxUploadBytes)
     {
-        return Results.Json(new { error = "文件不能超过 20MB" }, statusCode: 400);
+        return Results.Json(new { error = "文件不能超过 200MB" }, statusCode: 400);
     }
     var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
     if (new[] { ".exe", ".bat", ".cmd", ".com", ".scr", ".msi", ".js", ".vbs", ".ps1", ".sh" }.Contains(ext))

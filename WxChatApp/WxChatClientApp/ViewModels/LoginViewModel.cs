@@ -12,13 +12,14 @@ public partial class LoginViewModel : ObservableObject
     [ObservableProperty] private bool _isRegisterMode;
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private bool _rememberAccount = true;
+    [ObservableProperty] private string _serverAddress = AppConfig.ServerBaseUrl;
 
     public event Action<AuthResult>? LoginSucceeded;
 
     public string SubmitText => IsRegisterMode ? Loc.T("Login.Register") : Loc.T("Login.Submit");
     public string SwitchText => IsRegisterMode ? Loc.T("Login.SwitchToLogin") : Loc.T("Login.SwitchToRegister");
     public string SubtitleText => IsRegisterMode ? Loc.T("Login.SubtitleRegister") : Loc.T("Login.Subtitle");
-    public string ServerHint => Loc.T("Login.ServerHint", AppConfig.ServerBaseUrl);
+    public bool CanEditServer => !AppConfig.IsServerUrlLocked;
 
     public LoginViewModel()
     {
@@ -46,6 +47,11 @@ public partial class LoginViewModel : ObservableObject
             return;
         }
         ErrorMessage = "";
+        if (!AppConfig.TryNormalizeServerUrl(ServerAddress, out var serverUrl, out var serverError))
+        {
+            ErrorMessage = serverError;
+            return;
+        }
         var account = Account.Trim();
         if (account.Length == 0)
         {
@@ -62,6 +68,10 @@ public partial class LoginViewModel : ObservableObject
             ErrorMessage = Loc.T("Login.ErrorNickname");
             return;
         }
+
+        // 登录前先按输入框切换服务端，保证跨机器部署时也能连上
+        AppConfig.SaveServerBaseUrl(serverUrl);
+        ServerAddress = serverUrl;
 
         IsBusy = true;
         try
@@ -86,9 +96,9 @@ public partial class LoginViewModel : ObservableObject
         {
             ErrorMessage = ex.Message;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            ErrorMessage = Loc.T("Login.ErrorServer");
+            ErrorMessage = Loc.T("Login.ErrorConnect", AppConfig.ServerBaseUrl, ex.Message);
         }
         finally
         {

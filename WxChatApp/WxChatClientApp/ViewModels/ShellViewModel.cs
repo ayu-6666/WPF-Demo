@@ -540,6 +540,26 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
         IsReady = true;
     }
 
+    /// <summary>设置页保存新服务端地址后重连；成功返回 null，失败返回具体原因。</summary>
+    public async Task<string?> ReconnectToServerAsync()
+    {
+        try
+        {
+            await AppServices.Chat.ConnectAsync(AppServices.Token ?? "");
+            UpdateConnectionState("connected");
+            await RefreshAllAsync();
+            await ChatPane.ResyncAsync();
+            ShowToast(Loc.T("Settings.ServerSaved"));
+            return null;
+        }
+        catch (Exception ex)
+        {
+            IsOffline = true;
+            ConnectionText = Loc.T("Connection.Unavailable");
+            return ex.Message;
+        }
+    }
+
     private async Task RefreshAllAsync()
     {
         await RefreshConversationsAsync();

@@ -21,7 +21,8 @@ public partial class EditProfileWindow : Window
         _shell = shell;
         NicknameBox.Text = shell.Me?.NickName ?? "";
         SignatureBox.Text = shell.Me?.Signature ?? "";
-        WxIdBox.Text = shell.Me?.WxId ?? "";
+        // 微信号与登录账号是同一个号，此处只读展示
+        WxIdBox.Text = shell.Me?.Account ?? shell.Me?.WxId ?? "";
         PhoneBox.Text = shell.Me?.Phone ?? "";
         _currentAvatarUrl = shell.Me?.Avatar;
         InitAvatarPreview(shell.Me);
@@ -117,13 +118,7 @@ public partial class EditProfileWindow : Window
             SignatureBox.Focus();
             return;
         }
-        var wxid = WxIdBox.Text.Trim();
-        if (!System.Text.RegularExpressions.Regex.IsMatch(wxid, "^[A-Za-z][-A-Za-z0-9_]{5,19}$"))
-        {
-            ErrorText.Text = Loc.T("Profile.WxIdInvalid");
-            WxIdBox.Focus();
-            return;
-        }
+        var wxid = _shell.Me?.Account ?? WxIdBox.Text.Trim();
         var phone = PhoneBox.Text.Trim();
         if (phone.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(phone, "^1[3-9]\\d{9}$"))
         {

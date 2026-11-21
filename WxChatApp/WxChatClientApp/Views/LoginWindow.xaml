@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:WxChatApp.Views"
         Title="{DynamicResource App.LoginTitle}"
-        Width="420" Height="580"
+        Width="420" Height="660"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" ShowInTaskbar="True">
@@ -35,7 +35,26 @@
                         <TextBlock Text="{Binding SubtitleText}" Style="{StaticResource WxSecondaryText}"
                                    TextWrapping="Wrap" />
 
-                        <TextBlock Text="{DynamicResource Login.Account}" Margin="0,22,0,6" Style="{StaticResource WxSecondaryText}" />
+                        <TextBlock Text="{DynamicResource Login.ServerAddress}" Margin="0,22,0,6" Style="{StaticResource WxSecondaryText}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="ServerAddressBox" Grid.Column="0" Style="{StaticResource WxLabelInput}"
+                                     Text="{Binding ServerAddress, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding CanEditServer}" MaxLength="200"
+                                     TextChanged="ServerAddressBox_TextChanged"
+                                     AutomationProperties.AutomationId="ServerAddressBox" />
+                            <Button Grid.Column="1" Content="{DynamicResource Login.TestServer}" Margin="8,0,0,0"
+                                    Height="40" Padding="10,0" Style="{StaticResource WxGhostButton}"
+                                    Click="TestServer_Click" AutomationProperties.AutomationId="TestServerButton" />
+                        </Grid>
+                        <TextBlock x:Name="ServerCheckText" Text="{DynamicResource Login.ServerHint}"
+                                   Margin="0,6,0,0" FontSize="11" TextWrapping="Wrap"
+                                   Foreground="{StaticResource WxTextMutedBrush}" />
+
+                        <TextBlock Text="{DynamicResource Login.Account}" Margin="0,14,0,6" Style="{StaticResource WxSecondaryText}" />
                         <TextBox x:Name="AccountTextBox" Style="{StaticResource WxLabelInput}"
                                  Text="{Binding Account, UpdateSourceTrigger=PropertyChanged}" MaxLength="20"
                                  AutomationProperties.AutomationId="AccountTextBox" />
@@ -66,8 +85,8 @@
                         <CheckBox Content="{DynamicResource Login.Remember}" IsChecked="{Binding RememberAccount}" Margin="0,20,0,0"
                                   Foreground="{StaticResource WxTextSecondaryBrush}" />
 
-                        <TextBlock Text="{Binding ServerHint}" Margin="0,24,0,0" FontSize="10"
-                                   Foreground="{StaticResource WxTextMutedBrush}" />
+                        <TextBlock Text="{DynamicResource Login.ServerPersistHint}" Margin="0,24,0,0" FontSize="10"
+                                   Foreground="{StaticResource WxTextMutedBrush}" TextWrapping="Wrap" />
                     </StackPanel>
                 </ScrollViewer>
 

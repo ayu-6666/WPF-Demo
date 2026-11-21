@@ -267,6 +267,47 @@ public partial class ChatPaneView : UserControl
         }
     }
 
+    // ==================== 媒体气泡 ====================
+
+    private async void MediaBubble_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { DataContext: ChatMessageVm vm } || vm.ImageUrl == null || _vm == null)
+        {
+            return;
+        }
+        try
+        {
+            var ext = vm.FileExtension;
+            if (string.IsNullOrEmpty(ext))
+            {
+                ext = MediaExtension(vm.ImageUrl);
+            }
+            var dir = Path.Combine(Path.GetTempPath(), "WxChatMedia");
+            var path = UniquePath(dir, "media_" + vm.Id + ext);
+            if (!File.Exists(path))
+            {
+                _vm.Shell.ShowToast(Loc.T("Chat.MediaLoading"));
+                await AppServices.Api.DownloadFileAsync(vm.ImageUrl, path);
+            }
+
+            var owner = Window.GetWindow(this);
+            if (vm.IsImageFile)
+            {
+                var viewer = new ViewerWindow(new[] { new MediaItem { Url = path, FileName = vm.FileName } }) { Owner = owner };
+                viewer.ShowDialog();
+            }
+            else
+            {
+                var player = new MediaPlayerWindow(new MediaItem { Url = path, FileName = vm.FileName }) { Owner = owner };
+                player.ShowDialog();
+            }
+        }
+        catch (Exception ex)
+        {
+            _vm.ErrorText = Loc.T("Chat.MediaOpenFail", ex.Message);
+        }
+    }
+
     // ==================== 文件气泡 ====================
 
     private async void FileBubble_Click(object sender, RoutedEventArgs e)

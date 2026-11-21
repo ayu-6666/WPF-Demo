@@ -28,6 +28,32 @@
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Margin="18,12,18,8">
 
+                        <!-- 服务端 -->
+                        <Border Background="#FFFAFAFA" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                            <StackPanel>
+                                <TextBlock Text="{DynamicResource Settings.SectionServer}" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,8" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="84" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{DynamicResource Settings.ServerAddress}" FontSize="12" Foreground="#FF666666" VerticalAlignment="Center" />
+                                    <TextBox x:Name="ServerUrlBox" Grid.Column="1" Style="{StaticResource WxLabelInput}"
+                                             Height="30" Margin="0,0,8,0"
+                                             AutomationProperties.AutomationId="ServerUrlBox" />
+                                    <Button x:Name="TestServerButton" Grid.Column="2" Content="{DynamicResource Settings.TestServer}"
+                                            Style="{StaticResource WxGhostButton}" Width="86" Height="30"
+                                            Click="TestServer_Click"
+                                            AutomationProperties.AutomationId="TestServerButton" />
+                                </Grid>
+                                <TextBlock x:Name="ServerCheckText" FontSize="11" Margin="0,6,0,0" TextWrapping="Wrap"
+                                           Foreground="#FF8A8A8A" />
+                                <TextBlock x:Name="ServerHintText" Text="{DynamicResource Settings.ServerHint}"
+                                           FontSize="11" Foreground="#FF8A8A8A" Margin="0,4,0,0" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
                         <!-- 一、缓存 -->
                         <Border Background="#FFFAFAFA" CornerRadius="8" Padding="14" Margin="0,0,0,12">
                             <StackPanel>

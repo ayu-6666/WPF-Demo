@@ -5,16 +5,80 @@ namespace WxChatApp.Services;
 
 public static class AppConfig
 {
-    /// <summary>服务端地址，可用环境变量 WXCHAT_SERVER 覆盖，便于多机联调。</summary>
-    public static string ServerBaseUrl { get; } =
-        (Environment.GetEnvironmentVariable("WXCHAT_SERVER") ?? "http://127.0.0.1:5210").TrimEnd('/');
+    public const string DefaultServerBaseUrl = "http://127.0.0.1:5210";
+    /// <summary>单个上传文件的最大字节数（与服务端保持一致）。</summary>
+    public const long MaxUploadBytes = 200L * 1024 * 1024;
+
+    /// <summary>是否由环境变量锁定服务端地址（锁定后设置页不可修改）。</summary>
+    public static bool IsServerUrlLocked =>
+        !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("WXCHAT_SERVER"));
+
+    /// <summary>服务端地址：环境变量 WXCHAT_SERVER 优先，其次使用本机保存的地址。</summary>
+    public static string ServerBaseUrl
+    {
+        get
+        {
+            var env = Environment.GetEnvironmentVariable("WXCHAT_SERVER");
+            if (!string.IsNullOrWhiteSpace(env))
+            {
+                return env.Trim().TrimEnd('/');
+            }
+            var saved = LocalStore.Settings.ServerBaseUrl;
+            return string.IsNullOrWhiteSpace(saved) ? DefaultServerBaseUrl : saved.Trim().TrimEnd('/');
+        }
+    }
 
     public static string HubUrl => ServerBaseUrl + "/hub";
+
+    /// <summary>规范化用户输入的服务端地址；支持只填 IP:端口。</summary>
+    public static bool TryNormalizeServerUrl(string? input, out string url, out string error)
+    {
+        url = "";
+        error = "";
+        var raw = (input ?? "").Trim();
+        if (raw.Length == 0)
+        {
+            error = Loc.T("Server.UrlEmpty");
+            return false;
+        }
+        if (!raw.Contains("://", StringComparison.Ordinal))
+        {
+            raw = "http://" + raw;
+        }
+        if (!Uri.TryCreate(raw, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps) ||
+            string.IsNullOrWhiteSpace(uri.Host))
+        {
+            error = Loc.T("Server.UrlInvalid");
+            return false;
+        }
+        var builder = new UriBuilder(uri) { Query = "", Fragment = "" };
+        url = builder.Uri.AbsoluteUri.TrimEnd('/');
+        return true;
+    }
+
+    /// <summary>保存服务端地址并立即切换 API 客户端，同时持久化到本机设置。</summary>
+    public static void SaveServerBaseUrl(string url)
+    {
+        if (IsServerUrlLocked)
+        {
+            return;
+        }
+        var normalized = url.Trim().TrimEnd('/');
+        if (!string.Equals(LocalStore.Settings.ServerBaseUrl, normalized, StringComparison.OrdinalIgnoreCase))
+        {
+            LocalStore.Settings.ServerBaseUrl = normalized;
+            LocalStore.Save();
+        }
+        AppServices.Api.SetServerBaseUrl(normalized);
+    }
 }
 
 /// <summary>本机设置（只保存上次账号，不保存任何密码）。</summary>
 public sealed class LocalSettings
 {
+    /// <summary>上次使用的服务端地址（可跨机器配置）。</summary>
+    public string ServerBaseUrl { get; set; } = "";
     public string LastAccount { get; set; } = "";
     public bool RememberAccount { get; set; } = true;
     public bool NotificationsEnabled { get; set; } = true;

@@ -156,6 +156,13 @@ public sealed class Db
         EnsureColumn(conn, "friends", "remark", "TEXT NOT NULL DEFAULT ''");
         EnsureColumn(conn, "friends", "friend_group", "TEXT NOT NULL DEFAULT ''");
 
+        // 微信号与登录账号统一：旧库中的随机 wxid 一次性迁移为 account
+        using (var migrate = conn.CreateCommand())
+        {
+            migrate.CommandText = "UPDATE OR IGNORE users SET wxid = account WHERE wxid <> account";
+            migrate.ExecuteNonQuery();
+        }
+
         SeedOfficialAccounts(conn);
     }
 
@@ -337,7 +344,7 @@ public sealed class Db
             Account = account,
             NickName = nickname,
             Signature = "这个人很懒，什么都没写",
-            WxId = Auth.AuthService.NewWxId(),
+            WxId = account,
             Region = "中国 上海",
             Avatar = "",
             PasswordHash = passwordHash,
@@ -400,16 +407,15 @@ public sealed class Db
     }
 
     /// <summary>更新个人资料；avatarUrl 为 null 表示不改头像。</summary>
-    public void UpdateProfile(string userId, string nickname, string signature, string wxid, string phone, string? avatarUrl = null)
+    public void UpdateProfile(string userId, string nickname, string signature, string phone, string? avatarUrl = null)
     {
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = avatarUrl == null
-            ? "UPDATE users SET nickname = @n, signature = @s, wxid = @w, phone = @p WHERE id = @id"
-            : "UPDATE users SET nickname = @n, signature = @s, wxid = @w, phone = @p, avatar = @a WHERE id = @id";
+            ? "UPDATE users SET nickname = @n, signature = @s, phone = @p WHERE id = @id"
+            : "UPDATE users SET nickname = @n, signature = @s, phone = @p, avatar = @a WHERE id = @id";
         cmd.Parameters.AddWithValue("@n", nickname);
         cmd.Parameters.AddWithValue("@s", signature);
-        cmd.Parameters.AddWithValue("@w", wxid);
         cmd.Parameters.AddWithValue("@p", phone);
         if (avatarUrl != null)
         {
@@ -417,17 +423,6 @@ public sealed class Db
         }
         cmd.Parameters.AddWithValue("@id", userId);
         cmd.ExecuteNonQuery();
-    }
-
-    /// <summary>微信号是否已被他人占用（不区分大小写）。</summary>
-    public bool IsWxIdTaken(string wxid, string excludeUserId)
-    {
-        using var conn = Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT COUNT(*) FROM users WHERE wxid = @w COLLATE NOCASE AND id <> @id";
-        cmd.Parameters.AddWithValue("@w", wxid);
-        cmd.Parameters.AddWithValue("@id", excludeUserId);
-        return (long)cmd.ExecuteScalar()! > 0;
     }
 
     public List<(UserRecord User, bool IsFriend)> SearchUsers(string keyword, string meId)

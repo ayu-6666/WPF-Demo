@@ -1,4 +1,6 @@
+using System.IO;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using WxChatApp.Helpers;
 using WxChatApp.Models;
@@ -26,6 +28,35 @@ public partial class ChatMessageVm : ObservableObject
         AvatarBrush = AvatarHelper.BrushFor(IsMine ? AppServices.CurrentUser?.Id ?? "me" : dto.SenderId);
         AvatarUrl = IsMine ? AppServices.CurrentUser?.Avatar ?? "" : dto.SenderAvatar;
         AvatarImage = AvatarHelper.FromUrl(AvatarUrl);
+
+        FileExtension = IsFile ? Path.GetExtension(Content.Split('|')[0]).ToLowerInvariant() : "";
+        IsImageFile = IsFile && ImageExtensions.Contains(FileExtension);
+        IsAudioFile = IsFile && AudioExtensions.Contains(FileExtension);
+        IsVideoFile = IsFile && VideoExtensions.Contains(FileExtension);
+        if (IsVideoFile && !string.IsNullOrWhiteSpace(ImageUrl))
+        {
+            MediaThumbnailLoader.Request(ImageUrl!, OnVideoThumbnailReady);
+        }
+    }
+
+    private static readonly HashSet<string> ImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"
+    };
+
+    private static readonly HashSet<string> AudioExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".mp3", ".wav", ".m4a", ".aac", ".ogg", ".flac"
+    };
+
+    private static readonly HashSet<string> VideoExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".mp4", ".m4v", ".mov", ".avi", ".mkv", ".wmv", ".webm", ".flv"
+    };
+
+    private void OnVideoThumbnailReady(ImageSource? cover)
+    {
+        MediaCover = cover;
     }
 
     public string Id { get; }
@@ -94,6 +125,25 @@ public partial class ChatMessageVm : ObservableObject
     public string VoiceDurationText => VoiceSeconds + "″";
     /// <summary>气泡最小宽度随时长增长，模拟语音条。</summary>
     public double VoiceMinWidth => 90 + Math.Min(VoiceSeconds, 60) * 4;
+
+    /// <summary>文件扩展名（含点，小写），用于区分图片/音频/视频。</summary>
+    public string FileExtension { get; }
+    public bool IsImageFile { get; }
+    public bool IsAudioFile { get; }
+    public bool IsVideoFile { get; }
+    public bool IsPlainFile => IsFile && !IsImageFile && !IsAudioFile && !IsVideoFile;
+
+    /// <summary>通过“文件”入口发送的图片也直接显示预览。</summary>
+    public bool ShowFileImage => IsImageFile && !string.IsNullOrWhiteSpace(ImageUrl);
+    public string MediaCardTip => Loc.T(IsAudioFile ? "Chat.AudioCardTip" : "Chat.VideoCardTip");
+
+    [ObservableProperty] private ImageSource? _mediaCover;
+    public bool HasMediaCover => MediaCover != null;
+
+    partial void OnMediaCoverChanged(ImageSource? value)
+    {
+        OnPropertyChanged(nameof(HasMediaCover));
+    }
 
     /// <summary>文件名与大小（Content 格式为 "文件名|字节数"）。</summary>
     public string FileName => IsFile ? Content.Split('|')[0] : "";

@@ -25,13 +25,13 @@ public partial class LoginWindow : Window
         _vm.LoginSucceeded += OnLoginSucceeded;
         DataContext = _vm;
 
-        _statusTimer.Tick += async (_, _) => await RefreshServerStatusAsync();
+        _statusTimer.Tick += async (_, _) => await RefreshServerStatusAsync(false);
         Closed += (_, _) => _statusTimer.Stop();
 
         Loaded += async (_, _) =>
         {
             _statusTimer.Start();
-            await RefreshServerStatusAsync();
+            await RefreshServerStatusAsync(false);
             if (_vm.Account.Length == 0)
             {
                 AccountBoxFocus();
@@ -94,21 +94,56 @@ public partial class LoginWindow : Window
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
 
-    private async void Status_Click(object sender, MouseButtonEventArgs e) => await RefreshServerStatusAsync();
+    private async void Status_Click(object sender, MouseButtonEventArgs e) => await RefreshServerStatusAsync(true);
 
-    /// <summary>请求 /api/health，用绿/红灯表示服务端是否可用。</summary>
-    private async Task RefreshServerStatusAsync()
+    private async void TestServer_Click(object sender, RoutedEventArgs e) => await RefreshServerStatusAsync(true);
+
+    private void ServerAddressBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+    {
+        // 初始化阶段 ServerCheckText 可能尚未创建
+        if (ServerCheckText == null)
+        {
+            return;
+        }
+        ServerCheckText.Text = Loc.T("Login.ServerHint");
+        ServerCheckText.Foreground = (Brush)FindResource("WxTextMutedBrush");
+    }
+
+    /// <summary>使用输入框中的地址请求 /api/health，用绿/红灯表示服务端是否可用。</summary>
+    private async Task RefreshServerStatusAsync(bool manual)
     {
         if (_checking) return;
         _checking = true;
         try
         {
-            using var resp = await HealthClient.GetAsync(AppConfig.ServerBaseUrl + "/api/health");
-            ApplyStatus(resp.IsSuccessStatusCode);
-        }
-        catch
-        {
-            ApplyStatus(false);
+            var text = ServerAddressBox?.Text ?? "";
+            if (!AppConfig.TryNormalizeServerUrl(text, out var url, out var urlError))
+            {
+                ApplyStatus(false, urlError);
+                if (manual) ShowCheck(false, urlError);
+                return;
+            }
+
+            try
+            {
+                using var resp = await HealthClient.GetAsync(url + "/api/health");
+                var ok = resp.IsSuccessStatusCode;
+                ApplyStatus(ok, Loc.T("Login.StatusToolTip", url, DateTime.Now.ToString("HH:mm:ss")));
+                if (manual)
+                {
+                    ShowCheck(ok, ok
+                        ? Loc.T("Login.ServerOk", url)
+                        : Loc.T("Login.ServerHttpFail", url, (int)resp.StatusCode));
+                }
+            }
+            catch (Exception ex)
+            {
+                ApplyStatus(false, ex.Message);
+                if (manual)
+                {
+                    ShowCheck(false, Loc.T("Login.ServerFail", url, ex.Message));
+                }
+            }
         }
         finally
         {
@@ -116,13 +151,24 @@ public partial class LoginWindow : Window
         }
     }
 
-    private void ApplyStatus(bool online)
+    private void ShowCheck(bool ok, string message)
+    {
+        ServerCheckText.Text = message;
+        ServerCheckText.Foreground = new SolidColorBrush(ok
+            ? Color.FromRgb(0x07, 0xC1, 0x60)
+            : Color.FromRgb(0xE6, 0x43, 0x40));
+    }
+
+    private void ApplyStatus(bool online, string detail)
     {
         var color = online ? Color.FromRgb(0x07, 0xC1, 0x60) : Color.FromRgb(0xE6, 0x43, 0x40);
         StatusLight.Fill = new SolidColorBrush(color);
         StatusText.Text = online ? Loc.T("Login.StatusOnline") : Loc.T("Login.StatusOffline");
         StatusText.Foreground = new SolidColorBrush(online ? Color.FromRgb(0x80, 0x80, 0x80) : color);
-        StatusLight.ToolTip = Loc.T("Login.StatusToolTip", AppConfig.ServerBaseUrl, DateTime.Now.ToString("HH:mm:ss"));
+        var tip = Loc.T("Login.StatusToolTip", AppConfig.ServerBaseUrl, DateTime.Now.ToString("HH:mm:ss")) +
+                  (string.IsNullOrWhiteSpace(detail) ? "" : "\n" + detail);
+        StatusLight.ToolTip = tip;
+        StatusText.ToolTip = tip;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

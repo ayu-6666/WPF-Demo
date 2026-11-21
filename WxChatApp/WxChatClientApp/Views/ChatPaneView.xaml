@@ -206,25 +206,113 @@
                                                                        VerticalAlignment="Center" Margin="10,0,2,0" />
                                                         </StackPanel>
                                                     </Button>
-                                                    <!-- 文件消息：点击另存 -->
-                                                    <Button Visibility="{Binding IsFile, Converter={StaticResource BoolToVis}}"
-                                                            Background="Transparent" BorderThickness="0" Padding="0"
-                                                            MinWidth="190" Cursor="Hand" HorizontalContentAlignment="Stretch"
-                                                            Click="FileBubble_Click"
-                                                            AutomationProperties.AutomationId="{Binding Id}"
-                                                            ToolTip="{DynamicResource Chat.ClickToSaveFile}">
-                                                        <StackPanel>
-                                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                                                <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE8A5;"
-                                                                           FontSize="22" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                                                <TextBlock Text="{Binding FileName}" FontSize="13" MaxWidth="180"
-                                                                           TextWrapping="Wrap" VerticalAlignment="Center" />
+                                                    <!-- 文件/媒体消息 -->
+                                                    <StackPanel>
+                                                        <!-- 通过“文件”发送的图片：直接显示预览 -->
+                                                        <Button Visibility="{Binding ShowFileImage, Converter={StaticResource BoolToVis}}"
+                                                                Background="Transparent" BorderThickness="0" Padding="0"
+                                                                Cursor="Hand" HorizontalContentAlignment="Stretch"
+                                                                Click="MediaBubble_Click"
+                                                                AutomationProperties.AutomationId="{Binding Id}"
+                                                                ToolTip="{DynamicResource Chat.OpenImage}">
+                                                            <Border CornerRadius="4" ClipToBounds="True">
+                                                                <Image Source="{Binding ImageUrl, Converter={StaticResource ImageUrl}}"
+                                                                       MaxWidth="220" MaxHeight="240" Stretch="Uniform" />
+                                                            </Border>
+                                                        </Button>
+                                                        <!-- 音频文件：音乐卡片 -->
+                                                        <Button Visibility="{Binding IsAudioFile, Converter={StaticResource BoolToVis}}"
+                                                                Background="Transparent" BorderThickness="0" Padding="0"
+                                                                Cursor="Hand" HorizontalContentAlignment="Stretch"
+                                                                Click="MediaBubble_Click"
+                                                                AutomationProperties.AutomationId="{Binding Id}"
+                                                                ToolTip="{Binding MediaCardTip}">
+                                                            <Border Background="#FFF7F7F7" CornerRadius="6" Padding="10" Width="232">
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="44" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="28" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <Border Width="42" Height="42" CornerRadius="21" Background="#FF07C160"
+                                                                            VerticalAlignment="Center">
+                                                                        <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE8D6;"
+                                                                                   FontSize="20" Foreground="White"
+                                                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                    </Border>
+                                                                    <StackPanel Grid.Column="1" Margin="10,0,6,0" VerticalAlignment="Center">
+                                                                        <TextBlock Text="{Binding FileName}" FontSize="13" Foreground="#FF222222"
+                                                                                   TextTrimming="CharacterEllipsis" />
+                                                                        <TextBlock Text="{Binding FileSizeText}" FontSize="11" Foreground="#FF8A8A8A"
+                                                                                   Margin="0,3,0,0" />
+                                                                    </StackPanel>
+                                                                    <Border Grid.Column="2" Width="26" Height="26" CornerRadius="13"
+                                                                            Background="#FF07C160" VerticalAlignment="Center">
+                                                                        <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE768;"
+                                                                                   FontSize="12" Foreground="White"
+                                                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                    </Border>
+                                                                </Grid>
+                                                            </Border>
+                                                        </Button>
+                                                        <!-- 视频文件：首帧或占位封面 -->
+                                                        <Button Visibility="{Binding IsVideoFile, Converter={StaticResource BoolToVis}}"
+                                                                Background="Transparent" BorderThickness="0" Padding="0"
+                                                                Cursor="Hand" HorizontalContentAlignment="Stretch"
+                                                                Click="MediaBubble_Click"
+                                                                AutomationProperties.AutomationId="{Binding Id}"
+                                                                ToolTip="{Binding MediaCardTip}">
+                                                            <Border Width="236" Height="146" CornerRadius="6" ClipToBounds="True"
+                                                                    Background="#FF2B2B2B">
+                                                                <Grid>
+                                                                    <Image Source="{Binding MediaCover}" Stretch="UniformToFill"
+                                                                           Visibility="{Binding HasMediaCover, Converter={StaticResource BoolToVis}}" />
+                                                                    <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE714;"
+                                                                               FontSize="42" Foreground="#FF6E6E6E"
+                                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                               Margin="0,0,0,18"
+                                                                               Visibility="{Binding HasMediaCover, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}" />
+                                                                    <Border Width="46" Height="46" CornerRadius="23" Background="#B3000000"
+                                                                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                        <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE768;"
+                                                                                   FontSize="20" Foreground="White"
+                                                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                    </Border>
+                                                                    <Border VerticalAlignment="Bottom" Background="#B3000000" Padding="8,5">
+                                                                        <Grid>
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="*" />
+                                                                                <ColumnDefinition Width="Auto" />
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <TextBlock Text="{Binding FileName}" FontSize="11" Foreground="White"
+                                                                                       TextTrimming="CharacterEllipsis" />
+                                                                            <TextBlock Grid.Column="1" Text="{Binding FileSizeText}" FontSize="10"
+                                                                                       Foreground="#FFD0D0D0" Margin="8,0,0,0" />
+                                                                        </Grid>
+                                                                    </Border>
+                                                                </Grid>
+                                                            </Border>
+                                                        </Button>
+                                                        <!-- 普通文件：点击另存 -->
+                                                        <Button Visibility="{Binding IsPlainFile, Converter={StaticResource BoolToVis}}"
+                                                                Background="Transparent" BorderThickness="0" Padding="0"
+                                                                MinWidth="190" Cursor="Hand" HorizontalContentAlignment="Stretch"
+                                                                Click="FileBubble_Click"
+                                                                AutomationProperties.AutomationId="{Binding Id}"
+                                                                ToolTip="{DynamicResource Chat.ClickToSaveFile}">
+                                                            <StackPanel>
+                                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                                    <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE8A5;"
+                                                                               FontSize="22" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                                                    <TextBlock Text="{Binding FileName}" FontSize="13" MaxWidth="180"
+                                                                               TextWrapping="Wrap" VerticalAlignment="Center" />
+                                                                </StackPanel>
+                                                                <TextBlock Text="{Binding FileSizeText}" FontSize="11"
+                                                                           HorizontalAlignment="Right"
+                                                                           Foreground="{StaticResource WxTextSecondaryBrush}" />
                                                             </StackPanel>
-                                                            <TextBlock Text="{Binding FileSizeText}" FontSize="11"
-                                                                       HorizontalAlignment="Right"
-                                                                       Foreground="{StaticResource WxTextSecondaryBrush}" />
-                                                        </StackPanel>
-                                                    </Button>
+                                                        </Button>
+                                                    </StackPanel>
                                                     <!-- 合并转发的聊天记录 -->
                                                     <Border Visibility="{Binding IsMerge, Converter={StaticResource BoolToVis}}"
                                                             Background="White" BorderBrush="#FFE2E2E2" BorderThickness="1"
@@ -331,25 +419,113 @@
                                                                        VerticalAlignment="Center" Margin="10,0,2,0" />
                                                         </StackPanel>
                                                     </Button>
-                                                    <!-- 文件消息：点击另存 -->
-                                                    <Button Visibility="{Binding IsFile, Converter={StaticResource BoolToVis}}"
-                                                            Background="Transparent" BorderThickness="0" Padding="0"
-                                                            MinWidth="190" Cursor="Hand" HorizontalContentAlignment="Stretch"
-                                                            Click="FileBubble_Click"
-                                                            AutomationProperties.AutomationId="{Binding Id}"
-                                                            ToolTip="{DynamicResource Chat.ClickToSaveFile}">
-                                                        <StackPanel>
-                                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                                                <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE8A5;"
-                                                                           FontSize="22" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                                                <TextBlock Text="{Binding FileName}" FontSize="13" MaxWidth="180"
-                                                                           TextWrapping="Wrap" VerticalAlignment="Center" />
+                                                    <!-- 文件/媒体消息 -->
+                                                    <StackPanel>
+                                                        <!-- 通过“文件”发送的图片：直接显示预览 -->
+                                                        <Button Visibility="{Binding ShowFileImage, Converter={StaticResource BoolToVis}}"
+                                                                Background="Transparent" BorderThickness="0" Padding="0"
+                                                                Cursor="Hand" HorizontalContentAlignment="Stretch"
+                                                                Click="MediaBubble_Click"
+                                                                AutomationProperties.AutomationId="{Binding Id}"
+                                                                ToolTip="{DynamicResource Chat.OpenImage}">
+                                                            <Border CornerRadius="4" ClipToBounds="True">
+                                                                <Image Source="{Binding ImageUrl, Converter={StaticResource ImageUrl}}"
+                                                                       MaxWidth="220" MaxHeight="240" Stretch="Uniform" />
+                                                            </Border>
+                                                        </Button>
+                                                        <!-- 音频文件：音乐卡片 -->
+                                                        <Button Visibility="{Binding IsAudioFile, Converter={StaticResource BoolToVis}}"
+                                                                Background="Transparent" BorderThickness="0" Padding="0"
+                                                                Cursor="Hand" HorizontalContentAlignment="Stretch"
+                                                                Click="MediaBubble_Click"
+                                                                AutomationProperties.AutomationId="{Binding Id}"
+                                                                ToolTip="{Binding MediaCardTip}">
+                                                            <Border Background="#FFF7F7F7" CornerRadius="6" Padding="10" Width="232">
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="44" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="28" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <Border Width="42" Height="42" CornerRadius="21" Background="#FF07C160"
+                                                                            VerticalAlignment="Center">
+                                                                        <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE8D6;"
+                                                                                   FontSize="20" Foreground="White"
+                                                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                    </Border>
+                                                                    <StackPanel Grid.Column="1" Margin="10,0,6,0" VerticalAlignment="Center">
+                                                                        <TextBlock Text="{Binding FileName}" FontSize="13" Foreground="#FF222222"
+                                                                                   TextTrimming="CharacterEllipsis" />
+                                                                        <TextBlock Text="{Binding FileSizeText}" FontSize="11" Foreground="#FF8A8A8A"
+                                                                                   Margin="0,3,0,0" />
+                                                                    </StackPanel>
+                                                                    <Border Grid.Column="2" Width="26" Height="26" CornerRadius="13"
+                                                                            Background="#FF07C160" VerticalAlignment="Center">
+                                                                        <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE768;"
+                                                                                   FontSize="12" Foreground="White"
+                                                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                    </Border>
+                                                                </Grid>
+                                                            </Border>
+                                                        </Button>
+                                                        <!-- 视频文件：首帧或占位封面 -->
+                                                        <Button Visibility="{Binding IsVideoFile, Converter={StaticResource BoolToVis}}"
+                                                                Background="Transparent" BorderThickness="0" Padding="0"
+                                                                Cursor="Hand" HorizontalContentAlignment="Stretch"
+                                                                Click="MediaBubble_Click"
+                                                                AutomationProperties.AutomationId="{Binding Id}"
+                                                                ToolTip="{Binding MediaCardTip}">
+                                                            <Border Width="236" Height="146" CornerRadius="6" ClipToBounds="True"
+                                                                    Background="#FF2B2B2B">
+                                                                <Grid>
+                                                                    <Image Source="{Binding MediaCover}" Stretch="UniformToFill"
+                                                                           Visibility="{Binding HasMediaCover, Converter={StaticResource BoolToVis}}" />
+                                                                    <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE714;"
+                                                                               FontSize="42" Foreground="#FF6E6E6E"
+                                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                               Margin="0,0,0,18"
+                                                                               Visibility="{Binding HasMediaCover, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}" />
+                                                                    <Border Width="46" Height="46" CornerRadius="23" Background="#B3000000"
+                                                                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                        <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE768;"
+                                                                                   FontSize="20" Foreground="White"
+                                                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                    </Border>
+                                                                    <Border VerticalAlignment="Bottom" Background="#B3000000" Padding="8,5">
+                                                                        <Grid>
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="*" />
+                                                                                <ColumnDefinition Width="Auto" />
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <TextBlock Text="{Binding FileName}" FontSize="11" Foreground="White"
+                                                                                       TextTrimming="CharacterEllipsis" />
+                                                                            <TextBlock Grid.Column="1" Text="{Binding FileSizeText}" FontSize="10"
+                                                                                       Foreground="#FFD0D0D0" Margin="8,0,0,0" />
+                                                                        </Grid>
+                                                                    </Border>
+                                                                </Grid>
+                                                            </Border>
+                                                        </Button>
+                                                        <!-- 普通文件：点击另存 -->
+                                                        <Button Visibility="{Binding IsPlainFile, Converter={StaticResource BoolToVis}}"
+                                                                Background="Transparent" BorderThickness="0" Padding="0"
+                                                                MinWidth="190" Cursor="Hand" HorizontalContentAlignment="Stretch"
+                                                                Click="FileBubble_Click"
+                                                                AutomationProperties.AutomationId="{Binding Id}"
+                                                                ToolTip="{DynamicResource Chat.ClickToSaveFile}">
+                                                            <StackPanel>
+                                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                                    <TextBlock FontFamily="{StaticResource WxIconFont}" Text="&#xE8A5;"
+                                                                               FontSize="22" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                                                    <TextBlock Text="{Binding FileName}" FontSize="13" MaxWidth="180"
+                                                                               TextWrapping="Wrap" VerticalAlignment="Center" />
+                                                                </StackPanel>
+                                                                <TextBlock Text="{Binding FileSizeText}" FontSize="11"
+                                                                           HorizontalAlignment="Right"
+                                                                           Foreground="{StaticResource WxTextSecondaryBrush}" />
                                                             </StackPanel>
-                                                            <TextBlock Text="{Binding FileSizeText}" FontSize="11"
-                                                                       HorizontalAlignment="Right"
-                                                                       Foreground="{StaticResource WxTextSecondaryBrush}" />
-                                                        </StackPanel>
-                                                    </Button>
+                                                        </Button>
+                                                    </StackPanel>
                                                     <!-- 合并转发的聊天记录 -->
                                                     <Border Visibility="{Binding IsMerge, Converter={StaticResource BoolToVis}}"
                                                             Background="White" BorderBrush="#FFE2E2E2" BorderThickness="1"

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
@@ -40,6 +41,13 @@ public partial class SettingsWindow : Window
         InitializeComponent();
         _shell = shell;
         _loading = true;
+        ServerUrlBox.Text = AppConfig.ServerBaseUrl;
+        ServerUrlBox.IsReadOnly = AppConfig.IsServerUrlLocked;
+        TestServerButton.IsEnabled = !AppConfig.IsServerUrlLocked;
+        if (AppConfig.IsServerUrlLocked)
+        {
+            ServerHintText.Text = Loc.T("Settings.ServerLockedHint");
+        }
         CachePathBox.Text = _settings.CacheDir;
         FilesPathBox.Text = _settings.FileDir;
         NotifyCheck.IsChecked = _shell.NotificationsEnabled;
@@ -74,6 +82,35 @@ public partial class SettingsWindow : Window
             : bytes < 1024 * 1024
                 ? $"{bytes / 1024.0:F1} KB"
                 : $"{bytes / 1024.0 / 1024.0:F2} MB";
+    }
+
+    private async void TestServer_Click(object sender, RoutedEventArgs e)
+    {
+        if (!AppConfig.TryNormalizeServerUrl(ServerUrlBox.Text, out var url, out var error))
+        {
+            ShowServerCheck(false, error);
+            return;
+        }
+        try
+        {
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+            using var resp = await client.GetAsync(url + "/api/health");
+            ShowServerCheck(resp.IsSuccessStatusCode, resp.IsSuccessStatusCode
+                ? Loc.T("Settings.ServerOk", url)
+                : Loc.T("Settings.ServerFail", $"HTTP {(int)resp.StatusCode}"));
+        }
+        catch (Exception ex)
+        {
+            ShowServerCheck(false, Loc.T("Settings.ServerFail", ex.Message));
+        }
+    }
+
+    private void ShowServerCheck(bool ok, string message)
+    {
+        ServerCheckText.Text = message;
+        ServerCheckText.Foreground = new System.Windows.Media.SolidColorBrush(ok
+            ? System.Windows.Media.Color.FromRgb(0x07, 0xC1, 0x60)
+            : System.Windows.Media.Color.FromRgb(0xE6, 0x43, 0x40));
     }
 
     private void BrowseCache_Click(object sender, RoutedEventArgs e)
@@ -327,8 +364,16 @@ public partial class SettingsWindow : Window
         RollbackAndClose();
     }
 
-    private void Save_Click(object sender, RoutedEventArgs e)
+    private async void Save_Click(object sender, RoutedEventArgs e)
     {
+        if (!AppConfig.TryNormalizeServerUrl(ServerUrlBox.Text, out var serverUrl, out var serverError))
+        {
+            Dialogs.Error(this, serverError, Loc.T("Settings.SectionServer"));
+            return;
+        }
+        var serverChanged = !AppConfig.IsServerUrlLocked &&
+                            !string.Equals(serverUrl, AppConfig.ServerBaseUrl, StringComparison.OrdinalIgnoreCase);
+
         var newCacheDir = CachePathBox.Text.Trim();
         if (newCacheDir.Length == 0)
         {
@@ -359,7 +404,23 @@ public partial class SettingsWindow : Window
             _settings.CacheDir = newCacheDir;
             LocalStore.Save();
         }
+
+        if (serverChanged)
+        {
+            AppConfig.SaveServerBaseUrl(serverUrl);
+        }
         Close();
+
+        if (serverChanged)
+        {
+            var reason = await _shell.ReconnectToServerAsync();
+            if (reason != null)
+            {
+                Dialogs.Error(Application.Current.MainWindow,
+                    Loc.T("Settings.ServerReconnectFail", reason),
+                    Loc.T("Settings.SectionServer"));
+            }
+        }
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)

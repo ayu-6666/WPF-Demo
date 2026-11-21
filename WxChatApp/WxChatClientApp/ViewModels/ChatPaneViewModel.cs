@@ -426,12 +426,18 @@ public partial class ChatPaneViewModel : ObservableObject
             return;
         }
         var path = dialog.FileName;
+        var size = new FileInfo(path).Length;
+        if (size > AppConfig.MaxUploadBytes)
+        {
+            ErrorText = Loc.T("Chat.FileTooLarge", Path.GetFileName(path),
+                (AppConfig.MaxUploadBytes / 1024 / 1024).ToString());
+            return;
+        }
         try
         {
             IsSending = true;
-            var localCopy = LocalStore.StageOutgoingFile(path);
-            var url = await AppServices.Api.UploadFileAsync(localCopy);
-            var size = new FileInfo(path).Length;
+            // 直接流式上传原文件，避免大视频先复制一份导致耗时/磁盘占用翻倍
+            var url = await AppServices.Api.UploadFileAsync(path);
             var target = IsGroup ? ConvId : PeerId;
             await AppServices.Chat.SendMessageAsync(ConvType, target, "file",
                 Path.GetFileName(path) + "|" + size, url, Array.Empty<string>());

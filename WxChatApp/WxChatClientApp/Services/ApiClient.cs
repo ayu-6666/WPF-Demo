@@ -19,19 +19,63 @@ public sealed class ApiException : Exception
 public sealed class ApiClient
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-    private readonly HttpClient _http = new()
-    {
-        BaseAddress = new Uri(AppConfig.ServerBaseUrl),
-        Timeout = TimeSpan.FromSeconds(30)
-    };
+    private HttpClient _http = CreateHttpClient(AppConfig.ServerBaseUrl);
 
     public string? Token { get; private set; }
+
+    private static HttpClient CreateHttpClient(string baseUrl)
+    {
+        var client = new HttpClient
+        {
+            BaseAddress = new Uri(baseUrl),
+            // 大文件上传/下载可能持续较久，单个请求给足 10 分钟
+            Timeout = TimeSpan.FromMinutes(10)
+        };
+        return client;
+    }
+
+    /// <summary>切换服务端地址（设置页保存后调用），并保留当前登录令牌。</summary>
+    public void SetServerBaseUrl(string baseUrl)
+    {
+        var old = _http;
+        var next = CreateHttpClient(baseUrl);
+        if (!string.IsNullOrWhiteSpace(Token))
+        {
+            next.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+        }
+        _http = next;
+        try
+        {
+            old.Dispose();
+        }
+        catch
+        {
+            // 旧客户端可能仍有请求在途，忽略释放异常
+        }
+    }
 
     public void SetToken(string? token)
     {
         Token = token;
         _http.DefaultRequestHeaders.Authorization =
             token == null ? null : new AuthenticationHeaderValue("Bearer", token);
+    }
+
+    /// <summary>把网络层异常转换成可读的中文原因，避免只看到 "An error occurred..."。</summary>
+    private async Task<HttpResponseMessage> SendRawAsync(HttpRequestMessage req)
+    {
+        try
+        {
+            return await _http.SendAsync(req);
+        }
+        catch (TaskCanceledException)
+        {
+            throw new ApiException(Loc.T("Api.Timeout", _http.BaseAddress?.ToString() ?? ""));
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new ApiException(Loc.T("Api.NetworkError", _http.BaseAddress?.ToString() ?? "", ex.Message));
+        }
     }
 
     private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string path, object? body = null)
@@ -41,7 +85,7 @@ public sealed class ApiClient
         {
             req.Content = JsonContent.Create(body, options: JsonOptions);
         }
-        var resp = await _http.SendAsync(req);
+        var resp = await SendRawAsync(req);
         if (!resp.IsSuccessStatusCode)
         {
             var message = Loc.T("Api.RequestFail", (int)resp.StatusCode);
@@ -328,12 +372,31 @@ public sealed class ApiClient
     public async Task<string> UploadFileAsync(string filePath, string? errorPrefix = null)
     {
         errorPrefix ??= Loc.T("Api.FileUploadFail");
+        var info = new FileInfo(filePath);
+        if (info.Length > AppConfig.MaxUploadBytes)
+        {
+            throw new ApiException(Loc.T("Chat.FileTooLarge", info.Name,
+                (AppConfig.MaxUploadBytes / 1024 / 1024).ToString()));
+        }
         using var form = new MultipartFormDataContent();
-        var bytes = await File.ReadAllBytesAsync(filePath);
-        var content = new ByteArrayContent(bytes);
+        // 流式上传，避免把几十 MB 的视频整体读进内存
+        await using var stream = File.OpenRead(filePath);
+        var content = new StreamContent(stream);
         content.Headers.ContentType = new MediaTypeHeaderValue(GuessContentType(filePath));
         form.Add(content, "file", Path.GetFileName(filePath));
-        var resp = await _http.PostAsync("/api/upload", form);
+        HttpResponseMessage resp;
+        try
+        {
+            resp = await _http.PostAsync("/api/upload", form);
+        }
+        catch (TaskCanceledException)
+        {
+            throw new ApiException(Loc.T("Api.Timeout", _http.BaseAddress?.ToString() ?? ""));
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new ApiException(Loc.T("Api.NetworkError", _http.BaseAddress?.ToString() ?? "", ex.Message));
+        }
         if (!resp.IsSuccessStatusCode)
         {
             var status = resp.StatusCode;
@@ -353,20 +416,46 @@ public sealed class ApiClient
     /// <summary>把服务端媒体文件下载到指定路径。</summary>
     public async Task DownloadFileAsync(string url, string destPath)
     {
-        using var resp = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-        if (!resp.IsSuccessStatusCode)
+        HttpResponseMessage resp;
+        try
         {
-            throw new ApiException(Loc.T("Api.DownloadFail", (int)resp.StatusCode));
+            resp = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
         }
-        Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
-        await using var src = await resp.Content.ReadAsStreamAsync();
-        await using var dst = File.Create(destPath);
-        await src.CopyToAsync(dst);
+        catch (TaskCanceledException)
+        {
+            throw new ApiException(Loc.T("Api.Timeout", _http.BaseAddress?.ToString() ?? ""));
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new ApiException(Loc.T("Api.NetworkError", _http.BaseAddress?.ToString() ?? "", ex.Message));
+        }
+        using (resp)
+        {
+            if (!resp.IsSuccessStatusCode)
+            {
+                throw new ApiException(Loc.T("Api.DownloadFail", (int)resp.StatusCode));
+            }
+            Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
+            await using var src = await resp.Content.ReadAsStreamAsync();
+            await using var dst = File.Create(destPath);
+            await src.CopyToAsync(dst);
+        }
+    }
+
+    /// <summary>把消息里的媒体地址解析成绝对地址（兼容服务端返回相对路径）。</summary>
+    public Uri ResolveUri(string url)
+    {
+        if (Uri.TryCreate(url, UriKind.Absolute, out var abs))
+        {
+            return abs;
+        }
+        return new Uri(_http.BaseAddress!, url.TrimStart('/'));
     }
 
     private static string GuessContentType(string path) => Path.GetExtension(path).ToLowerInvariant() switch
     {
         ".png" => "image/png",
+        ".jpg" or ".jpeg" => "image/jpeg",
         ".gif" => "image/gif",
         ".webp" => "image/webp",
         ".bmp" => "image/bmp",
@@ -375,6 +464,15 @@ public sealed class ApiClient
         ".mp3" => "audio/mpeg",
         ".m4a" => "audio/mp4",
         ".aac" => "audio/aac",
+        ".ogg" => "audio/ogg",
+        ".flac" => "audio/flac",
+        ".mp4" or ".m4v" => "video/mp4",
+        ".mov" => "video/quicktime",
+        ".avi" => "video/x-msvideo",
+        ".mkv" => "video/x-matroska",
+        ".wmv" => "video/x-ms-wmv",
+        ".webm" => "video/webm",
+        ".flv" => "video/x-flv",
         ".txt" => "text/plain",
         ".pdf" => "application/pdf",
         ".zip" => "application/zip",

@@ -123,7 +123,12 @@ public sealed class ChatConnection
         catch (OperationCanceledException) when (totalCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
         {
             // 是我们自己的 15s 超时
-            throw new TimeoutException(Loc.T("Connection.TimeoutDetail"));
+            throw new TimeoutException(Loc.T("Connection.TimeoutDetail", AppConfig.ServerBaseUrl));
+        }
+        catch (Exception ex) when (ex is not ApiException)
+        {
+            // 把底层网络错误（连接被拒绝/DNS/证书等）转成可读原因
+            throw new ApiException(Loc.T("Connection.FailedDetail", AppConfig.ServerBaseUrl, ex.Message));
         }
 
         Dispatch(() => StatusChanged?.Invoke("connected"));
