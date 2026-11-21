@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using MediaStudioWpf48.Commands;
 using MediaStudioWpf48.Models;
 using MediaStudioWpf48.Services;
+using MediaStudioWpf48.Views;
 using Microsoft.Win32;
 
 namespace MediaStudioWpf48.ViewModels
@@ -18,12 +21,14 @@ namespace MediaStudioWpf48.ViewModels
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private const int MaxLogEntries = 2000;
+        private static readonly string[] SlideExtensions = { ".jpg", ".jpeg", ".png", ".bmp", ".webp" };
+
         private readonly FfmpegService _ffmpeg = new FfmpegService();
         private readonly List<string> _tempFiles = new List<string>();
         private string _input = "";
         private string _output = "";
         private string _music = "";
-        private string _log = "";
         private string _statusKey = "StatusReady";
         private string _start = "00:00:00";
         private string _duration = "10";
@@ -65,9 +70,9 @@ namespace MediaStudioWpf48.ViewModels
             };
 
             LocalizationManager.Instance.PropertyChanged += (s, e) => ApplyLanguage();
-            _ffmpeg.Log += s => Application.Current.Dispatcher.Invoke(() =>
+            _ffmpeg.Log += (line, isError) => Application.Current.Dispatcher.Invoke(() =>
             {
-                if (DetailedLog) Log += s + Environment.NewLine;
+                if (DetailedLog || isError) AppendLog(line, isError);
             });
 
             ExecuteCommand = new RelayCommand(async _ => await Execute(), _ => CanRun());
@@ -113,10 +118,13 @@ namespace MediaStudioWpf48.ViewModels
             set { _music = value; N(nameof(Music)); AfterPathChanged(); }
         }
 
-        public string Log
+        public ObservableCollection<LogEntry> LogLines { get; } = new ObservableCollection<LogEntry>();
+
+        private void AppendLog(string text, bool isError = false, bool isSuccess = false)
         {
-            get => _log;
-            set { _log = value; N(nameof(Log)); }
+            if (string.IsNullOrWhiteSpace(text)) return;
+            if (LogLines.Count >= MaxLogEntries) LogLines.RemoveAt(0);
+            LogLines.Add(new LogEntry { Text = text, IsError = isError, IsSuccess = isSuccess });
         }
 
         public string Status => L[_statusKey];
@@ -171,7 +179,7 @@ namespace MediaStudioWpf48.ViewModels
         public bool ShowAnyParam => ShowTiming || ShowFps || ShowRegion || ShowFilter;
         public bool ShowNoParams => !ShowAnyParam;
 
-        public string InputHint => L[Selected != null && (Selected.Key == "concat" || Selected.Key == "slides")
+        public string InputHint => L[Selected != null && IsFolderTool(Selected.Key)
             ? "InputHintFolder" : "InputHintFile"];
 
         public string ActionHint
@@ -201,16 +209,19 @@ namespace MediaStudioWpf48.ViewModels
 
         public RelayCommand BrowseInput => new RelayCommand(_ =>
         {
-            if (Selected != null && (Selected.Key == "concat" || Selected.Key == "slides"))
+            string key = Selected == null ? "" : Selected.Key;
+            if (IsFolderTool(key))
             {
                 var dialog = new System.Windows.Forms.FolderBrowserDialog();
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) Input = dialog.SelectedPath;
+                return;
             }
-            else
+
+            var picker = new OpenFileDialog
             {
-                var dialog = new OpenFileDialog { Filter = L["PickMedia"] };
-                if (dialog.ShowDialog() == true) Input = dialog.FileName;
-            }
+                Filter = IsImageTool(key) ? L["PickImage"] : L["PickVideo"]
+            };
+            if (picker.ShowDialog() == true) Input = picker.FileName;
         });
 
         public RelayCommand BrowseMusic => new RelayCommand(_ =>
@@ -221,14 +232,36 @@ namespace MediaStudioWpf48.ViewModels
 
         public RelayCommand BrowseOutput => new RelayCommand(_ =>
         {
-            string ext = Selected == null ? ".mp4"
-                : Selected.Key == "audio" ? ".mp3"
-                : Selected.Key == "gif" ? ".gif"
-                : Selected.Key.StartsWith("i") ? ".png"
-                : ".mp4";
-            var dialog = new SaveFileDialog { Filter = L["PickOutput"], DefaultExt = ext };
+            string key = Selected == null ? "" : Selected.Key;
+            string ext;
+            string filter;
+            switch (key)
+            {
+                case "audio":
+                    ext = ".mp3";
+                    filter = L["PickAudioOut"];
+                    break;
+                case "gif":
+                    ext = ".gif";
+                    filter = L["PickGifOut"];
+                    break;
+                case "idelogo":
+                case "ienhance":
+                    ext = ".png";
+                    filter = L["PickImageOut"];
+                    break;
+                default:
+                    ext = ".mp4";
+                    filter = L["PickVideoOut"];
+                    break;
+            }
+            var dialog = new SaveFileDialog { Filter = filter, DefaultExt = ext, AddExtension = true };
             if (dialog.ShowDialog() == true) Output = dialog.FileName;
         });
+
+        private static bool IsFolderTool(string key) => key == "concat" || key == "slides";
+
+        private static bool IsImageTool(string key) => key == "idelogo" || key == "ienhance";
 
         private bool CanRun()
         {
@@ -282,6 +315,45 @@ namespace MediaStudioWpf48.ViewModels
 
         private string Q(string value) => "\"" + value.Replace("\"", "\\\"") + "\"";
 
+        private List<string> GetSlideFiles()
+        {
+            if (string.IsNullOrWhiteSpace(Input) || !Directory.Exists(Input)) return new List<string>();
+            return Directory.GetFiles(Input)
+                .Where(f => SlideExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
+                .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        private string SlideFps()
+        {
+            double fps;
+            if (!double.TryParse(Fps, NumberStyles.Float, CultureInfo.InvariantCulture, out fps) || fps <= 0.1)
+                fps = 15;
+            return fps.ToString("0.###", CultureInfo.InvariantCulture);
+        }
+
+        private string BuildSlideList(IList<string> files, string fps)
+        {
+            double seconds = 1.0 / double.Parse(fps, CultureInfo.InvariantCulture);
+            string duration = seconds.ToString("0.######", CultureInfo.InvariantCulture);
+            var builder = new StringBuilder();
+            foreach (string file in files)
+            {
+                builder.AppendLine("file '" + ConcatPath(file) + "'");
+                builder.AppendLine("duration " + duration);
+            }
+            // concat 清单需要重复最后一帧，否则最后一秒不会被输出。
+            builder.AppendLine("file '" + ConcatPath(files[files.Count - 1]) + "'");
+
+            string list = Path.Combine(Path.GetTempPath(), "slides_" + Guid.NewGuid().ToString("N") + ".txt");
+            File.WriteAllText(list, builder.ToString(), new UTF8Encoding(false));
+            _tempFiles.Add(list);
+            return list;
+        }
+
+        private static string ConcatPath(string path) =>
+            Path.GetFullPath(path).Replace("\\", "/").Replace("'", "'\\''");
+
         private string Args()
         {
             string input = Q(Input);
@@ -307,8 +379,12 @@ namespace MediaStudioWpf48.ViewModels
                     return "-y -protocol_whitelist file,http,https,tcp,tls,crypto -i " + input +
                            " -c copy -bsf:a aac_adtstoasc " + output;
                 case "slides":
-                    return "-y -framerate " + Fps + " -pattern_type glob -i " +
-                           Q(Path.Combine(Input, "*.jpg")) + " -c:v libx264 -pix_fmt yuv420p " + output;
+                    List<string> slides = GetSlideFiles();
+                    if (slides.Count == 0) throw new Exception(L["NoImages"]);
+                    string slideList = BuildSlideList(slides, SlideFps());
+                    return "-y -f concat -safe 0 -i " + Q(slideList) +
+                           " -r " + SlideFps() +
+                           " -c:v libx264 -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2,setsar=1\" " + output;
                 case "vdelogo":
                     return "-y -i " + input + " -vf \"delogo=x=" + X + ":y=" + Y + ":w=" + W + ":h=" + H +
                            ":show=0\" -c:a copy " + output;
@@ -338,25 +414,30 @@ namespace MediaStudioWpf48.ViewModels
                     throw new Exception(L["NeedPaths"]);
                 if (Selected.Key == "music" && string.IsNullOrWhiteSpace(Music))
                     throw new Exception(L["NeedMusic"]);
+                if (Selected.Key == "slides" && GetSlideFiles().Count == 0)
+                {
+                    MessageDialog.ShowMessage(MessageDialogKind.Warning, L["NoImages"]);
+                    return;
+                }
 
                 Progress = 0;
                 Busy = true;
                 SetStatus("StatusProcessing");
-                Log += L["LogStart"] + Selected.Name + Environment.NewLine;
+                AppendLog(L["LogStart"] + Selected.Name);
 
                 await _ffmpeg.Run(Args());
 
                 Progress = 100;
                 SetStatus("StatusDone");
-                Log += L["LogDone"] + Output + Environment.NewLine;
+                AppendLog(L["LogDone"] + Output, false, true);
                 if (OpenAfterDone) OpenOutputFolder();
-                MessageBox.Show(L["Completed"]);
+                MessageDialog.ShowMessage(MessageDialogKind.Success, L["Completed"]);
             }
             catch (Exception ex)
             {
                 SetStatus("StatusFailed");
-                Log += ex.Message + Environment.NewLine;
-                MessageBox.Show(ex.Message, L["ErrorTitle"]);
+                AppendLog(ex.Message, true);
+                MessageDialog.ShowMessage(MessageDialogKind.Error, ex.Message, L["ErrorTitle"]);
             }
             finally
             {

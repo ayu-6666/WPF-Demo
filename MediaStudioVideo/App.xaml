@@ -48,6 +48,8 @@
         <SolidColorBrush x:Key="ScrollTrack" Color="#EAEFF7"/>
         <SolidColorBrush x:Key="ProgressTrack" Color="#E4EAF3"/>
         <SolidColorBrush x:Key="Success" Color="#1F9D6A"/>
+        <SolidColorBrush x:Key="Warning" Color="#B7791F"/>
+        <SolidColorBrush x:Key="WarningSoft" Color="#FDF3DF"/>
         <SolidColorBrush x:Key="LogBg" Color="#F7F9FC"/>
         <SolidColorBrush x:Key="StatusChipBg" Color="#EAF1FE"/>
         <SolidColorBrush x:Key="HoverOverlay" Color="#1A000000"/>
@@ -289,8 +291,21 @@
                                                Margin="{TemplateBinding Padding}"
                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                                TextTrimming="CharacterEllipsis"
-                                               IsHitTestVisible="False"
-                                               Visibility="Collapsed"/>
+                                               IsHitTestVisible="False">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource AncestorType=TextBox}}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource AncestorType=TextBox}}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </Grid>
                             </Border>
                             <Border x:Name="FocusRing"
@@ -314,12 +329,6 @@
                                 <Setter Property="Foreground" Value="{DynamicResource DisabledText}"/>
                                 <Setter TargetName="Body" Property="Opacity" Value="0.8"/>
                             </Trigger>
-                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
-                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -327,14 +336,42 @@
         </Style>
         <Style TargetType="TextBox" BasedOn="{StaticResource InputTextBox}"/>
 
-        <Style x:Key="LogTextBox" TargetType="TextBox" BasedOn="{StaticResource InputTextBox}">
-            <Setter Property="Background" Value="{DynamicResource LogBg}"/>
+        <!-- ============================ 日志列表 ============================ -->
+        <Style x:Key="LogListItem" TargetType="ListBoxItem">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+            <Setter Property="Padding" Value="0,1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="LogListBox" TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
             <Setter Property="FontFamily" Value="Consolas"/>
             <Setter Property="FontSize" Value="{StaticResource FontSm}"/>
-            <Setter Property="Padding" Value="10,8"/>
-            <Setter Property="MinHeight" Value="200"/>
-            <Setter Property="MaxHeight" Value="320"/>
-            <Setter Property="VerticalContentAlignment" Value="Top"/>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource LogListItem}"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBox">
+                        <ScrollViewer Focusable="False"
+                                      Padding="{TemplateBinding Padding}"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                            <ItemsPresenter/>
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- ============================ 滚动条 ============================ -->

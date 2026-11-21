@@ -9,7 +9,9 @@ namespace MediaStudioWpf48.Services
     public class FfmpegService
     {
         public string Exe { get; private set; }
-        public event Action<string> Log;
+
+        // 第二个参数表示该行是否为错误信息，供界面标红使用。
+        public event Action<string, bool> Log;
 
         public FfmpegService()
         {
@@ -65,6 +67,26 @@ namespace MediaStudioWpf48.Services
             return null;
         }
 
+        private static readonly string[] ErrorMarkers =
+        {
+            "error", "invalid", "failed", "failure", "unable", "no such file",
+            "not found", "could not", "cannot", "matches no streams",
+            "function not implemented", "unrecognized", "unknown encoder",
+            "unknown decoder", "no such filter", "does not contain",
+            "permission denied", "no such file or directory"
+        };
+
+        private static bool LooksLikeError(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line)) return false;
+            string lower = line.ToLowerInvariant();
+            foreach (string marker in ErrorMarkers)
+            {
+                if (lower.Contains(marker)) return true;
+            }
+            return false;
+        }
+
         public async Task Run(string args)
         {
             // Re-resolve each run so environment changes made after app launch can be picked up.
@@ -92,11 +114,13 @@ namespace MediaStudioWpf48.Services
                 var error = new StringBuilder();
                 process.ErrorDataReceived += (sender, e) =>
                 {
-                    if (e.Data != null) { lock (error) error.AppendLine(e.Data); Log?.Invoke(e.Data); }
+                    if (e.Data == null) return;
+                    lock (error) error.AppendLine(e.Data);
+                    Log?.Invoke(e.Data, LooksLikeError(e.Data));
                 };
                 process.OutputDataReceived += (sender, e) =>
                 {
-                    if (e.Data != null) Log?.Invoke(e.Data);
+                    if (e.Data != null) Log?.Invoke(e.Data, LooksLikeError(e.Data));
                 };
                 try
                 {

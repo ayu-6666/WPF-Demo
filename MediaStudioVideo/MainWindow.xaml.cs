@@ -1,5 +1,8 @@
+using System;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using MediaStudioWpf48.Services;
 using MediaStudioWpf48.ViewModels;
 
@@ -11,9 +14,22 @@ namespace MediaStudioWpf48
         {
             InitializeComponent();
             ThemeManager.Apply(false);
+
+            // 日志追加后自动滚动到底部。
+            if (DataContext is MainViewModel vm)
+                vm.LogLines.CollectionChanged += LogLines_CollectionChanged;
         }
 
-        private MainViewModel Vm => (MainViewModel)DataContext;
+        private MainViewModel Vm => DataContext as MainViewModel;
+
+        private void LogLines_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action != NotifyCollectionChangedAction.Add) return;
+            var vm = Vm;
+            if (vm == null || vm.LogLines.Count == 0) return;
+            var last = vm.LogLines[vm.LogLines.Count - 1];
+            Dispatcher.BeginInvoke(new Action(() => LogList.ScrollIntoView(last)), DispatcherPriority.Background);
+        }
 
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {

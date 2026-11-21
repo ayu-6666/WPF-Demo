@@ -330,12 +330,56 @@
 
                                     <ProgressBar Value="{Binding Progress}" Maximum="100" Margin="0,0,0,12"/>
 
-                                    <TextBox Style="{StaticResource LogTextBox}"
-                                             AutomationProperties.AutomationId="LogBox"
-                                             Text="{Binding Log, Mode=OneWay}"
-                                             Tag="{loc:Loc LogHint}"
-                                             IsReadOnly="True" AcceptsReturn="True"
-                                             VerticalScrollBarVisibility="Auto"/>
+                                    <Grid>
+                                        <Border Background="{DynamicResource LogBg}"
+                                                BorderBrush="{DynamicResource InputBorder}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource RadiusSm}"
+                                                MinHeight="200" MaxHeight="320">
+                                            <ListBox x:Name="LogList"
+                                                     ItemsSource="{Binding LogLines}"
+                                                     Style="{StaticResource LogListBox}"
+                                                     AutomationProperties.AutomationId="LogBox"
+                                                     Padding="10,8">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Text}" TextWrapping="Wrap">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsError}" Value="True">
+                                                                            <Setter Property="Foreground" Value="{DynamicResource Danger}"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsSuccess}" Value="True">
+                                                                            <Setter Property="Foreground" Value="{DynamicResource Success}"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </Border>
+                                        <TextBlock Text="{loc:Loc LogHint}"
+                                                   Foreground="{DynamicResource TextTertiary}"
+                                                   FontSize="{StaticResource FontSm}"
+                                                   Margin="12,10,12,10"
+                                                   VerticalAlignment="Top"
+                                                   IsHitTestVisible="False">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasItems, ElementName=LogList}" Value="False">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                                         <CheckBox Content="{loc:Loc OpenOutputAfter}"

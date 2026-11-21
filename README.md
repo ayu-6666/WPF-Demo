@@ -39,6 +39,12 @@
 - WpfDevDemo
 <img width="1198" height="798" alt="image" src="https://github.com/user-attachments/assets/5f1a84ce-c869-4cea-8206-36ae5193154f" />
 
+- MediaStudioVideo
+
+> 本地音视频/图片处理工具集，包含 12 个常用工具（抽音轨、拼接、剪辑、去水印、图片合成视频等），内置 FFmpeg，支持中英文与浅色/深色主题。
+>
+> 详见 [MediaStudioVideo/README.md](MediaStudioVideo/README.md)
+
 - CoordinateFunction
 <img width="1384" height="851" alt="image" src="https://github.com/user-attachments/assets/7c1d4d69-dbab-4626-9aa2-cc9d22ac60dd" />
 
@@ -91,4 +97,4 @@ WPF-Demo/
 └── WxChatApp/
 ```
 
-- 共20各工程
+- 共 20 个工程

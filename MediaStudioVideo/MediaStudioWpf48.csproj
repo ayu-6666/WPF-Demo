@@ -8,4 +8,7 @@
     <OutputPath>bin\Release\</OutputPath><DefineConstants>TRACE</DefineConstants>
   </PropertyGroup><ItemGroup><Reference Include="System"/><Reference Include="System.Core"/><Reference Include="System.Xaml"/><Reference Include="WindowsBase"/><Reference Include="PresentationCore"/><Reference Include="PresentationFramework"/><Reference Include="System.Windows.Forms"/></ItemGroup><ItemGroup><ApplicationDefinition Include="App.xaml"/><Compile Include="App.xaml.cs"/><Page Include="MainWindow.xaml"/><Compile Include="MainWindow.xaml.cs"/><Compile Include="Commands\RelayCommand.cs"/><Compile Include="ViewModels\MainViewModel.cs"/><Compile Include="Models\ToolItem.cs"/><Compile Include="Services\FfmpegService.cs"/>
     <Compile Include="Services\LocalizationManager.cs"/>
-    <Compile Include="Services\ThemeManager.cs"/></ItemGroup><Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/></Project>
+    <Compile Include="Services\ThemeManager.cs"/>
+    <Compile Include="Models\LogEntry.cs"/>
+    <Page Include="Views\MessageDialog.xaml"/>
+    <Compile Include="Views\MessageDialog.xaml.cs"/></ItemGroup><Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/></Project>

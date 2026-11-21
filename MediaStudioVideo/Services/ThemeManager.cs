@@ -42,6 +42,8 @@ namespace MediaStudioWpf48.Services
             Set(r, "ScrollTrack", dark ? "#1B2738" : "#EAEFF7");
             Set(r, "ProgressTrack", dark ? "#26364B" : "#E4EAF3");
             Set(r, "Success", dark ? "#4CC38A" : "#1F9D6A");
+            Set(r, "Warning", dark ? "#E8B44A" : "#B7791F");
+            Set(r, "WarningSoft", dark ? "#3A2E18" : "#FDF3DF");
             Set(r, "LogBg", dark ? "#0F1A29" : "#F7F9FC");
             Set(r, "StatusChipBg", dark ? "#1E2C42" : "#EAF1FE");
             Set(r, "HoverOverlay", dark ? "#1FFFFFFF" : "#1A000000");
