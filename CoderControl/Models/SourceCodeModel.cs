@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace CoderControl.Models
 {
@@ -20,7 +21,7 @@ namespace CoderControl.Models
     public class BreatheLightModel
     {
         public string Title { get; set; } = string.Empty;
-        public string ImageSource { get; set; } = string.Empty;
+        public ImageSource? ImageSource { get; set; }
         public string Status { get; set; } = "正在直播";
     }
 }
